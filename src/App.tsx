@@ -1,15 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { WORDS, type Word } from "./data/words";
 import { burstConfetti } from "./lib/confetti";
-import { sampleDistinct, shuffleInPlace } from "./lib/random";
+import { shuffleInPlace } from "./lib/random";
 import { playDing, playPop, playTada } from "./lib/sfx";
 import { speakChineseSequence, stopSpeech } from "./lib/speech";
 
 type OptionState = "idle" | "wrong" | "correct";
 
+type AnswerMode = "english" | "pinyin";
+
 type Option = {
   id: string;
-  label: string;
 };
 
 type Question = {
@@ -19,6 +20,7 @@ type Question = {
 };
 
 const AUDIO_STORAGE_KEY = "readcn.audioEnabled";
+const ANSWER_MODE_STORAGE_KEY = "readcn.answerMode";
 const PROMPT_ZH = "这是什么字？";
 
 function loadStoredBool(key: string, fallback: boolean): boolean {
@@ -32,6 +34,17 @@ function loadStoredBool(key: string, fallback: boolean): boolean {
   }
 }
 
+function loadStoredString(key: string, fallback: string): string {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const stored = window.localStorage.getItem(key);
+    if (stored === null) return fallback;
+    return stored;
+  } catch {
+    return fallback;
+  }
+}
+
 function storeBool(key: string, value: boolean): void {
   try {
     window.localStorage.setItem(key, String(value));
@@ -40,9 +53,45 @@ function storeBool(key: string, value: boolean): void {
   }
 }
 
+function storeString(key: string, value: string): void {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {
+    // ignore
+  }
+}
+
+function normalizeKey(value: string): string {
+  return value.trim().toLowerCase();
+}
+
 function buildQuestion(word: Word): Question {
-  const distractors = sampleDistinct(WORDS, 2, (candidate) => candidate.id !== word.id);
-  const options: Option[] = [word, ...distractors].map((w) => ({ id: w.id, label: w.english }));
+  const candidates = WORDS.filter((candidate) => candidate.id !== word.id);
+  shuffleInPlace(candidates);
+
+  const distractors: Word[] = [];
+  const usedEnglish = new Set<string>([normalizeKey(word.english)]);
+  const usedPinyin = new Set<string>([normalizeKey(word.pinyin)]);
+
+  for (const candidate of candidates) {
+    if (distractors.length >= 2) break;
+    const englishKey = normalizeKey(candidate.english);
+    const pinyinKey = normalizeKey(candidate.pinyin);
+    if (usedEnglish.has(englishKey)) continue;
+    if (usedPinyin.has(pinyinKey)) continue;
+    distractors.push(candidate);
+    usedEnglish.add(englishKey);
+    usedPinyin.add(pinyinKey);
+  }
+
+  if (distractors.length < 2) {
+    const remaining = candidates.filter((candidate) => !distractors.some((d) => d.id === candidate.id));
+    while (distractors.length < 2 && remaining.length > 0) {
+      distractors.push(remaining.pop()!);
+    }
+  }
+
+  const options: Option[] = [word, ...distractors].map((w) => ({ id: w.id }));
   shuffleInPlace(options);
 
   return {
@@ -71,6 +120,10 @@ export default function App() {
 
   const [started, setStarted] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(() => loadStoredBool(AUDIO_STORAGE_KEY, true));
+  const [answerMode, setAnswerMode] = useState<AnswerMode>(() => {
+    const stored = loadStoredString(ANSWER_MODE_STORAGE_KEY, "english");
+    return stored === "pinyin" ? "pinyin" : "english";
+  });
 
   const [question, setQuestion] = useState<Question | null>(null);
   const [optionStates, setOptionStates] = useState<Record<string, OptionState>>({});
@@ -133,9 +186,8 @@ export default function App() {
   }
 
   function sayPrompt(): void {
-    if (!question) return;
     if (!audioEnabled) return;
-    void speakChineseSequence([PROMPT_ZH, question.word.hanzi], { rate: 0.95 });
+    void speakChineseSequence([PROMPT_ZH], { rate: 0.95 });
   }
 
   function choose(optionId: string): void {
@@ -151,6 +203,7 @@ export default function App() {
 
     if (isCorrect) {
       if (audioEnabled) playDing();
+      if (audioEnabled) void speakChineseSequence([question.word.hanzi], { rate: 0.95 });
       setLocked(true);
       setCorrectCount((count) => count + 1);
       if (hadMistakeThisQuestionRef.current) {
@@ -163,9 +216,10 @@ export default function App() {
         });
       }
 
+      const delayMs = audioEnabled ? 950 : 650;
       nextTimeoutRef.current = window.setTimeout(() => {
         nextQuestion();
-      }, 650);
+      }, delayMs);
       return;
     }
 
@@ -181,10 +235,14 @@ export default function App() {
   }, [audioEnabled]);
 
   useEffect(() => {
+    storeString(ANSWER_MODE_STORAGE_KEY, answerMode);
+  }, [answerMode]);
+
+  useEffect(() => {
     if (!started) return;
     if (!question) return;
     if (!audioEnabled) return;
-    void speakChineseSequence([PROMPT_ZH, question.word.hanzi], { rate: 0.95 });
+    void speakChineseSequence([PROMPT_ZH], { rate: 0.95 });
   }, [started, question?.word.id, audioEnabled]);
 
   useEffect(() => {
@@ -218,23 +276,6 @@ export default function App() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setAudioEnabled((value) => !value)}
-                className="inline-flex touch-manipulation items-center gap-2 rounded-full bg-slate-800 px-4 py-2 text-sm font-medium text-slate-100 ring-1 ring-slate-700/40 hover:bg-slate-700"
-                aria-pressed={audioEnabled}
-                title="Toggle audio"
-              >
-                <span
-                  className={[
-                    "h-2.5 w-2.5 rounded-full",
-                    audioEnabled ? "bg-emerald-400" : "bg-slate-500",
-                  ].join(" ")}
-                  aria-hidden="true"
-                />
-                Audio {audioEnabled ? "On" : "Off"}
-              </button>
-
               <button
                 type="button"
                 onClick={restart}
@@ -274,15 +315,13 @@ export default function App() {
                   {question.word.hanzi}
                 </div>
 
-                <div className="mt-2 text-sm text-slate-400">{question.word.pinyin}</div>
-
                 <button
                   type="button"
                   onClick={sayPrompt}
                   disabled={!audioEnabled}
                   className="mt-4 inline-flex touch-manipulation items-center gap-2 rounded-full bg-slate-800 px-4 py-2 text-sm font-medium text-slate-100 ring-1 ring-slate-700/40 hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Play audio
+                  Play prompt
                 </button>
               </div>
 
@@ -290,6 +329,12 @@ export default function App() {
                 {question.options.map((option) => {
                   const state = optionStates[option.id] ?? "idle";
                   const isDisabled = locked || state === "wrong";
+                  const optionWord = wordsById[option.id];
+                  const label = optionWord
+                    ? answerMode === "pinyin"
+                      ? optionWord.pinyin
+                      : optionWord.english
+                    : option.id;
 
                   const className =
                     state === "correct"
@@ -311,7 +356,7 @@ export default function App() {
                         className,
                       ].join(" ")}
                     >
-                      {option.label}
+                      {label}
                     </button>
                   );
                 })}
@@ -338,6 +383,42 @@ export default function App() {
             </div>
           ) : null}
         </div>
+      </div>
+
+      <div className="fixed z-50 flex flex-col gap-2 [right:calc(theme(spacing.4)+env(safe-area-inset-right))] [bottom:calc(theme(spacing.4)+env(safe-area-inset-bottom))]">
+        <button
+          type="button"
+          onClick={() => setAudioEnabled((value) => !value)}
+          className="inline-flex touch-manipulation items-center gap-2 rounded-full bg-slate-800/90 px-4 py-2 text-sm font-medium text-slate-100 shadow-lg ring-1 ring-slate-700/40 backdrop-blur hover:bg-slate-700"
+          aria-pressed={audioEnabled}
+          title="Toggle audio"
+        >
+          <span
+            className={[
+              "h-2.5 w-2.5 rounded-full",
+              audioEnabled ? "bg-emerald-400" : "bg-slate-500",
+            ].join(" ")}
+            aria-hidden="true"
+          />
+          Audio {audioEnabled ? "On" : "Off"}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setAnswerMode((mode) => (mode === "english" ? "pinyin" : "english"))}
+          className="inline-flex touch-manipulation items-center gap-2 rounded-full bg-slate-800/90 px-4 py-2 text-sm font-medium text-slate-100 shadow-lg ring-1 ring-slate-700/40 backdrop-blur hover:bg-slate-700"
+          aria-pressed={answerMode === "pinyin"}
+          title="Toggle answers between English and Pinyin"
+        >
+          <span
+            className={[
+              "h-2.5 w-2.5 rounded-full",
+              answerMode === "pinyin" ? "bg-sky-400" : "bg-amber-300",
+            ].join(" ")}
+            aria-hidden="true"
+          />
+          Answers {answerMode === "pinyin" ? "PY" : "EN"}
+        </button>
       </div>
     </div>
   );

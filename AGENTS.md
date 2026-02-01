@@ -20,8 +20,11 @@
   - Streak counts only first-try correct answers; any wrong guess resets it to `0`.
   - Every streak milestone (10, 20, 30...) triggers confetti + a “tada”.
 - Audio:
-  - Uses Web Speech API (`speechSynthesis`) to say `这是什么字？` then the character.
+  - Uses Web Speech API (`speechSynthesis`) to say `这是什么字？` (prompt) when a new card appears.
+  - Says the target character only after you select the correct answer.
   - Browsers require a user gesture before speech will play; keep a “Start/Play audio” button.
+- Switches:
+  - Bottom-right toggles for Audio On/Off and Answers EN/PY (English vs Pinyin choices).
 
 ## Words dataset
 
