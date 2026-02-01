@@ -3,7 +3,7 @@ import { WORDS, type Word } from "./data/words";
 import { burstConfetti } from "./lib/confetti";
 import { shuffleInPlace } from "./lib/random";
 import { playDing, playPop, playTada } from "./lib/sfx";
-import { speakChineseSequence, stopSpeech } from "./lib/speech";
+import { speakChineseSequence, speakEnglishSequence, stopSpeech } from "./lib/speech";
 
 type OptionState = "idle" | "wrong" | "correct";
 
@@ -192,9 +192,14 @@ export default function App() {
     start();
   }
 
-  function sayPrompt(): void {
+  function playPromptAudio(): void {
+    if (!question) return;
     if (!audioEnabled) return;
-    void speakChineseSequence([PROMPT_ZH], { rate: 0.95 });
+    if (answerMode === "cn") {
+      void speakEnglishSequence([question.word.english], { rate: 1 });
+      return;
+    }
+    void speakChineseSequence([question.word.hanzi], { rate: 0.95 });
   }
 
   function choose(optionId: string): void {
@@ -333,11 +338,11 @@ export default function App() {
 
                 <button
                   type="button"
-                  onClick={sayPrompt}
+                  onClick={playPromptAudio}
                   disabled={!audioEnabled}
                   className="mt-4 inline-flex touch-manipulation items-center gap-2 rounded-full bg-slate-800 px-4 py-2 text-sm font-medium text-slate-100 ring-1 ring-slate-700/40 hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Play prompt
+                  Play audio
                 </button>
               </div>
 

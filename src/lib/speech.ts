@@ -21,6 +21,15 @@ function pickChineseVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice 
   );
 }
 
+function pickEnglishVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | undefined {
+  const enVoices = voices.filter((voice) => voice.lang.toLowerCase().startsWith("en"));
+  return (
+    enVoices.find((voice) => voice.lang.toLowerCase() === "en-us") ??
+    enVoices.find((voice) => voice.lang.toLowerCase().startsWith("en-")) ??
+    enVoices[0]
+  );
+}
+
 async function getVoices(timeoutMs = 800): Promise<SpeechSynthesisVoice[]> {
   const synth = window.speechSynthesis;
   const immediate = synth.getVoices();
@@ -45,8 +54,10 @@ export function stopSpeech(): void {
   window.speechSynthesis.cancel();
 }
 
-export async function speakChineseSequence(
+async function speakSequence(
   texts: string[],
+  voicePicker: (voices: SpeechSynthesisVoice[]) => SpeechSynthesisVoice | undefined,
+  fallbackLang: string,
   options: SpeakOptions = {},
 ): Promise<void> {
   if (!isSpeechSupported()) return;
@@ -57,7 +68,7 @@ export async function speakChineseSequence(
   synth.cancel();
 
   const voices = await getVoices();
-  const voice = pickChineseVoice(voices);
+  const voice = voicePicker(voices);
 
   for (const text of texts) {
     const trimmed = text.trim();
@@ -65,7 +76,7 @@ export async function speakChineseSequence(
 
     const utterance = new SpeechSynthesisUtterance(trimmed);
     if (voice) utterance.voice = voice;
-    utterance.lang = voice?.lang ?? "zh-CN";
+    utterance.lang = voice?.lang ?? fallbackLang;
     utterance.rate = rate;
     utterance.pitch = pitch;
     utterance.volume = volume;
@@ -74,3 +85,16 @@ export async function speakChineseSequence(
   }
 }
 
+export async function speakChineseSequence(
+  texts: string[],
+  options: SpeakOptions = {},
+): Promise<void> {
+  await speakSequence(texts, pickChineseVoice, "zh-CN", options);
+}
+
+export async function speakEnglishSequence(
+  texts: string[],
+  options: SpeakOptions = {},
+): Promise<void> {
+  await speakSequence(texts, pickEnglishVoice, "en-US", options);
+}

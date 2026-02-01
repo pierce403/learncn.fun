@@ -27,6 +27,9 @@
   - Bottom-right toggles for Audio On/Off and Answers EN/CN.
     - `EN`: prompt is Hanzi, answers are English.
     - `CN`: prompt is English, answers are Hanzi with Pinyin shown below.
+  - “Play audio” button reads the prompt:
+    - `CN` mode: speaks the English word.
+    - `EN` mode: speaks the Hanzi (Mandarin).
 
 ## Words dataset
 
