@@ -18,7 +18,11 @@
 - Sound + celebration:
   - Wrong plays a short “pop”, correct plays a “ding” (Web Audio API).
   - Streak counts only first-try correct answers; any wrong guess resets it to `0`.
-  - Every streak milestone (10, 20, 30...) triggers confetti + a “tada”.
+  - Every streak milestone triggers confetti + “tada” + a big number flash:
+    - `10`: 1 burst
+    - `20`: 2 bursts
+    - `30`: 3 bursts
+    - etc.
 - Audio:
   - Uses Web Speech API (`speechSynthesis`) to say `这是什么字？` (prompt) when a new card appears.
   - Says the target character only after you select the correct answer.

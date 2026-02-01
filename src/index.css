@@ -9,3 +9,21 @@ body {
   margin: 0;
 }
 
+@keyframes streak-flash {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.85);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(0) scale(1.06);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-6px) scale(1.2);
+  }
+}

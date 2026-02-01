@@ -22,6 +22,10 @@ type Question = {
 const AUDIO_STORAGE_KEY = "readcn.audioEnabled";
 const ANSWER_MODE_STORAGE_KEY = "readcn.answerMode";
 const PROMPT_ZH = "这是什么字？";
+const STREAK_MILESTONE = 10;
+const CELEBRATION_STEP_MS = 260;
+const CELEBRATION_BUFFER_MS = 220;
+const FLASH_DURATION_MS = 650;
 
 function loadStoredBool(key: string, fallback: boolean): boolean {
   if (typeof window === "undefined") return fallback;
@@ -140,17 +144,40 @@ export default function App() {
   const [mistakeCount, setMistakeCount] = useState(0);
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
+  const [streakFlash, setStreakFlash] = useState<{ token: number; value: number } | null>(null);
 
   const deckRef = useRef<string[]>([]);
   const lastWordIdRef = useRef<string | null>(null);
   const nextTimeoutRef = useRef<number | null>(null);
   const lastCelebratedStreakRef = useRef<number>(0);
   const hadMistakeThisQuestionRef = useRef<boolean>(false);
+  const streakRef = useRef<number>(0);
+  const streakFlashTokenRef = useRef<number>(0);
+  const celebrationTimeoutsRef = useRef<number[]>([]);
 
   function clearNextTimeout(): void {
     if (nextTimeoutRef.current === null) return;
     window.clearTimeout(nextTimeoutRef.current);
     nextTimeoutRef.current = null;
+  }
+
+  function clearCelebrationTimeouts(): void {
+    for (const timeoutId of celebrationTimeoutsRef.current) {
+      window.clearTimeout(timeoutId);
+    }
+    celebrationTimeoutsRef.current = [];
+  }
+
+  function flashStreak(value: number): void {
+    streakFlashTokenRef.current += 1;
+    const token = streakFlashTokenRef.current;
+    setStreakFlash({ token, value });
+
+    celebrationTimeoutsRef.current.push(
+      window.setTimeout(() => {
+        setStreakFlash((current) => (current?.token === token ? null : current));
+      }, FLASH_DURATION_MS),
+    );
   }
 
   function nextQuestion(): void {
@@ -176,11 +203,13 @@ export default function App() {
 
   function start(): void {
     clearNextTimeout();
+    clearCelebrationTimeouts();
     setStarted(true);
     setCorrectCount(0);
     setMistakeCount(0);
     setStreak(0);
     setBestStreak(0);
+    setStreakFlash(null);
     lastCelebratedStreakRef.current = 0;
     hadMistakeThisQuestionRef.current = false;
     lastWordIdRef.current = null;
@@ -214,6 +243,10 @@ export default function App() {
     }));
 
     if (isCorrect) {
+      const nextStreak = hadMistakeThisQuestionRef.current ? 0 : streakRef.current + 1;
+      const celebrationBursts =
+        nextStreak > 0 && nextStreak % STREAK_MILESTONE === 0 ? nextStreak / STREAK_MILESTONE : 0;
+
       if (audioEnabled) playDing();
       if (audioEnabled) void speakChineseSequence([question.word.hanzi], { rate: 0.95 });
       setLocked(true);
@@ -228,7 +261,11 @@ export default function App() {
         });
       }
 
-      const delayMs = audioEnabled ? 950 : 650;
+      const celebrationExtraMs =
+        celebrationBursts > 0
+          ? (celebrationBursts - 1) * CELEBRATION_STEP_MS + CELEBRATION_BUFFER_MS
+          : 0;
+      const delayMs = (audioEnabled ? 950 : 650) + celebrationExtraMs;
       nextTimeoutRef.current = window.setTimeout(() => {
         nextQuestion();
       }, delayMs);
@@ -247,6 +284,10 @@ export default function App() {
   }, [audioEnabled]);
 
   useEffect(() => {
+    streakRef.current = streak;
+  }, [streak]);
+
+  useEffect(() => {
     storeString(ANSWER_MODE_STORAGE_KEY, answerMode);
   }, [answerMode]);
 
@@ -260,17 +301,28 @@ export default function App() {
   useEffect(() => {
     if (!started) return;
     if (streak <= 0) return;
-    if (streak % 10 !== 0) return;
+    if (streak % STREAK_MILESTONE !== 0) return;
     if (lastCelebratedStreakRef.current === streak) return;
     lastCelebratedStreakRef.current = streak;
 
-    burstConfetti();
-    if (audioEnabled) playTada();
+    const bursts = Math.max(1, Math.floor(streak / STREAK_MILESTONE));
+    clearCelebrationTimeouts();
+
+    for (let index = 0; index < bursts; index++) {
+      celebrationTimeoutsRef.current.push(
+        window.setTimeout(() => {
+          flashStreak(streak);
+          burstConfetti();
+          if (audioEnabled) playTada();
+        }, index * CELEBRATION_STEP_MS),
+      );
+    }
   }, [streak, started, audioEnabled]);
 
   useEffect(() => {
     return () => {
       clearNextTimeout();
+      clearCelebrationTimeouts();
       stopSpeech();
     };
   }, []);
@@ -440,7 +492,20 @@ export default function App() {
 	          />
 	          Answers {answerMode === "cn" ? "CN" : "EN"}
 	        </button>
-	      </div>
-	    </div>
-	  );
-	}
+      </div>
+
+      {streakFlash ? (
+        <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center">
+          <div
+            key={streakFlash.token}
+            className="animate-[streak-flash_650ms_cubic-bezier(0.2,0.9,0.2,1)] rounded-3xl bg-slate-950/35 px-8 py-5 text-center shadow-2xl ring-1 ring-slate-200/10 backdrop-blur"
+          >
+            <div className="text-7xl font-extrabold tracking-tight text-amber-200">
+              {streakFlash.value}
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
