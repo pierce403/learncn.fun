@@ -229,6 +229,10 @@ export default function ReadApp({ onHome }: ReadAppProps) {
     if (audioEnabled) void speakChineseSequence([PROMPT_ZH], { rate: 0.95 });
   }
 
+  useEffect(() => {
+    startGame();
+  }, []);
+
   function playPromptAudio(): void {
     if (!question) return;
     if (!audioEnabled) return;
@@ -368,31 +372,7 @@ export default function ReadApp({ onHome }: ReadAppProps) {
             </div>
           </header>
 
-          {!started ? (
-            <div className="mt-10 text-center">
-              <div className="text-6xl font-semibold leading-none text-slate-200 sm:text-7xl">
-                汉字
-              </div>
-
-              <p className="mx-auto mt-4 max-w-md text-sm text-slate-300">
-                {answerMode === "cn"
-                  ? "You’ll see a character and 3 choices. Pick the correct pinyin."
-                  : "You’ll see a character and 3 choices. Pick the correct English word."}
-              </p>
-
-              <button
-                type="button"
-                onClick={startGame}
-                className="mt-8 inline-flex touch-manipulation items-center justify-center rounded-2xl bg-emerald-500 px-6 py-3 text-base font-semibold text-emerald-950 shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-300"
-              >
-                Start
-              </button>
-
-              <p className="mt-4 text-xs text-slate-400">
-                Tip: tap Start once so your browser will allow speech audio.
-              </p>
-            </div>
-          ) : question ? (
+          {question ? (
             <div className="mt-8">
               <div className="flex flex-col items-center text-center">
                 <div

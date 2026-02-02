@@ -27,9 +27,9 @@
   - Wrong: button turns red; streak resets to `0`; plays “pop”.
   - Correct: button turns green; speaks the character; advances to the next card; plays “ding”.
 - Prompt audio:
-  - Auto prompt says `这是什么字？` after each new card (once the app is started).
+  - Auto prompt says `这是什么字？` after each new card.
   - “Play audio” speaks the English word in CN mode, or the Mandarin character in EN mode.
-- Audio requires a user gesture → the app gates with a Start button.
+- Audio requires a user gesture (the tap that opens the app is usually enough).
 
 ## Words dataset
 
@@ -44,7 +44,7 @@
 - Guided stroke-order practice using `hanzi-writer` (see `package.json`).
 - Dataset: `src/apps/write/data/unit2.ts` (Unit 2 items marked with (W)).
 - Any mistake during the word resets the “perfect streak” to `0`.
-- Audio requires a user gesture → the app gates with a Start button.
+- Audio requires a user gesture (the tap that opens the app is usually enough).
 
 ## Celebration (both apps)
 
