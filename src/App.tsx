@@ -342,15 +342,6 @@ export default function App() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <a
-                href="https://writecn.fun"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex touch-manipulation items-center rounded-full bg-slate-800 px-4 py-2 text-sm font-medium text-slate-100 ring-1 ring-slate-700/40 hover:bg-slate-700"
-                title="Open writecn.fun"
-              >
-                writecn.fun
-              </a>
               <button
                 type="button"
                 onClick={restart}
@@ -466,6 +457,16 @@ export default function App() {
           ) : null}
         </div>
       </div>
+
+      <a
+        href="https://writecn.fun"
+        target="_blank"
+        rel="noreferrer"
+        className="fixed z-40 text-sm font-medium text-slate-300 underline-offset-4 hover:text-slate-100 hover:underline [left:calc(theme(spacing.4)+env(safe-area-inset-left))] [bottom:calc(theme(spacing.4)+env(safe-area-inset-bottom))]"
+        title="Open writecn.fun"
+      >
+        writecn.fun
+      </a>
 
       <div className="fixed z-50 flex flex-col gap-2 [right:calc(theme(spacing.4)+env(safe-area-inset-right))] [bottom:calc(theme(spacing.4)+env(safe-area-inset-bottom))]">
         <button
