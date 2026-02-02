@@ -215,9 +215,6 @@ export default function App() {
     nextQuestion();
   }
 
-  function restart(): void {
-    resetGame();
-  }
 
   function playPromptAudio(): void {
     if (!question) return;
@@ -342,13 +339,6 @@ export default function App() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={restart}
-                className="inline-flex touch-manipulation items-center rounded-full bg-slate-800 px-4 py-2 text-sm font-medium text-slate-100 ring-1 ring-slate-700/40 hover:bg-slate-700"
-              >
-                Restart
-              </button>
             </div>
           </header>
 
