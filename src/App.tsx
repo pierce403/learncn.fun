@@ -128,7 +128,6 @@ export default function App() {
     [],
   );
 
-  const [started, setStarted] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(() => loadStoredBool(AUDIO_STORAGE_KEY, true));
   const [answerMode, setAnswerMode] = useState<AnswerMode>(() => {
     const stored = loadStoredString(ANSWER_MODE_STORAGE_KEY, "cn");
@@ -201,10 +200,9 @@ export default function App() {
     setLocked(false);
   }
 
-  function start(): void {
+  function resetGame(): void {
     clearNextTimeout();
     clearCelebrationTimeouts();
-    setStarted(true);
     setCorrectCount(0);
     setMistakeCount(0);
     setStreak(0);
@@ -218,7 +216,7 @@ export default function App() {
   }
 
   function restart(): void {
-    start();
+    resetGame();
   }
 
   function playPromptAudio(): void {
@@ -284,6 +282,10 @@ export default function App() {
   }, [audioEnabled]);
 
   useEffect(() => {
+    resetGame();
+  }, []);
+
+  useEffect(() => {
     streakRef.current = streak;
   }, [streak]);
 
@@ -292,14 +294,12 @@ export default function App() {
   }, [answerMode]);
 
   useEffect(() => {
-    if (!started) return;
     if (!question) return;
     if (!audioEnabled) return;
     void speakChineseSequence([PROMPT_ZH], { rate: 0.95 });
-  }, [started, question?.word.id, audioEnabled]);
+  }, [question?.word.id, audioEnabled]);
 
   useEffect(() => {
-    if (!started) return;
     if (streak <= 0) return;
     if (streak % STREAK_MILESTONE !== 0) return;
     if (lastCelebratedStreakRef.current === streak) return;
@@ -317,7 +317,7 @@ export default function App() {
         }, index * CELEBRATION_STEP_MS),
       );
     }
-  }, [streak, started, audioEnabled]);
+  }, [streak, audioEnabled]);
 
   useEffect(() => {
     return () => {
@@ -352,35 +352,11 @@ export default function App() {
             </div>
           </header>
 
-	          {!started ? (
-	            <div className="mt-10 text-center">
-	              <div className="text-6xl font-semibold leading-none text-slate-200 sm:text-7xl">
-	                汉字
-	              </div>
-
-              <p className="mx-auto mt-4 max-w-md text-sm text-slate-300">
-                {answerMode === "cn"
-                  ? "You’ll see a character and 3 choices. Pick the correct pinyin."
-                  : "You’ll see a character and 3 choices. Pick the correct English word."}
-              </p>
-
-              <button
-                type="button"
-                onClick={start}
-                className="mt-8 inline-flex touch-manipulation items-center justify-center rounded-2xl bg-emerald-500 px-6 py-3 text-base font-semibold text-emerald-950 shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-300"
-              >
-                Start
-              </button>
-
-              <p className="mt-4 text-xs text-slate-400">
-                Tip: browsers require a click before they’ll play speech audio.
-              </p>
-            </div>
-	          ) : question ? (
-	            <div className="mt-8">
-	              <div className="flex flex-col items-center text-center">
-	                <div
-	                  className={[
+          {question ? (
+            <div className="mt-8">
+              <div className="flex flex-col items-center text-center">
+                <div
+                  className={[
 	                    "select-none font-semibold leading-none tracking-tight",
 	                    "text-7xl sm:text-8xl",
 	                  ].join(" ")}
@@ -454,7 +430,11 @@ export default function App() {
                 </div>
               </div>
             </div>
-          ) : null}
+          ) : (
+            <div className="mt-10 text-center">
+              <div className="text-2xl font-semibold text-slate-200">Loading…</div>
+            </div>
+          )}
         </div>
       </div>
 

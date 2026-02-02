@@ -27,7 +27,7 @@
 - Audio:
   - Uses Web Speech API (`speechSynthesis`) to say `这是什么字？` (prompt) when a new card appears.
   - Says the target character only after you select the correct answer.
-  - Browsers require a user gesture before speech will play; keep a “Start/Play audio” button.
+  - Browsers require a user gesture before speech will play; use the “Play audio” button.
 - Switches:
   - Bottom-right toggles for Audio On/Off and Answers EN/CN.
     - `EN`: prompt is Hanzi, answers are English.
@@ -35,6 +35,10 @@
   - “Play audio” button reads the prompt:
     - `CN` mode: speaks the English word.
     - `EN` mode: speaks the Hanzi (Mandarin).
+
+## Start behavior
+
+- The game auto-starts on page load (no Start button).
 
 ## Words dataset
 
