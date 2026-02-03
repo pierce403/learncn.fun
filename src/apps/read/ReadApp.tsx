@@ -28,8 +28,8 @@ const AUDIO_STORAGE_KEY = "learncn.read.audioEnabled";
 const ANSWER_MODE_STORAGE_KEY = "learncn.read.answerMode";
 const PROMPT_ZH = "这是什么字？";
 const STREAK_MILESTONE = 10;
-const UNLOCK_UNIT_2_STREAK = 10;
-const UNLOCK_UNIT_3_STREAK = 20;
+const AUTO_ADD_UNIT_2_STREAK = 10;
+const AUTO_ADD_UNIT_3_STREAK = 20;
 const CELEBRATION_STEP_MS = 260;
 const CELEBRATION_BUFFER_MS = 220;
 const FLASH_DURATION_MS = 650;
@@ -131,8 +131,8 @@ function makeDeck(previousWordId: string | null, ids: string[]): string[] {
 
 export default function ReadApp({ onHome }: ReadAppProps) {
   const [selectedUnits, setSelectedUnits] = useState<UnitId[]>([1]);
-  const [maxUnlockedUnit, setMaxUnlockedUnit] = useState<UnitId>(1);
-  const lastUnlockedRef = useRef<UnitId>(1);
+  const autoUnitsEnabledRef = useRef(true);
+  const lastAutoAddedUnitRef = useRef<UnitId>(1);
 
   const activeWords = useMemo(() => getReadWordsForUnits(selectedUnits), [selectedUnits]);
   const activeWordIds = useMemo(() => activeWords.map((word) => word.id), [activeWords]);
@@ -188,7 +188,7 @@ export default function ReadApp({ onHome }: ReadAppProps) {
   }, [wordsById]);
 
   function toggleUnit(unit: UnitId): void {
-    if (unit > maxUnlockedUnit) return;
+    autoUnitsEnabledRef.current = false;
     unitToggleByUserRef.current = true;
     setSelectedUnits((prev) => {
       const has = prev.includes(unit);
@@ -273,27 +273,20 @@ export default function ReadApp({ onHome }: ReadAppProps) {
   }, []);
 
   useEffect(() => {
-    if (streak >= UNLOCK_UNIT_3_STREAK) {
-      setMaxUnlockedUnit((current) => (current >= 3 ? current : 3));
-      return;
-    }
-    if (streak >= UNLOCK_UNIT_2_STREAK) {
-      setMaxUnlockedUnit((current) => (current >= 2 ? current : 2));
-    }
-  }, [streak]);
-
-  useEffect(() => {
-    const prev = lastUnlockedRef.current;
-    if (maxUnlockedUnit <= prev) return;
-    lastUnlockedRef.current = maxUnlockedUnit;
+    if (!autoUnitsEnabledRef.current) return;
+    const desiredMaxUnit: UnitId =
+      streak >= AUTO_ADD_UNIT_3_STREAK ? 3 : streak >= AUTO_ADD_UNIT_2_STREAK ? 2 : 1;
+    const prev = lastAutoAddedUnitRef.current;
+    if (desiredMaxUnit <= prev) return;
+    lastAutoAddedUnitRef.current = desiredMaxUnit;
     setSelectedUnits((units) => {
       const next = new Set<UnitId>(units);
-      for (let u = prev + 1; u <= maxUnlockedUnit; u++) {
+      for (let u = prev + 1; u <= desiredMaxUnit; u++) {
         next.add(u as UnitId);
       }
       return Array.from(next).sort((a, b) => a - b);
     });
-  }, [maxUnlockedUnit]);
+  }, [streak]);
 
   useEffect(() => {
     if (!started) return;
@@ -425,13 +418,13 @@ export default function ReadApp({ onHome }: ReadAppProps) {
                   ? "Pick the correct pinyin for the character."
                   : "Pick the English meaning of the character."}
               </p>
-              <div className="mt-3">
-                <div className="text-xs font-medium text-slate-400">Units</div>
-                <div className="mt-2">
-                  <UnitSelector selectedUnits={selectedUnits} maxUnlockedUnit={maxUnlockedUnit} onToggle={toggleUnit} />
-                </div>
-              </div>
-            </div>
+	              <div className="mt-3">
+	                <div className="text-xs font-medium text-slate-400">Units</div>
+	                <div className="mt-2">
+	                  <UnitSelector selectedUnits={selectedUnits} onToggle={toggleUnit} />
+	                </div>
+	              </div>
+	            </div>
 
             <div className="flex flex-wrap items-center gap-3">
               {onHome ? (
