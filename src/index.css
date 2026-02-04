@@ -31,8 +31,14 @@ body {
 }
 
 .grid-board svg path[stroke^="rgba(52,211,153,"] {
-  filter: drop-shadow(0 0 1px rgba(52, 211, 153, 0.45))
+  filter: blur(0.45px) drop-shadow(0 0 1px rgba(52, 211, 153, 0.55))
     drop-shadow(0 1px 0 rgba(15, 23, 42, 0.35));
+}
+
+@supports (filter: url("#learncn-user-brush")) {
+  .grid-board svg path[stroke^="rgba(52,211,153,"] {
+    filter: url(#learncn-user-brush);
+  }
 }
 
 @keyframes streak-flash {

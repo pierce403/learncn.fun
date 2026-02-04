@@ -23,6 +23,72 @@ const NEXT_DELAY_MS = 900;
 const NEXT_CHARACTER_DELAY_MS = 520;
 const MAX_CHARACTER_ATTEMPTS = 3;
 const FLASH_DURATION_MS = 650;
+const USER_BRUSH_FILTER_ID = "learncn-user-brush";
+const RETRY_RESTART_DELAY_MS = 820;
+
+function ensureUserBrushFilter(container: HTMLElement): void {
+  const svg = container.querySelector("svg");
+  if (!svg) return;
+  if (svg.querySelector(`#${USER_BRUSH_FILTER_ID}`)) return;
+
+  const svgNS = "http://www.w3.org/2000/svg";
+  const defs =
+    svg.querySelector("defs") ?? svg.insertBefore(document.createElementNS(svgNS, "defs"), svg.firstChild);
+
+  const filter = document.createElementNS(svgNS, "filter");
+  filter.setAttribute("id", USER_BRUSH_FILTER_ID);
+  filter.setAttribute("x", "-20%");
+  filter.setAttribute("y", "-20%");
+  filter.setAttribute("width", "140%");
+  filter.setAttribute("height", "140%");
+  filter.setAttribute("color-interpolation-filters", "sRGB");
+
+  const blur = document.createElementNS(svgNS, "feGaussianBlur");
+  blur.setAttribute("in", "SourceGraphic");
+  blur.setAttribute("stdDeviation", "0.55");
+  blur.setAttribute("result", "blur");
+
+  const noise = document.createElementNS(svgNS, "feTurbulence");
+  noise.setAttribute("type", "fractalNoise");
+  noise.setAttribute("baseFrequency", "0.9");
+  noise.setAttribute("numOctaves", "1");
+  noise.setAttribute("seed", "2");
+  noise.setAttribute("result", "noise");
+
+  const displacement = document.createElementNS(svgNS, "feDisplacementMap");
+  displacement.setAttribute("in", "blur");
+  displacement.setAttribute("in2", "noise");
+  displacement.setAttribute("scale", "1.0");
+  displacement.setAttribute("xChannelSelector", "R");
+  displacement.setAttribute("yChannelSelector", "G");
+  displacement.setAttribute("result", "displaced");
+
+  const shadow = document.createElementNS(svgNS, "feDropShadow");
+  shadow.setAttribute("dx", "0");
+  shadow.setAttribute("dy", "1");
+  shadow.setAttribute("stdDeviation", "0.85");
+  shadow.setAttribute("flood-color", "rgb(15, 23, 42)");
+  shadow.setAttribute("flood-opacity", "0.35");
+  shadow.setAttribute("result", "shadow");
+
+  const merge = document.createElementNS(svgNS, "feMerge");
+  const mergeShadow = document.createElementNS(svgNS, "feMergeNode");
+  mergeShadow.setAttribute("in", "shadow");
+  const mergeDisplaced = document.createElementNS(svgNS, "feMergeNode");
+  mergeDisplaced.setAttribute("in", "displaced");
+  const mergeSource = document.createElementNS(svgNS, "feMergeNode");
+  mergeSource.setAttribute("in", "SourceGraphic");
+  merge.appendChild(mergeShadow);
+  merge.appendChild(mergeDisplaced);
+  merge.appendChild(mergeSource);
+
+  filter.appendChild(blur);
+  filter.appendChild(noise);
+  filter.appendChild(displacement);
+  filter.appendChild(shadow);
+  filter.appendChild(merge);
+  defs.appendChild(filter);
+}
 
 function loadStoredBool(key: string, fallback: boolean): boolean {
   if (typeof window === "undefined") return fallback;
@@ -362,12 +428,14 @@ export default function WriteApp({ onHome }: WriteAppProps) {
       drawingColor: "rgba(52, 211, 153, 0.9)",
       highlightColor: "rgba(56, 189, 248, 0.45)",
       highlightCompleteColor: "#fbbf24",
-      drawingWidth: clamp(Math.round(boardSize * 0.02), 4, 14),
+      drawingFadeDuration: 750,
+      drawingWidth: clamp(Math.round(boardSize * 0.022), 5, 16),
       strokeWidth: clamp(Math.round(boardSize * 0.007), 2, 6),
       outlineWidth: clamp(Math.round(boardSize * 0.006), 1, 5),
     });
 
     writerRef.current = writer;
+    ensureUserBrushFilter(boardEl);
     nextStrokeNumRef.current = 0;
     setTotalStrokes(null);
     setStrokeProgress(null);
@@ -414,13 +482,15 @@ export default function WriteApp({ onHome }: WriteAppProps) {
           clearNextTimeout();
           characterAttemptRef.current += 1;
           setCharacterAttempt(characterAttemptRef.current);
-          nextStrokeNumRef.current = 0;
-          setTotalStrokes(null);
-          setStrokeProgress(null);
-          setMistakePulse(null);
 
-          if (audioEnabledRef.current) speakPrompt(currentCharacter, `${word.id}:${characterIndex}`);
-          setQuizKey((key) => key + 1);
+          nextTimeoutRef.current = window.setTimeout(() => {
+            nextStrokeNumRef.current = 0;
+            setTotalStrokes(null);
+            setStrokeProgress(null);
+            setMistakePulse(null);
+            setQuizKey((key) => key + 1);
+            if (audioEnabledRef.current) speakPrompt(currentCharacter, `${word.id}:${characterIndex}`);
+          }, RETRY_RESTART_DELAY_MS);
           return;
         }
 
