@@ -69,6 +69,16 @@
 - Vite config sets `base: "./"` so assets work on Pages (see `vite.config.ts`).
 - Custom domain is configured via `public/CNAME`.
 
+## Git workflow (agent)
+
+- After completing each task, **always**:
+  - `git status` (sanity check) then `git add -A`
+  - `git commit -m "<message>"` (pick a concise message if the user didn’t specify one)
+  - `git push` (push the current branch to its upstream)
+- After pushing, if `gh` is available, verify the GitHub Pages deploy:
+  - Wait for the latest run of **Deploy to GitHub Pages** to finish: `gh run list --workflow \"Deploy to GitHub Pages\" --limit 1` then `gh run watch <run-id> --exit-status`
+  - If it fails, surface the failure summary/logs (`gh run view <run-id> --log-failed`)
+
 ## TypeScript gotcha we hit
 
 - `tsc` can accidentally pick up global `@types/*` from parent directories.

@@ -21,6 +21,7 @@ const CELEBRATION_STEP_MS = 260;
 const CELEBRATION_BUFFER_MS = 220;
 const NEXT_DELAY_MS = 900;
 const NEXT_CHARACTER_DELAY_MS = 520;
+const MAX_CHARACTER_ATTEMPTS = 3;
 const FLASH_DURATION_MS = 650;
 
 function loadStoredBool(key: string, fallback: boolean): boolean {
@@ -87,6 +88,7 @@ export default function WriteApp({ onHome }: WriteAppProps) {
 
   const [word, setWord] = useState<Word | null>(null);
   const [characterIndex, setCharacterIndex] = useState(0);
+  const [characterAttempt, setCharacterAttempt] = useState(1);
   const [quizKey, setQuizKey] = useState(0);
   const [totalStrokes, setTotalStrokes] = useState<number | null>(null);
   const [strokeProgress, setStrokeProgress] = useState<{ done: number; total: number } | null>(null);
@@ -108,6 +110,8 @@ export default function WriteApp({ onHome }: WriteAppProps) {
   const flashTokenRef = useRef<number>(0);
   const mistakeTokenRef = useRef<number>(0);
   const totalStrokesRef = useRef<number | null>(null);
+  const characterAttemptRef = useRef(1);
+  const characterAttemptKeyRef = useRef<string | null>(null);
 
   const writerRef = useRef<HanziWriter | null>(null);
   const nextStrokeNumRef = useRef<number>(0);
@@ -252,6 +256,8 @@ export default function WriteApp({ onHome }: WriteAppProps) {
 
   function resetWord(): void {
     hadMistakeThisWordRef.current = true;
+    characterAttemptRef.current = 1;
+    setCharacterAttempt(1);
     setCharacterIndex(0);
     setQuizKey((key) => key + 1);
   }
@@ -300,6 +306,15 @@ export default function WriteApp({ onHome }: WriteAppProps) {
   }, [started, word?.id, currentCharacter, characterIndex]);
 
   useEffect(() => {
+    if (!word) return;
+    const key = `${word.id}:${characterIndex}`;
+    if (characterAttemptKeyRef.current === key) return;
+    characterAttemptKeyRef.current = key;
+    characterAttemptRef.current = 1;
+    setCharacterAttempt(1);
+  }, [word?.id, characterIndex]);
+
+  useEffect(() => {
     if (!autoUnitsEnabledRef.current) return;
     const desiredMaxUnit: UnitId =
       streak >= AUTO_ADD_UNIT_3_STREAK ? 3 : streak >= AUTO_ADD_UNIT_2_STREAK ? 2 : 1;
@@ -344,10 +359,10 @@ export default function WriteApp({ onHome }: WriteAppProps) {
       showCharacter: false,
       outlineColor: "rgba(148, 163, 184, 0.22)",
       strokeColor: "#cbd5e1",
-      drawingColor: "#34d399",
+      drawingColor: "rgba(52, 211, 153, 0.9)",
       highlightColor: "rgba(56, 189, 248, 0.45)",
       highlightCompleteColor: "#fbbf24",
-      drawingWidth: clamp(Math.round(boardSize * 0.012), 3, 8),
+      drawingWidth: clamp(Math.round(boardSize * 0.02), 4, 14),
       strokeWidth: clamp(Math.round(boardSize * 0.007), 2, 6),
       outlineWidth: clamp(Math.round(boardSize * 0.006), 1, 5),
     });
@@ -392,7 +407,23 @@ export default function WriteApp({ onHome }: WriteAppProps) {
         });
       },
       onComplete: ({ totalMistakes }) => {
-        hadMistakeThisWordRef.current = hadMistakeThisWordRef.current || totalMistakes > 0;
+        const didHaveMistakeThisAttempt = totalMistakes > 0;
+        hadMistakeThisWordRef.current = hadMistakeThisWordRef.current || didHaveMistakeThisAttempt;
+
+        if (didHaveMistakeThisAttempt && characterAttemptRef.current < MAX_CHARACTER_ATTEMPTS) {
+          clearNextTimeout();
+          characterAttemptRef.current += 1;
+          setCharacterAttempt(characterAttemptRef.current);
+          nextStrokeNumRef.current = 0;
+          setTotalStrokes(null);
+          setStrokeProgress(null);
+          setMistakePulse(null);
+
+          if (audioEnabledRef.current) speakPrompt(currentCharacter, `${word.id}:${characterIndex}`);
+          setQuizKey((key) => key + 1);
+          return;
+        }
+
         const isLastCharacter = characterIndex >= wordCharacters.length - 1;
 
         if (!isLastCharacter) {
@@ -509,15 +540,21 @@ export default function WriteApp({ onHome }: WriteAppProps) {
             <div className="mt-8">
               <div className="flex flex-col items-center text-center">
                 <div className="text-sm font-medium text-slate-300">Write:</div>
-                <div className="mt-2 text-3xl font-semibold tracking-tight text-slate-100">
-                  {word.english}
+                <div className="mt-2 text-4xl font-semibold tracking-tight text-slate-100">
+                  {word.pinyin}
                 </div>
 
-                <div className="mt-1 text-sm text-slate-400">{word.pinyin}</div>
+                <div className="mt-1 text-lg text-slate-300">{word.english}</div>
 
                 {wordCharacters.length > 1 ? (
                   <div className="mt-1 text-xs text-slate-500">
                     Character {characterIndex + 1} / {wordCharacters.length}
+                  </div>
+                ) : null}
+
+                {characterAttempt > 1 ? (
+                  <div className="mt-1 text-xs text-slate-500">
+                    Repeat {characterAttempt} / {MAX_CHARACTER_ATTEMPTS}
                   </div>
                 ) : null}
 
