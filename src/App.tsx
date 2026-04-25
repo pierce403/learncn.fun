@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import ReadApp from "./apps/read/ReadApp";
+import ReadOutLoudApp from "./apps/read-out-loud/ReadOutLoudApp";
 import WriteApp from "./apps/write/WriteApp";
 
-type AppId = "read" | "write";
+type AppId = "read" | "readOutLoud" | "write";
 
 type AppMeta = {
   id: AppId;
@@ -21,6 +22,13 @@ export default function App() {
         subtitle: "Multiple choice",
         description: "See a character and pick the right meaning (English) or pronunciation (pinyin).",
         accent: "from-sky-400/20 via-slate-900/40 to-slate-900/20 ring-sky-400/30",
+      },
+      {
+        id: "readOutLoud",
+        title: "Read Out Loud",
+        subtitle: "Voice practice",
+        description: "Say the character into the mic and let local Vosk recognition check the pinyin.",
+        accent: "from-amber-300/20 via-slate-900/40 to-slate-900/20 ring-amber-300/30",
       },
       {
         id: "write",
@@ -44,6 +52,10 @@ export default function App() {
       document.title = "Write • learncn.fun";
       return;
     }
+    if (activeApp === "readOutLoud") {
+      document.title = "Read Out Loud • learncn.fun";
+      return;
+    }
     document.title = "learncn.fun";
   }, [activeApp]);
 
@@ -53,6 +65,10 @@ export default function App() {
 
   if (activeApp === "write") {
     return <WriteApp onHome={() => setActiveApp(null)} />;
+  }
+
+  if (activeApp === "readOutLoud") {
+    return <ReadOutLoudApp onHome={() => setActiveApp(null)} />;
   }
 
   return (
@@ -69,7 +85,7 @@ export default function App() {
               Popular apps
             </div>
 
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
               {apps.map((app) => (
                 <button
                   key={app.id}
