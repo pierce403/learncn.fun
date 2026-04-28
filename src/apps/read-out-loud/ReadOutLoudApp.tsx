@@ -23,7 +23,7 @@ type MicPipeline = {
 
 type MicStatus = "idle" | "loading" | "requesting" | "listening" | "stopped" | "error";
 
-type HeardState = "idle" | "partial" | "correct" | "wrong" | "unknown";
+type HeardState = "idle" | "partial" | "correct" | "near" | "wrong" | "unknown";
 
 type HeardSpeech = {
   token: number;
@@ -88,6 +88,75 @@ function normalizePinyinKey(value: string): string {
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/[^a-z]/g, "");
+}
+
+function getPinyinVariants(key: string): string[] {
+  const variants = new Set<string>();
+  const normalized = normalizePinyinKey(key);
+  if (!normalized) return [];
+
+  variants.add(normalized);
+
+  if (normalized.length % 2 === 0) {
+    const midpoint = normalized.length / 2;
+    const firstHalf = normalized.slice(0, midpoint);
+    if (firstHalf && firstHalf === normalized.slice(midpoint)) {
+      variants.add(firstHalf);
+    }
+  }
+
+  return Array.from(variants);
+}
+
+function editDistance(a: string, b: string): number {
+  if (a === b) return 0;
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+
+  let previous = Array.from({ length: b.length + 1 }, (_, index) => index);
+
+  for (let i = 1; i <= a.length; i++) {
+    const current = [i];
+
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      current[j] = Math.min(
+        current[j - 1] + 1,
+        previous[j] + 1,
+        previous[j - 1] + cost,
+      );
+    }
+
+    previous = current;
+  }
+
+  return previous[b.length];
+}
+
+function hasPinyinVariantMatch(a: string, b: string): boolean {
+  const aVariants = getPinyinVariants(a);
+  const bVariants = new Set(getPinyinVariants(b));
+  return aVariants.some((variant) => bVariants.has(variant));
+}
+
+function isNearPinyinMatch(a: string, b: string): boolean {
+  const aVariants = getPinyinVariants(a);
+  const bVariants = getPinyinVariants(b);
+
+  for (const aVariant of aVariants) {
+    for (const bVariant of bVariants) {
+      const shorter = aVariant.length <= bVariant.length ? aVariant : bVariant;
+      const longer = aVariant.length > bVariant.length ? aVariant : bVariant;
+
+      if (shorter.length >= 2 && longer.includes(shorter)) return true;
+
+      const distance = editDistance(aVariant, bVariant);
+      if (distance <= 1) return true;
+      if (longer.length >= 5 && distance <= 2) return true;
+    }
+  }
+
+  return false;
 }
 
 function extractHanzi(value: string): string {
@@ -244,6 +313,7 @@ export default function ReadOutLoudApp({ onHome }: ReadOutLoudAppProps) {
 
   const [correctCount, setCorrectCount] = useState(0);
   const [mistakeCount, setMistakeCount] = useState(0);
+  const [skipCount, setSkipCount] = useState(0);
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
   const [streakFlash, setStreakFlash] = useState<{ token: number; value: number } | null>(null);
@@ -388,6 +458,7 @@ export default function ReadOutLoudApp({ onHome }: ReadOutLoudAppProps) {
 
     setCorrectCount(0);
     setMistakeCount(0);
+    setSkipCount(0);
     setStreak(0);
     setBestStreak(0);
     setStreakFlash(null);
@@ -458,6 +529,20 @@ export default function ReadOutLoudApp({ onHome }: ReadOutLoudAppProps) {
     setStreak(0);
   }
 
+  function skipWord(): void {
+    if (!wordRef.current) return;
+    if (lockedRef.current) return;
+
+    clearNextTimeout();
+    ignoreRecognitionFor(650);
+    setLocked(true);
+    lockedRef.current = true;
+    setSkipCount((count) => count + 1);
+    nextTimeoutRef.current = window.setTimeout(() => {
+      nextWord();
+    }, 120);
+  }
+
   function scoreFinalSpeech(raw: string): void {
     if (Date.now() < ignoreRecognitionUntilRef.current) return;
 
@@ -474,14 +559,19 @@ export default function ReadOutLoudApp({ onHome }: ReadOutLoudAppProps) {
     }
 
     const targetKey = normalizePinyinKey(currentWord.pinyin);
+    const heardKeys = [description.pinyinKey, ...description.segmentKeys].filter(Boolean);
     const heardTarget =
       description.known &&
-      (description.pinyinKey === targetKey ||
-        (description.segmentKeys.length === 1 && description.segmentKeys[0] === targetKey));
+      heardKeys.some((heardKey) => hasPinyinVariantMatch(targetKey, heardKey));
 
     if (heardTarget) {
       setHeardSpeech(description, "correct");
       markCorrect();
+      return;
+    }
+
+    if (description.known && heardKeys.some((heardKey) => isNearPinyinMatch(targetKey, heardKey))) {
+      setHeardSpeech(description, "near");
       return;
     }
 
@@ -743,11 +833,22 @@ export default function ReadOutLoudApp({ onHome }: ReadOutLoudAppProps) {
   const heardPanelClass =
     heard.state === "correct"
       ? "bg-emerald-500/15 text-emerald-100 ring-emerald-300/50"
+      : heard.state === "near"
+        ? "bg-amber-500/15 text-amber-100 ring-amber-300/40"
       : heard.state === "wrong"
         ? "bg-rose-500/15 text-rose-100 ring-rose-300/50"
         : heard.state === "unknown"
           ? "bg-amber-500/15 text-amber-100 ring-amber-300/40"
           : "bg-slate-950/40 text-slate-100 ring-slate-700/40";
+
+  const heardCaption =
+    heard.state === "near"
+      ? "Close. Try again; no penalty."
+      : heard.hanzi
+        ? heard.hanzi
+        : heard.raw.trim()
+          ? heard.raw.trim()
+          : "The pinyin will light up here when Vosk hears a practice word.";
 
   return (
     <div className="min-h-[100dvh] bg-gradient-to-b from-slate-950 to-slate-900 text-slate-100">
@@ -820,6 +921,15 @@ export default function ReadOutLoudApp({ onHome }: ReadOutLoudAppProps) {
                   >
                     Hear answer
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={skipWord}
+                    disabled={locked}
+                    className="inline-flex touch-manipulation items-center gap-2 rounded-full bg-slate-800 px-4 py-2.5 text-sm font-medium text-slate-100 ring-1 ring-slate-700/40 hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Skip
+                  </button>
                 </div>
 
                 <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
@@ -853,15 +963,11 @@ export default function ReadOutLoudApp({ onHome }: ReadOutLoudAppProps) {
                     (heard.hanzi ? "Not in list" : micStatus === "listening" ? "Listening..." : "Start the mic")}
                 </div>
                 <div className="mt-1 min-h-6 text-sm opacity-80">
-                  {heard.hanzi
-                    ? heard.hanzi
-                    : heard.raw.trim()
-                      ? heard.raw.trim()
-                      : "The pinyin will light up here when Vosk hears a practice word."}
+                  {heardCaption}
                 </div>
               </div>
 
-              <div className="mt-8 grid grid-cols-2 gap-3 text-sm text-slate-300 sm:grid-cols-4">
+              <div className="mt-8 grid grid-cols-2 gap-3 text-sm text-slate-300 sm:grid-cols-5">
                 <div className="rounded-2xl bg-slate-950/40 px-4 py-3 ring-1 ring-slate-700/30">
                   <div className="text-xs text-slate-400">Correct</div>
                   <div className="mt-1 text-lg font-semibold text-slate-100">{correctCount}</div>
@@ -869,6 +975,10 @@ export default function ReadOutLoudApp({ onHome }: ReadOutLoudAppProps) {
                 <div className="rounded-2xl bg-slate-950/40 px-4 py-3 ring-1 ring-slate-700/30">
                   <div className="text-xs text-slate-400">Mistakes</div>
                   <div className="mt-1 text-lg font-semibold text-slate-100">{mistakeCount}</div>
+                </div>
+                <div className="rounded-2xl bg-slate-950/40 px-4 py-3 ring-1 ring-slate-700/30">
+                  <div className="text-xs text-slate-400">Skipped</div>
+                  <div className="mt-1 text-lg font-semibold text-slate-100">{skipCount}</div>
                 </div>
                 <div className="rounded-2xl bg-slate-950/40 px-4 py-3 ring-1 ring-slate-700/30">
                   <div className="text-xs text-slate-400">Streak</div>
