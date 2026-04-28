@@ -400,6 +400,17 @@ export default function ReadOutLoudApp({ onHome }: ReadOutLoudAppProps) {
     });
   }
 
+  function setAcceptedSpeech(word: Word, raw: string): void {
+    heardTokenRef.current += 1;
+    setHeard({
+      token: heardTokenRef.current,
+      raw,
+      hanzi: word.hanzi,
+      pinyin: word.pinyin,
+      state: "correct",
+    });
+  }
+
   function clearHeardSpeech(): void {
     heardTokenRef.current += 1;
     setHeard({
@@ -571,13 +582,13 @@ export default function ReadOutLoudApp({ onHome }: ReadOutLoudAppProps) {
       heardKeys.some((heardKey) => hasPinyinVariantMatch(targetKey, heardKey));
 
     if (heardTarget) {
-      setHeardSpeech(description, "correct");
+      setAcceptedSpeech(currentWord, description.raw);
       markCorrect();
       return;
     }
 
     if (description.known && heardKeys.some((heardKey) => isNearPinyinMatch(targetKey, heardKey))) {
-      setHeardSpeech(description, "correct");
+      setAcceptedSpeech(currentWord, description.raw);
       markCorrect();
       return;
     }
@@ -684,8 +695,9 @@ export default function ReadOutLoudApp({ onHome }: ReadOutLoudAppProps) {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: false,
         audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false,
           channelCount: 1,
           sampleRate: 16000,
         },
