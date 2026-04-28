@@ -755,6 +755,7 @@ export default function ReadOutLoudApp({ onHome }: ReadOutLoudAppProps) {
     if (!word) return;
     if (!audioEnabled) return;
     ignoreRecognitionFor(1600);
+    setAcceptedSpeech(word, word.hanzi);
     void speakChineseSequence([getChineseSpeechText(word)], { rate: 0.95 });
   }
 
