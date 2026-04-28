@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getReadWordsForUnits, type UnitId, type Word } from "../../data/words";
+import { getChineseSpeechText, getReadWordsForUnits, type UnitId, type Word } from "../../data/words";
 import { UnitSelector } from "../../components/UnitSelector";
 import { burstConfetti } from "../../lib/confetti";
 import { shuffleInPlace } from "../../lib/random";
@@ -304,7 +304,7 @@ export default function ReadApp({ onHome }: ReadAppProps) {
       void speakEnglishSequence([question.word.english], { rate: 1 });
       return;
     }
-    void speakChineseSequence([question.word.hanzi], { rate: 0.95 });
+    void speakChineseSequence([getChineseSpeechText(question.word)], { rate: 0.95 });
   }
 
   function choose(optionId: string): void {
@@ -324,7 +324,7 @@ export default function ReadApp({ onHome }: ReadAppProps) {
         nextStreak > 0 && nextStreak % STREAK_MILESTONE === 0 ? nextStreak / STREAK_MILESTONE : 0;
 
       if (audioEnabled) playDing();
-      if (audioEnabled) void speakChineseSequence([question.word.hanzi], { rate: 0.95 });
+      if (audioEnabled) void speakChineseSequence([getChineseSpeechText(question.word)], { rate: 0.95 });
       setLocked(true);
       setCorrectCount((count) => count + 1);
       if (hadMistakeThisQuestionRef.current) {

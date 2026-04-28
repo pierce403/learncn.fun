@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { KaldiRecognizer, Model } from "vosk-browser";
 import { UnitSelector } from "../../components/UnitSelector";
-import { getReadWordsForUnits, type UnitId, type Word, WORDS } from "../../data/words";
+import {
+  getChineseSpeechText,
+  getReadWordsForUnits,
+  type UnitId,
+  type Word,
+  WORDS,
+} from "../../data/words";
 import { burstConfetti } from "../../lib/confetti";
 import { shuffleInPlace } from "../../lib/random";
 import { playDing, playPop, playTada } from "../../lib/sfx";
@@ -23,7 +29,7 @@ type MicPipeline = {
 
 type MicStatus = "idle" | "loading" | "requesting" | "listening" | "stopped" | "error";
 
-type HeardState = "idle" | "partial" | "correct" | "near" | "wrong" | "unknown";
+type HeardState = "idle" | "partial" | "correct" | "wrong" | "unknown";
 
 type HeardSpeech = {
   token: number;
@@ -504,7 +510,7 @@ export default function ReadOutLoudApp({ onHome }: ReadOutLoudAppProps) {
     if (audioEnabledRef.current) {
       playDing();
       ignoreRecognitionFor(1500);
-      void speakChineseSequence([currentWord.hanzi], { rate: 0.95 });
+      void speakChineseSequence([getChineseSpeechText(currentWord)], { rate: 0.95 });
     }
 
     const celebrationExtraMs =
@@ -571,7 +577,8 @@ export default function ReadOutLoudApp({ onHome }: ReadOutLoudAppProps) {
     }
 
     if (description.known && heardKeys.some((heardKey) => isNearPinyinMatch(targetKey, heardKey))) {
-      setHeardSpeech(description, "near");
+      setHeardSpeech(description, "correct");
+      markCorrect();
       return;
     }
 
@@ -736,7 +743,7 @@ export default function ReadOutLoudApp({ onHome }: ReadOutLoudAppProps) {
     if (!word) return;
     if (!audioEnabled) return;
     ignoreRecognitionFor(1600);
-    void speakChineseSequence([word.hanzi], { rate: 0.95 });
+    void speakChineseSequence([getChineseSpeechText(word)], { rate: 0.95 });
   }
 
   useEffect(() => {
@@ -833,22 +840,17 @@ export default function ReadOutLoudApp({ onHome }: ReadOutLoudAppProps) {
   const heardPanelClass =
     heard.state === "correct"
       ? "bg-emerald-500/15 text-emerald-100 ring-emerald-300/50"
-      : heard.state === "near"
-        ? "bg-amber-500/15 text-amber-100 ring-amber-300/40"
       : heard.state === "wrong"
         ? "bg-rose-500/15 text-rose-100 ring-rose-300/50"
         : heard.state === "unknown"
           ? "bg-amber-500/15 text-amber-100 ring-amber-300/40"
           : "bg-slate-950/40 text-slate-100 ring-slate-700/40";
 
-  const heardCaption =
-    heard.state === "near"
-      ? "Close. Try again; no penalty."
-      : heard.hanzi
-        ? heard.hanzi
-        : heard.raw.trim()
-          ? heard.raw.trim()
-          : "The pinyin will light up here when Vosk hears a practice word.";
+  const heardCaption = heard.hanzi
+    ? heard.hanzi
+    : heard.raw.trim()
+      ? heard.raw.trim()
+      : "";
 
   return (
     <div className="min-h-[100dvh] bg-gradient-to-b from-slate-950 to-slate-900 text-slate-100">

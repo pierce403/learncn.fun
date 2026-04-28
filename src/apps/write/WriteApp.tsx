@@ -1,7 +1,7 @@
 import HanziWriter, { type StrokeData } from "hanzi-writer";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { UnitSelector } from "../../components/UnitSelector";
-import { getWriteWordsForUnits, type UnitId, type Word } from "../../data/words";
+import { getChineseSpeechText, getWriteWordsForUnits, type UnitId, type Word } from "../../data/words";
 import { burstConfetti } from "../../lib/confetti";
 import { shuffleInPlace } from "../../lib/random";
 import { playDing, playPop, playTada } from "../../lib/sfx";
@@ -560,7 +560,7 @@ export default function WriteApp({ onHome }: WriteAppProps) {
         lastCelebratedStreakRef.current = didHaveMistake ? 0 : lastCelebratedStreakRef.current;
 
         if (audioEnabledRef.current) playDing();
-        if (audioEnabledRef.current) void speakChineseSequence([word.hanzi], { rate: 0.95 });
+        if (audioEnabledRef.current) void speakChineseSequence([getChineseSpeechText(word)], { rate: 0.95 });
 
         const celebrationExtraMs =
           celebrationBursts > 0

@@ -137,3 +137,11 @@ export const WORDS: Word[] = uniqueById([
   ...READ_WORDS_BY_UNIT[2],
   ...READ_WORDS_BY_UNIT[3],
 ]);
+
+const CHINESE_SPEECH_TEXT_BY_ID: Partial<Record<string, string>> = {
+  "ban-half": "一半，半",
+};
+
+export function getChineseSpeechText(word: Word): string {
+  return CHINESE_SPEECH_TEXT_BY_ID[word.id] ?? word.hanzi;
+}
