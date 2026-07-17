@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { KaldiRecognizer, Model } from "vosk-browser";
-import { UnitSelector } from "../../components/UnitSelector";
+import { LevelSelector } from "../../components/LevelSelector";
 import {
   getChineseSpeechText,
-  getReadWordsForUnits,
-  type UnitId,
+  getReadWordsForLevel,
   type Word,
   WORDS,
 } from "../../data/words";
+import { useVocabularySelection } from "../../hooks/useVocabularySelection";
 import { burstConfetti } from "../../lib/confetti";
 import { shuffleInPlace } from "../../lib/random";
 import { playDing, playPop, playTada } from "../../lib/sfx";
@@ -58,8 +58,6 @@ const AUDIO_STORAGE_KEY = "learncn.readOutLoud.audioEnabled";
 const MODEL_PATH = `${import.meta.env.BASE_URL}models/vosk-model-small-cn-0.22.tar.gz`;
 const PROMPT_ZH = "请读这个字。";
 const STREAK_MILESTONE = 10;
-const AUTO_ADD_UNIT_2_STREAK = 10;
-const AUTO_ADD_UNIT_3_STREAK = 20;
 const CELEBRATION_STEP_MS = 260;
 const CELEBRATION_BUFFER_MS = 220;
 const NEXT_DELAY_MS = 900;
@@ -286,12 +284,10 @@ async function createVoskModel(): Promise<Model> {
 }
 
 export default function ReadOutLoudApp({ onHome }: ReadOutLoudAppProps) {
-  const [selectedUnits, setSelectedUnits] = useState<UnitId[]>([1]);
-  const autoUnitsEnabledRef = useRef(true);
-  const lastAutoAddedUnitRef = useRef<UnitId>(1);
-  const unitToggleByUserRef = useRef(false);
+  const { level, scope, setLevel, setScope } = useVocabularySelection();
+  const selectionChangedByUserRef = useRef(false);
 
-  const activeWords = useMemo(() => getReadWordsForUnits(selectedUnits), [selectedUnits]);
+  const activeWords = useMemo(() => getReadWordsForLevel(level, scope), [level, scope]);
   const activeWordIds = useMemo(() => activeWords.map((word) => word.id), [activeWords]);
   const activeWordIdsKey = useMemo(() => activeWordIds.join("|"), [activeWordIds]);
 
@@ -434,16 +430,14 @@ export default function ReadOutLoudApp({ onHome }: ReadOutLoudAppProps) {
     );
   }
 
-  function toggleUnit(unit: UnitId): void {
-    autoUnitsEnabledRef.current = false;
-    unitToggleByUserRef.current = true;
-    setSelectedUnits((prev) => {
-      const has = prev.includes(unit);
-      const next = has ? prev.filter((u) => u !== unit) : [...prev, unit];
-      if (next.length === 0) return prev;
-      next.sort((a, b) => a - b);
-      return next;
-    });
+  function changeLevel(nextLevel: Parameters<typeof setLevel>[0]): void {
+    selectionChangedByUserRef.current = true;
+    setLevel(nextLevel);
+  }
+
+  function changeScope(nextScope: Parameters<typeof setScope>[0]): void {
+    selectionChangedByUserRef.current = true;
+    setScope(nextScope);
   }
 
   function nextWord(): void {
@@ -776,29 +770,13 @@ export default function ReadOutLoudApp({ onHome }: ReadOutLoudAppProps) {
   }, [started, word?.id, audioEnabled]);
 
   useEffect(() => {
-    if (!autoUnitsEnabledRef.current) return;
-    const desiredMaxUnit: UnitId =
-      streak >= AUTO_ADD_UNIT_3_STREAK ? 3 : streak >= AUTO_ADD_UNIT_2_STREAK ? 2 : 1;
-    const prev = lastAutoAddedUnitRef.current;
-    if (desiredMaxUnit <= prev) return;
-    lastAutoAddedUnitRef.current = desiredMaxUnit;
-    setSelectedUnits((units) => {
-      const next = new Set<UnitId>(units);
-      for (let u = prev + 1; u <= desiredMaxUnit; u++) {
-        next.add(u as UnitId);
-      }
-      return Array.from(next).sort((a, b) => a - b);
-    });
-  }, [streak]);
-
-  useEffect(() => {
     if (!started) return;
     deckRef.current = makeDeck(lastWordIdRef.current, activeWordIds);
     replaceRecognizer();
 
-    const wasUserToggle = unitToggleByUserRef.current;
-    unitToggleByUserRef.current = false;
-    if (!wasUserToggle && (locked || nextTimeoutRef.current !== null)) return;
+    const wasUserChange = selectionChangedByUserRef.current;
+    selectionChangedByUserRef.current = false;
+    if (!wasUserChange && (locked || nextTimeoutRef.current !== null)) return;
     nextWord();
   }, [activeWordIdsKey]);
 
@@ -876,10 +854,12 @@ export default function ReadOutLoudApp({ onHome }: ReadOutLoudAppProps) {
                 Say the character out loud. Vosk listens locally after the model downloads.
               </p>
               <div className="mt-3">
-                <div className="text-xs font-medium text-slate-400">Units</div>
-                <div className="mt-2">
-                  <UnitSelector selectedUnits={selectedUnits} onToggle={toggleUnit} />
-                </div>
+                <LevelSelector
+                  level={level}
+                  scope={scope}
+                  onLevelChange={changeLevel}
+                  onScopeChange={changeScope}
+                />
               </div>
             </div>
 

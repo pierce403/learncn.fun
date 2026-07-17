@@ -1,7 +1,8 @@
 import HanziWriter, { type StrokeData } from "hanzi-writer";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { UnitSelector } from "../../components/UnitSelector";
-import { getChineseSpeechText, getWriteWordsForUnits, type UnitId, type Word } from "../../data/words";
+import { LevelSelector } from "../../components/LevelSelector";
+import { getChineseSpeechText, getWriteWordsForLevel, type Word } from "../../data/words";
+import { useVocabularySelection } from "../../hooks/useVocabularySelection";
 import { burstConfetti } from "../../lib/confetti";
 import { shuffleInPlace } from "../../lib/random";
 import { playDing, playPop, playTada } from "../../lib/sfx";
@@ -15,8 +16,6 @@ const AUDIO_STORAGE_KEY = "learncn.write.audioEnabled";
 
 const PROMPT_ZH = "这个字怎么写？";
 const STREAK_MILESTONE = 10;
-const AUTO_ADD_UNIT_2_STREAK = 10;
-const AUTO_ADD_UNIT_3_STREAK = 20;
 const CELEBRATION_STEP_MS = 260;
 const CELEBRATION_BUFFER_MS = 220;
 const NEXT_DELAY_MS = 900;
@@ -142,11 +141,9 @@ function computeTotalStrokesFallback(strokeData: StrokeData): number {
 }
 
 export default function WriteApp({ onHome }: WriteAppProps) {
-  const [selectedUnits, setSelectedUnits] = useState<UnitId[]>([1]);
-  const autoUnitsEnabledRef = useRef(true);
-  const lastAutoAddedUnitRef = useRef<UnitId>(1);
+  const { level, scope, setLevel, setScope } = useVocabularySelection();
 
-  const activeWords = useMemo(() => getWriteWordsForUnits(selectedUnits), [selectedUnits]);
+  const activeWords = useMemo(() => getWriteWordsForLevel(level, scope), [level, scope]);
   const activeWordIds = useMemo(() => activeWords.map((word) => word.id), [activeWords]);
   const activeWordIdsKey = useMemo(() => activeWordIds.join("|"), [activeWordIds]);
 
@@ -210,15 +207,14 @@ export default function WriteApp({ onHome }: WriteAppProps) {
     wordsByIdRef.current = wordsById;
   }, [wordsById]);
 
-  function toggleUnit(unit: UnitId): void {
-    autoUnitsEnabledRef.current = false;
-    setSelectedUnits((prev) => {
-      const has = prev.includes(unit);
-      const next = has ? prev.filter((u) => u !== unit) : [...prev, unit];
-      if (next.length === 0) return prev;
-      next.sort((a, b) => a - b);
-      return next;
-    });
+  function changeLevel(nextLevel: Parameters<typeof setLevel>[0]): void {
+    clearNextTimeout();
+    setLevel(nextLevel);
+  }
+
+  function changeScope(nextScope: Parameters<typeof setScope>[0]): void {
+    clearNextTimeout();
+    setScope(nextScope);
   }
 
   function clearNextTimeout(): void {
@@ -327,24 +323,24 @@ export default function WriteApp({ onHome }: WriteAppProps) {
     lastWordIdRef.current = null;
     deckRef.current = makeDeck(null, activeWordIdsRef.current);
     const first = nextWord();
-    if (first) speakPrompt(Array.from(first.hanzi)[0] ?? first.hanzi, `${first.id}:0`);
+    if (first) speakPrompt(getChineseSpeechText(first), `${first.id}:0`);
   }
 
   useEffect(() => {
     start();
   }, []);
 
-  function speakPrompt(character: string, promptKey: string): void {
+  function speakPrompt(speechText: string, promptKey: string): void {
     if (!audioEnabledRef.current) return;
     stopSpeech();
     lastPromptedKeyRef.current = promptKey;
-    void speakChineseSequence([PROMPT_ZH, character], { rate: 0.95 });
+    void speakChineseSequence([PROMPT_ZH, speechText], { rate: 0.95 });
   }
 
   function replayPrompt(): void {
     if (!word) return;
     if (!currentCharacter) return;
-    speakPrompt(currentCharacter, `${word.id}:${characterIndex}`);
+    speakPrompt(getChineseSpeechText(word), `${word.id}:${characterIndex}`);
   }
 
   function hintStroke(): void {
@@ -408,7 +404,7 @@ export default function WriteApp({ onHome }: WriteAppProps) {
     if (!audioEnabledRef.current) return;
     const promptKey = `${word.id}:${characterIndex}`;
     if (lastPromptedKeyRef.current === promptKey) return;
-    speakPrompt(currentCharacter, promptKey);
+    speakPrompt(getChineseSpeechText(word), promptKey);
   }, [started, word?.id, currentCharacter, characterIndex]);
 
   useEffect(() => {
@@ -419,22 +415,6 @@ export default function WriteApp({ onHome }: WriteAppProps) {
     characterAttemptRef.current = 1;
     setCharacterAttempt(1);
   }, [word?.id, characterIndex]);
-
-  useEffect(() => {
-    if (!autoUnitsEnabledRef.current) return;
-    const desiredMaxUnit: UnitId =
-      streak >= AUTO_ADD_UNIT_3_STREAK ? 3 : streak >= AUTO_ADD_UNIT_2_STREAK ? 2 : 1;
-    const prev = lastAutoAddedUnitRef.current;
-    if (desiredMaxUnit <= prev) return;
-    lastAutoAddedUnitRef.current = desiredMaxUnit;
-    setSelectedUnits((units) => {
-      const next = new Set<UnitId>(units);
-      for (let u = prev + 1; u <= desiredMaxUnit; u++) {
-        next.add(u as UnitId);
-      }
-      return Array.from(next).sort((a, b) => a - b);
-    });
-  }, [streak]);
 
   useEffect(() => {
     if (!started) return;
@@ -529,7 +509,9 @@ export default function WriteApp({ onHome }: WriteAppProps) {
             setStrokeProgress(null);
             setMistakePulse(null);
             setQuizKey((key) => key + 1);
-            if (audioEnabledRef.current) speakPrompt(currentCharacter, `${word.id}:${characterIndex}`);
+            if (audioEnabledRef.current) {
+              speakPrompt(getChineseSpeechText(word), `${word.id}:${characterIndex}`);
+            }
           }, RETRY_RESTART_DELAY_MS);
           return;
         }
@@ -542,7 +524,7 @@ export default function WriteApp({ onHome }: WriteAppProps) {
           if (audioEnabledRef.current) playDing();
           nextTimeoutRef.current = window.setTimeout(() => {
             if (nextCharacter && audioEnabledRef.current) {
-              speakPrompt(nextCharacter, `${word.id}:${nextIndex}`);
+              speakPrompt(getChineseSpeechText(word), `${word.id}:${nextIndex}`);
             }
             setCharacterIndex(nextIndex);
           }, NEXT_CHARACTER_DELAY_MS);
@@ -623,10 +605,12 @@ export default function WriteApp({ onHome }: WriteAppProps) {
                 Listen, then write the character with correct stroke order.
               </p>
 	              <div className="mt-3">
-	                <div className="text-xs font-medium text-slate-400">Units</div>
-	                <div className="mt-2">
-	                  <UnitSelector selectedUnits={selectedUnits} onToggle={toggleUnit} />
-	                </div>
+	                <LevelSelector
+	                  level={level}
+	                  scope={scope}
+	                  onLevelChange={changeLevel}
+	                  onScopeChange={changeScope}
+	                />
 	              </div>
 	            </div>
 

@@ -7,6 +7,7 @@
 - Local:
   - `npm install`
   - `npm run dev`
+  - `npm test`
   - `npm run build` (runs `tsc -b` then `vite build`)
 
 ## App structure
@@ -14,13 +15,15 @@
 - `src/App.tsx` is the learncn.fun home screen and app switcher.
 - Apps live under `src/apps/*`:
   - `src/apps/read/ReadApp.tsx`
+  - `src/apps/read-out-loud/ReadOutLoudApp.tsx`
   - `src/apps/write/WriteApp.tsx`
 - Each app supports an optional `onHome` callback and renders an “Apps” button in the header when provided.
 
 ## Read app
 
 - Shows one Chinese character (`hanzi`) and 3 choices.
-- Units: starts with Unit 1; auto-adds Unit 2 at 10 streak and Unit 3 at 20, but you can toggle any unit at any time.
+- Curriculum: one persisted book level shared across apps, with `All through level` and `New in level` scopes.
+- Available vocabulary currently covers Levels 1–6. Levels 7–14 remain metadata-only until exact lists exist.
 - Answer modes:
   - `Answers CN`: choices are **Pinyin**
   - `Answers EN`: choices are **English**
@@ -32,19 +35,26 @@
   - “Play audio” speaks the English word in CN mode, or the Mandarin character in EN mode.
 - Audio requires a user gesture (the tap that opens the app is usually enough).
 
-## Words dataset
+## Character dataset
 
-- Source of truth: `src/data/words.ts`
+- Source rows: `src/data/level-character-seeds.ts`
+- Level model and computed catalogs: `src/data/words.ts`
+- Level picker: `src/components/LevelSelector.tsx`
+- Persisted selection: `src/hooks/useVocabularySelection.ts`
 - Each entry must have:
   - `id` unique + stable (used for options / deck)
   - `hanzi`, `pinyin`, `english`
-- Current list is based on the Unit 2 literacy assessment photos.
+- Each source row is one newly introduced core Han character. Cumulative practice sets are computed.
+- Expected new-character counts for Levels 1–6: `60, 60, 60, 60, 70, 80`.
+- Polyphonic characters may need a contextual speech override in `src/data/words.ts` so browser audio
+  matches the catalog pinyin.
+- Run `npm test` after any curriculum edit. See `docs/curriculum.md` for provenance and verification status.
 
 ## Write app
 
 - Guided stroke-order practice using `hanzi-writer` (see `package.json`).
-- Dataset: `src/data/words.ts` (Unit 1–3 write words).
-- Units: starts with Unit 1; auto-adds Unit 2 at 10 perfect streak and Unit 3 at 20, but you can toggle any unit at any time.
+- Dataset: the selected level/scope from `src/data/words.ts`.
+- Book levels never change automatically based on streak.
 - Any mistake during the word resets the “perfect streak” to `0`.
 - Multi-character prompts (e.g. 爸爸/妈妈) advance character-by-character.
 - Audio requires a user gesture (the tap that opens the app is usually enough).

@@ -1,147 +1,162 @@
+import { LEVEL_CHARACTER_SEEDS } from "./level-character-seeds";
+
 export type Word = {
   id: string;
   hanzi: string;
   pinyin: string;
   english: string;
+  introducedAt: LevelId;
+  speechText?: string;
 };
 
-export type UnitId = 1 | 2 | 3;
+export type LevelId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14;
 
-export const ALL_UNITS: readonly UnitId[] = [1, 2, 3];
+export type AvailableLevelId = 1 | 2 | 3 | 4 | 5 | 6;
 
-export const UNIT1_WRITE_WORDS: Word[] = [
-  { id: "yi-one", hanzi: "一", pinyin: "yī", english: "one" },
-  { id: "er-two", hanzi: "二", pinyin: "èr", english: "two" },
-  { id: "san-three", hanzi: "三", pinyin: "sān", english: "three" },
-  { id: "si-four", hanzi: "四", pinyin: "sì", english: "four" },
-  { id: "wu-five", hanzi: "五", pinyin: "wǔ", english: "five" },
-  { id: "liu-six", hanzi: "六", pinyin: "liù", english: "six" },
-  { id: "qi-seven", hanzi: "七", pinyin: "qī", english: "seven" },
-  { id: "ba-eight", hanzi: "八", pinyin: "bā", english: "eight" },
-  { id: "jiu-nine", hanzi: "九", pinyin: "jiǔ", english: "nine" },
-  { id: "shi-ten", hanzi: "十", pinyin: "shí", english: "ten" },
-  { id: "baba-dad", hanzi: "爸爸", pinyin: "bàba", english: "dad" },
-  { id: "mama-mom", hanzi: "妈妈", pinyin: "māma", english: "mom" },
-  { id: "ren-person", hanzi: "人", pinyin: "rén", english: "person" },
-  { id: "ri-sun", hanzi: "日", pinyin: "rì", english: "sun" },
-  { id: "yue-moon", hanzi: "月", pinyin: "yuè", english: "moon" },
-  { id: "ban-half", hanzi: "半", pinyin: "bàn", english: "half" },
-];
+export type PracticeScope = "introduced" | "through";
 
-export const UNIT1_READ_ONLY_WORDS: Word[] = [
-  { id: "xia-down", hanzi: "下", pinyin: "xià", english: "down" },
-  { id: "da-big", hanzi: "大", pinyin: "dà", english: "big" },
-  { id: "xiao-small", hanzi: "小", pinyin: "xiǎo", english: "small" },
-  { id: "gege-older-brother", hanzi: "哥哥", pinyin: "gēge", english: "older brother" },
-  { id: "jiejie-older-sister", hanzi: "姐姐", pinyin: "jiějie", english: "older sister" },
-  { id: "didi-younger-brother", hanzi: "弟弟", pinyin: "dìdi", english: "younger brother" },
-  { id: "meimei-younger-sister", hanzi: "妹妹", pinyin: "mèimei", english: "younger sister" },
-  { id: "yeye-grandpa-dad", hanzi: "爷爷", pinyin: "yéye", english: "grandpa (dad's side)" },
-  { id: "nainai-grandma-dad", hanzi: "奶奶", pinyin: "nǎinai", english: "grandma (dad's side)" },
-  { id: "waigong-grandpa-mom", hanzi: "外公", pinyin: "wàigōng", english: "grandpa (mom's side)" },
-  { id: "waipo-grandma-mom", hanzi: "外婆", pinyin: "wàipó", english: "grandma (mom's side)" },
-];
+export type LevelStatus = "transcribed" | "planned";
 
-export const UNIT2_WRITE_WORDS: Word[] = [
-  { id: "xi-west", hanzi: "西", pinyin: "xī", english: "west" },
-  { id: "jia-home", hanzi: "家", pinyin: "jiā", english: "home" },
-  { id: "wo-i", hanzi: "我", pinyin: "wǒ", english: "I" },
-  { id: "de-of", hanzi: "的", pinyin: "de", english: "of / 's" },
-  { id: "nv-woman", hanzi: "女", pinyin: "nǚ", english: "woman" },
-  { id: "kou-mouth", hanzi: "口", pinyin: "kǒu", english: "mouth" },
-  { id: "qu-go", hanzi: "去", pinyin: "qù", english: "go" },
-  { id: "zi-child", hanzi: "子", pinyin: "zǐ", english: "child (depends on context)" },
-  { id: "zhi-only", hanzi: "只", pinyin: "zhǐ", english: "only / measure word" },
-  { id: "chang-long", hanzi: "长", pinyin: "cháng", english: "long" },
-  { id: "fang-square", hanzi: "方", pinyin: "fāng", english: "square" },
-  { id: "zai-at", hanzi: "在", pinyin: "zài", english: "at" },
-  { id: "le-already", hanzi: "了", pinyin: "le", english: "already" },
-];
-
-export const UNIT2_READ_ONLY_WORDS: Word[] = [
-  { id: "dong-east", hanzi: "东", pinyin: "dōng", english: "east" },
-  { id: "nan-south", hanzi: "南", pinyin: "nán", english: "south" },
-  { id: "bei-north", hanzi: "北", pinyin: "běi", english: "north" },
-  { id: "bao-treasure", hanzi: "宝", pinyin: "bǎo", english: "treasure" },
-  { id: "shui-water", hanzi: "水", pinyin: "shuǐ", english: "water" },
-  { id: "zuo-left", hanzi: "左", pinyin: "zuǒ", english: "left" },
-  { id: "you-right", hanzi: "右", pinyin: "yòu", english: "right" },
-  { id: "niao-bird", hanzi: "鸟", pinyin: "niǎo", english: "bird" },
-  { id: "shou-hand", hanzi: "手", pinyin: "shǒu", english: "hand" },
-  { id: "tian-sky", hanzi: "天", pinyin: "tiān", english: "sky" },
-  { id: "xing-shape", hanzi: "形", pinyin: "xíng", english: "shape" },
-  { id: "fang-house", hanzi: "房", pinyin: "fáng", english: "house" },
-  { id: "wen-writing", hanzi: "文", pinyin: "wén", english: "writing (depends on context)" },
-  { id: "dong-winter", hanzi: "冬", pinyin: "dōng", english: "winter" },
-];
-
-export const UNIT3_WRITE_WORDS: Word[] = [
-  { id: "tu-soil", hanzi: "土", pinyin: "tǔ", english: "soil" },
-  { id: "ge-unit", hanzi: "个", pinyin: "gè", english: "unit / measure word" },
-  { id: "gong-public", hanzi: "公", pinyin: "gōng", english: "public" },
-  { id: "la-trash", hanzi: "垃", pinyin: "lā", english: "trash (la)" },
-  { id: "ji-trash", hanzi: "圾", pinyin: "jī", english: "trash (ji)" },
-  { id: "xue-study", hanzi: "学", pinyin: "xué", english: "study" },
-  { id: "ma-horse", hanzi: "马", pinyin: "mǎ", english: "horse" },
-  { id: "nian-year", hanzi: "年", pinyin: "nián", english: "year" },
-  { id: "fu-fortune", hanzi: "福", pinyin: "fú", english: "good fortune" },
-  { id: "hui-return", hanzi: "回", pinyin: "huí", english: "return" },
-  { id: "ni-you", hanzi: "你", pinyin: "nǐ", english: "you" },
-  { id: "ke-can", hanzi: "可", pinyin: "kě", english: "can / but" },
-];
-
-export const UNIT3_READ_ONLY_WORDS: Word[] = [
-  { id: "li-inside", hanzi: "里", pinyin: "lǐ", english: "inside" },
-  { id: "sheng-life", hanzi: "生", pinyin: "shēng", english: "life / born" },
-  { id: "hong-red", hanzi: "红", pinyin: "hóng", english: "red" },
-  { id: "hei-black", hanzi: "黑", pinyin: "hēi", english: "black" },
-  { id: "shou-receive", hanzi: "收", pinyin: "shōu", english: "receive" },
-  { id: "lv-green", hanzi: "绿", pinyin: "lǜ", english: "green" },
-  { id: "yu-fish", hanzi: "鱼", pinyin: "yú", english: "fish" },
-  { id: "zhu-wish", hanzi: "祝", pinyin: "zhù", english: "wish / congratulate" },
-];
-
-export const READ_WORDS_BY_UNIT: Record<UnitId, Word[]> = {
-  1: [...UNIT1_WRITE_WORDS, ...UNIT1_READ_ONLY_WORDS],
-  2: [...UNIT2_WRITE_WORDS, ...UNIT2_READ_ONLY_WORDS],
-  3: [...UNIT3_WRITE_WORDS, ...UNIT3_READ_ONLY_WORDS],
+export type LevelDefinition = {
+  id: LevelId;
+  cumulativeTarget: number;
+  introducedTarget: number;
+  status: LevelStatus;
 };
 
-export const WRITE_WORDS_BY_UNIT: Record<UnitId, Word[]> = {
-  1: UNIT1_WRITE_WORDS,
-  2: UNIT2_WRITE_WORDS,
-  3: UNIT3_WRITE_WORDS,
+const CUMULATIVE_TARGETS = [
+  60,
+  120,
+  180,
+  240,
+  310,
+  390,
+  490,
+  600,
+  750,
+  950,
+  1250,
+  1680,
+  2260,
+  3000,
+] as const;
+
+export const ALL_LEVELS: readonly LevelId[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+
+export const AVAILABLE_LEVELS: readonly AvailableLevelId[] = [1, 2, 3, 4, 5, 6];
+
+// Browser speech engines choose a reading from context. These short phrases keep
+// polyphonic characters and neutral-tone particles aligned with the catalog pinyin.
+const CHINESE_SPEECH_TEXT_BY_CHARACTER: Readonly<Partial<Record<string, string>>> = {
+  只: "一只",
+  了: "好了",
+  少: "多少",
+  地: "大地",
+  兴: "高兴",
+  乐: "快乐",
+  好: "美好",
+  的: "好的",
+  子: "儿子",
+  几: "几个",
+  中: "中间",
+  可: "可以",
+  长: "长大",
+  没: "没有",
+  觉: "觉得",
+  把: "一把",
+  和: "我和你",
+  得: "得到",
+  着: "看着",
+  啊: "好啊",
+  吧: "好吧",
+  吗: "好吗",
+  发: "出发",
+  为: "成为",
+  会: "开会",
+  行: "行走",
+  过: "走过",
+  给: "给我",
+  干: "干草",
+  还: "还有",
+  呢: "你呢",
+  分: "分开",
+  当: "当时",
+  作: "作业",
+  转: "转身",
+  数: "数字",
+  空: "天空",
+  片: "一片",
+  那: "那里",
+  更: "更多",
+  都: "都是",
+  藏: "藏起来",
+  种: "一种",
+  参: "参加",
+  落: "落下",
+  处: "到处",
+  呀: "好呀",
 };
 
-function uniqueById(words: Word[]): Word[] {
-  const seen = new Set<string>();
-  const out: Word[] = [];
-  for (const word of words) {
-    if (seen.has(word.id)) continue;
-    seen.add(word.id);
-    out.push(word);
-  }
-  return out;
+export const LEVELS: readonly LevelDefinition[] = ALL_LEVELS.map((id, index) => {
+  const cumulativeTarget = CUMULATIVE_TARGETS[index];
+  const previousTarget = index === 0 ? 0 : CUMULATIVE_TARGETS[index - 1];
+
+  return {
+    id,
+    cumulativeTarget,
+    introducedTarget: cumulativeTarget - previousTarget,
+    status: (AVAILABLE_LEVELS as readonly LevelId[]).includes(id) ? "transcribed" : "planned",
+  };
+});
+
+function makeWord(level: LevelId, seed: { hanzi: string; pinyin: string; english: string }): Word {
+  const codePoints = Array.from(seed.hanzi)
+    .map((character) => character.codePointAt(0)?.toString(16))
+    .filter(Boolean)
+    .join("-");
+
+  return {
+    id: `hanzi-${codePoints}`,
+    ...seed,
+    introducedAt: level,
+    speechText: CHINESE_SPEECH_TEXT_BY_CHARACTER[seed.hanzi],
+  };
 }
 
-export function getReadWordsForUnits(units: readonly UnitId[]): Word[] {
-  return uniqueById(units.flatMap((unit) => READ_WORDS_BY_UNIT[unit]));
+export const WORDS_BY_LEVEL: Readonly<Partial<Record<LevelId, readonly Word[]>>> = Object.fromEntries(
+  AVAILABLE_LEVELS.map((level) => [
+    level,
+    LEVEL_CHARACTER_SEEDS[level].map((seed) => makeWord(level, seed)),
+  ]),
+);
+
+export const WORDS: Word[] = AVAILABLE_LEVELS.flatMap((level) => WORDS_BY_LEVEL[level] ?? []);
+
+export function isLevelAvailable(level: LevelId): boolean {
+  return (AVAILABLE_LEVELS as readonly LevelId[]).includes(level);
 }
 
-export function getWriteWordsForUnits(units: readonly UnitId[]): Word[] {
-  return uniqueById(units.flatMap((unit) => WRITE_WORDS_BY_UNIT[unit]));
+export function getLevelDefinition(level: LevelId): LevelDefinition {
+  return LEVELS[level - 1];
 }
 
-export const WORDS: Word[] = uniqueById([
-  ...READ_WORDS_BY_UNIT[1],
-  ...READ_WORDS_BY_UNIT[2],
-  ...READ_WORDS_BY_UNIT[3],
-]);
+export function getWordsForLevel(level: LevelId, scope: PracticeScope): Word[] {
+  if (!isLevelAvailable(level)) return [];
+  if (scope === "introduced") return [...(WORDS_BY_LEVEL[level] ?? [])];
 
-const CHINESE_SPEECH_TEXT_BY_ID: Partial<Record<string, string>> = {
-  "ban-half": "半个",
-};
+  return AVAILABLE_LEVELS.filter((candidate) => candidate <= level).flatMap(
+    (candidate) => WORDS_BY_LEVEL[candidate] ?? [],
+  );
+}
+
+export function getReadWordsForLevel(level: LevelId, scope: PracticeScope): Word[] {
+  return getWordsForLevel(level, scope);
+}
+
+export function getWriteWordsForLevel(level: LevelId, scope: PracticeScope): Word[] {
+  return getWordsForLevel(level, scope);
+}
 
 export function getChineseSpeechText(word: Word): string {
-  return CHINESE_SPEECH_TEXT_BY_ID[word.id] ?? word.hanzi;
+  return word.speechText ?? word.hanzi;
 }
