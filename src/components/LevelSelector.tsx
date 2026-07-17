@@ -54,7 +54,7 @@ export function LevelSelector({ level, scope, onLevelChange, onScopeChange }: Le
                 className={[
                   "h-8 touch-manipulation rounded-lg px-3 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-slate-300/40",
                   selected
-                    ? "bg-amber-300 text-amber-950"
+                    ? "bg-amber-700 text-white shadow-sm ring-1 ring-inset ring-amber-500/40"
                     : "text-slate-300 hover:bg-slate-800 hover:text-slate-100",
                 ].join(" ")}
               >
