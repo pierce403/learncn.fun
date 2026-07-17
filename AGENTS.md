@@ -81,11 +81,16 @@
 
 ## Git workflow (agent)
 
-- After completing each task, **always**:
+- After completing each task that changes repository files, **always**:
   - `git status` (sanity check) then `git add -A`
   - `git commit -m "<message>"` (pick a concise message if the user didn’t specify one)
   - `git push` (push the current branch to its upstream)
-- After pushing, if `gh` is available, verify the GitHub Pages deploy:
+- After pushing, **always** open or update a pull request into `main`, merge it once required checks
+  pass, and treat the merge as part of completing the task. Prefer squash merge unless the repository
+  or user specifies another method.
+- Leave a pull request unmerged only when the user explicitly asks for a draft/review handoff or a
+  higher-priority safety rule requires confirmation.
+- After merging, verify the GitHub Pages deploy. If `gh` is available:
   - Wait for the latest run of **Deploy to GitHub Pages** to finish: `gh run list --workflow \"Deploy to GitHub Pages\" --limit 1` then `gh run watch <run-id> --exit-status`
   - If it fails, surface the failure summary/logs (`gh run view <run-id> --log-failed`)
 
