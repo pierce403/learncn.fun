@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getChineseSpeechText, getReadWordsForUnits, type UnitId, type Word } from "../../data/words";
-import { UnitSelector } from "../../components/UnitSelector";
+import { LevelSelector } from "../../components/LevelSelector";
+import { getChineseSpeechText, getReadWordsForLevel, type Word } from "../../data/words";
+import { useVocabularySelection } from "../../hooks/useVocabularySelection";
 import { burstConfetti } from "../../lib/confetti";
 import { shuffleInPlace } from "../../lib/random";
 import { playDing, playPop, playTada } from "../../lib/sfx";
@@ -28,8 +29,6 @@ const AUDIO_STORAGE_KEY = "learncn.read.audioEnabled";
 const ANSWER_MODE_STORAGE_KEY = "learncn.read.answerMode";
 const PROMPT_ZH = "这是什么字？";
 const STREAK_MILESTONE = 10;
-const AUTO_ADD_UNIT_2_STREAK = 10;
-const AUTO_ADD_UNIT_3_STREAK = 20;
 const CELEBRATION_STEP_MS = 260;
 const CELEBRATION_BUFFER_MS = 220;
 const FLASH_DURATION_MS = 650;
@@ -130,11 +129,9 @@ function makeDeck(previousWordId: string | null, ids: string[]): string[] {
 }
 
 export default function ReadApp({ onHome }: ReadAppProps) {
-  const [selectedUnits, setSelectedUnits] = useState<UnitId[]>([1]);
-  const autoUnitsEnabledRef = useRef(true);
-  const lastAutoAddedUnitRef = useRef<UnitId>(1);
+  const { level, scope, setLevel, setScope } = useVocabularySelection();
 
-  const activeWords = useMemo(() => getReadWordsForUnits(selectedUnits), [selectedUnits]);
+  const activeWords = useMemo(() => getReadWordsForLevel(level, scope), [level, scope]);
   const activeWordIds = useMemo(() => activeWords.map((word) => word.id), [activeWords]);
   const activeWordIdsKey = useMemo(() => activeWordIds.join("|"), [activeWordIds]);
 
@@ -145,7 +142,7 @@ export default function ReadApp({ onHome }: ReadAppProps) {
   const activeWordsRef = useRef<Word[]>(activeWords);
   const activeWordIdsRef = useRef<string[]>(activeWordIds);
   const wordsByIdRef = useRef<Record<string, Word>>(wordsById);
-  const unitToggleByUserRef = useRef(false);
+  const selectionChangedByUserRef = useRef(false);
 
   const [started, setStarted] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(() => loadStoredBool(AUDIO_STORAGE_KEY, true));
@@ -187,16 +184,14 @@ export default function ReadApp({ onHome }: ReadAppProps) {
     wordsByIdRef.current = wordsById;
   }, [wordsById]);
 
-  function toggleUnit(unit: UnitId): void {
-    autoUnitsEnabledRef.current = false;
-    unitToggleByUserRef.current = true;
-    setSelectedUnits((prev) => {
-      const has = prev.includes(unit);
-      const next = has ? prev.filter((u) => u !== unit) : [...prev, unit];
-      if (next.length === 0) return prev;
-      next.sort((a, b) => a - b);
-      return next;
-    });
+  function changeLevel(nextLevel: Parameters<typeof setLevel>[0]): void {
+    selectionChangedByUserRef.current = true;
+    setLevel(nextLevel);
+  }
+
+  function changeScope(nextScope: Parameters<typeof setScope>[0]): void {
+    selectionChangedByUserRef.current = true;
+    setScope(nextScope);
   }
 
   function clearNextTimeout(): void {
@@ -273,27 +268,11 @@ export default function ReadApp({ onHome }: ReadAppProps) {
   }, []);
 
   useEffect(() => {
-    if (!autoUnitsEnabledRef.current) return;
-    const desiredMaxUnit: UnitId =
-      streak >= AUTO_ADD_UNIT_3_STREAK ? 3 : streak >= AUTO_ADD_UNIT_2_STREAK ? 2 : 1;
-    const prev = lastAutoAddedUnitRef.current;
-    if (desiredMaxUnit <= prev) return;
-    lastAutoAddedUnitRef.current = desiredMaxUnit;
-    setSelectedUnits((units) => {
-      const next = new Set<UnitId>(units);
-      for (let u = prev + 1; u <= desiredMaxUnit; u++) {
-        next.add(u as UnitId);
-      }
-      return Array.from(next).sort((a, b) => a - b);
-    });
-  }, [streak]);
-
-  useEffect(() => {
     if (!started) return;
     deckRef.current = makeDeck(lastWordIdRef.current, activeWordIds);
-    const wasUserToggle = unitToggleByUserRef.current;
-    unitToggleByUserRef.current = false;
-    if (!wasUserToggle && (locked || nextTimeoutRef.current !== null)) return;
+    const wasUserChange = selectionChangedByUserRef.current;
+    selectionChangedByUserRef.current = false;
+    if (!wasUserChange && (locked || nextTimeoutRef.current !== null)) return;
     nextQuestion();
   }, [activeWordIdsKey]);
 
@@ -419,10 +398,12 @@ export default function ReadApp({ onHome }: ReadAppProps) {
                   : "Pick the English meaning of the character."}
               </p>
 	              <div className="mt-3">
-	                <div className="text-xs font-medium text-slate-400">Units</div>
-	                <div className="mt-2">
-	                  <UnitSelector selectedUnits={selectedUnits} onToggle={toggleUnit} />
-	                </div>
+	                <LevelSelector
+	                  level={level}
+	                  scope={scope}
+	                  onLevelChange={changeLevel}
+	                  onScopeChange={changeScope}
+	                />
 	              </div>
 	            </div>
 

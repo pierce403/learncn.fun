@@ -77,7 +77,9 @@ export default function App() {
         <div className="w-full rounded-3xl bg-slate-900/50 p-6 shadow-2xl ring-1 ring-slate-700/40 backdrop-blur sm:p-8">
           <header className="flex flex-col gap-2">
             <h1 className="text-2xl font-semibold tracking-tight text-slate-100">learncn.fun</h1>
-            <p className="text-sm text-slate-300">Fast, tiny Chinese practice apps. Pick one to start.</p>
+            <p className="text-sm text-slate-300">
+              Practice the 14-level 小羊上山 reading path, one character level at a time.
+            </p>
           </header>
 
           <div className="mt-8">
@@ -116,6 +118,10 @@ export default function App() {
 
             <p className="mt-6 text-xs text-slate-400">
               Audio note: your first tap (opening an app) unlocks speech in most browsers.
+            </p>
+            <p className="mt-2 text-xs text-slate-500">
+              Levels 1–6 are available now. Independent practice tool—not affiliated with the book
+              publisher.
             </p>
           </div>
         </div>
