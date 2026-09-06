@@ -2,15 +2,20 @@ export type SpeakOptions = {
   rate?: number;
   pitch?: number;
   volume?: number;
+  onStart?: () => void;
+  onError?: (error: SpeechSynthesisErrorCode) => void;
 };
 
-function isSpeechSupported(): boolean {
+export function isSpeechSupported(): boolean {
   return (
     typeof window !== "undefined" &&
     "speechSynthesis" in window &&
     typeof SpeechSynthesisUtterance !== "undefined"
   );
 }
+
+let speechGeneration = 0;
+const pendingUtterances = new Set<SpeechSynthesisUtterance>();
 
 function normalizeLang(lang: string): string {
   return lang.trim().toLowerCase();
@@ -87,10 +92,12 @@ async function getVoices(timeoutMs = 1800): Promise<SpeechSynthesisVoice[]> {
 
   return await new Promise<SpeechSynthesisVoice[]>((resolve) => {
     let interval: number | null = null;
+    let timeout: number | null = null;
 
     const cleanup = () => {
       synth.removeEventListener("voiceschanged", onVoicesChanged);
       if (interval !== null) window.clearInterval(interval);
+      if (timeout !== null) window.clearTimeout(timeout);
     };
 
     const tryResolve = () => {
@@ -111,7 +118,7 @@ async function getVoices(timeoutMs = 1800): Promise<SpeechSynthesisVoice[]> {
     interval = window.setInterval(() => {
       tryResolve();
     }, 50);
-    window.setTimeout(() => {
+    timeout = window.setTimeout(() => {
       cleanup();
       resolve(synth.getVoices());
     }, timeoutMs);
@@ -119,6 +126,8 @@ async function getVoices(timeoutMs = 1800): Promise<SpeechSynthesisVoice[]> {
 }
 
 export function stopSpeech(): void {
+  speechGeneration++;
+  pendingUtterances.clear();
   if (!isSpeechSupported()) return;
   window.speechSynthesis.cancel();
 }
@@ -134,9 +143,11 @@ async function speakSequence(
   const { rate = 0.95, pitch = 1, volume = 1 } = options;
   const synth = window.speechSynthesis;
 
-  synth.cancel();
+  stopSpeech();
+  const generation = speechGeneration;
 
   const voices = await getVoices();
+  if (generation !== speechGeneration) return;
   const voice = voicePicker(voices);
 
   for (const text of texts) {
@@ -149,7 +160,18 @@ async function speakSequence(
     utterance.rate = rate;
     utterance.pitch = pitch;
     utterance.volume = volume;
+    utterance.onstart = () => {
+      if (generation === speechGeneration) options.onStart?.();
+    };
+    utterance.onend = () => { pendingUtterances.delete(utterance); };
+    utterance.onerror = (event) => {
+      pendingUtterances.delete(utterance);
+      if (generation !== speechGeneration || event.error === "interrupted" || event.error === "canceled") return;
+      options.onError?.(event.error);
+    };
 
+    // Keep playback alive on browsers that collect unreferenced utterances early.
+    pendingUtterances.add(utterance);
     synth.speak(utterance);
   }
 }
