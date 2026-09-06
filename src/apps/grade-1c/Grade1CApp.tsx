@@ -4,6 +4,8 @@ import { playDing, playTada } from "../../lib/sfx";
 import { LESSONS, NUMBERS, type Lesson, type Word } from "./curriculum";
 import { makeReview, makeRound, parseProgress, PROGRESS_KEY, saveCompletion, type Progress, type Question } from "./game";
 import { useLessonAudio } from "./useLessonAudio";
+import PenguinPath from "./PenguinPath";
+import { POLAR_ART, nextIceLesson } from "./ice-path";
 
 type Screen = "home" | "learn" | "play" | "complete";
 type Run = { original: Question[]; questions: Question[]; index: number; reviewing: boolean; missed: string[]; firstTry: number };
@@ -39,6 +41,10 @@ export default function Grade1CApp() {
   const [lesson, setLesson] = useState<Lesson>(LESSONS[0]);
   const [learnIndex, setLearnIndex] = useState(0);
   const [progress, setProgress] = useState<Progress>(readProgress);
+  const [mapPosition, setMapPosition] = useState(() => {
+    const id = nextIceLesson(progress);
+    return { from: id, to: id };
+  });
   const [storageNotice, setStorageNotice] = useState("");
   const [run, setRun] = useState<Run | null>(null);
   const [wrong, setWrong] = useState<string[]>([]);
@@ -59,6 +65,10 @@ export default function Grade1CApp() {
   }, [screen, learnIndex, run?.index, run?.reviewing]);
 
   useEffect(() => {
+    if (screen !== "home") window.scrollTo(0, 0);
+  }, [screen]);
+
+  useEffect(() => {
     if (feedback === "correct") nextButton.current?.focus({ preventScroll: true });
   }, [feedback]);
 
@@ -69,7 +79,15 @@ export default function Grade1CApp() {
     setSelectedTiles([]);
   }
 
-  function home() { audio.stop(); setScreen("home"); setRun(null); resetAnswer(); }
+  function showMap(destination = lesson.id) {
+    audio.stop();
+    setMapPosition({ from: lesson.id, to: destination });
+    setScreen("home");
+    setRun(null);
+    resetAnswer();
+  }
+
+  function home() { showMap(); }
 
   function startLesson(item: Lesson) {
     audio.stop();
@@ -173,36 +191,14 @@ export default function Grade1CApp() {
       <header className="one-c-header">
         <a className="one-c-brand" href="/">learncn<span>.fun</span></a>
         <div className="one-c-header-actions">
-          {screen !== "home" && <button className="one-c-button quiet" onClick={home}>All activities</button>}
+          {screen !== "home" && <button className="one-c-button quiet" onClick={home}>Ice path</button>}
           <button className="one-c-sound-toggle" aria-label={audio.enabled ? "Turn sound off" : "Turn sound on"} aria-pressed={audio.enabled} onClick={audio.toggle}><SoundIcon /><span>Sound {audio.enabled ? "on" : "off"}</span></button>
         </div>
       </header>
 
       <main>
         {screen === "home" && <>
-          <section className="one-c-welcome">
-            <div className="one-c-eyebrow"><span className="one-c-class-badge">1C</span> Week 1A · September 1–4</div>
-            <h1 ref={heading} tabIndex={-1}>My first<br /><span>school day.</span></h1>
-            <p className="one-c-intro">A little Chinese. A little play. Let’s get to know our classroom.</p>
-            <div className="one-c-start-row">
-              <button className="one-c-button primary" onClick={() => startLesson(nextLesson)}>{learned === 0 ? "Let’s play" : learned === LESSONS.length ? "Play again" : "Keep learning"}<span aria-hidden="true">→</span></button>
-              <span className="one-c-small">Learn it. Hear it. Try it.</span>
-            </div>
-            <div className="one-c-passport" aria-label={`${learned} of ${LESSONS.length} activity stars earned`}>
-              <div className="one-c-passport-label"><strong>Your school-day stars</strong><span>{learned} / {LESSONS.length}</span></div>
-              <div className="one-c-stars">{LESSONS.map((item) => <span key={item.id} className={progress[item.id] ? "earned" : ""} aria-label={`${item.title}: ${progress[item.id] ? "star earned" : "ready to play"}`}>★</span>)}</div>
-            </div>
-          </section>
-
-          <section className="one-c-activities" aria-labelledby="activities-heading">
-            <div className="one-c-section-title"><h2 id="activities-heading">Pick an adventure</h2><span className="one-c-small">Start anywhere</span></div>
-            <div className="one-c-lesson-grid">{LESSONS.map((item, index) => <button key={item.id} className={`one-c-lesson ${progress[item.id] ? "completed" : ""}`} style={{ "--card-accent": COLORS[item.color] } as CSSProperties} onClick={() => startLesson(item)}>
-              <div className="one-c-lesson-top"><span className="one-c-lesson-number">0{index + 1}</span><span className="one-c-lesson-status">{progress[item.id] ? "★ Star earned" : item.kind === "sentences" ? "3 sentences" : `${item.words.length} words`}</span></div>
-              <div className="one-c-lesson-chinese" lang="zh-CN">{item.chinese}</div>
-              <h3>{item.title}<span aria-hidden="true">↗</span></h3>
-              <p>{item.description}</p>
-            </button>)}</div>
-          </section>
+          <PenguinPath progress={progress} initialLessonId={mapPosition.from} destinationLessonId={mapPosition.to} onStart={startLesson} headingRef={heading} />
           <details className="one-c-family-note">
             <summary>For grown-ups · What we’re practicing</summary>
             <p>Based on the Grade 1C Week 1A newsletter (2026–27): all 12 words and all three sentence patterns from “Chinese Learning Point,” plus the number recognition within 10 described in Math.</p>
@@ -281,14 +277,14 @@ export default function Grade1CApp() {
         </section>}
 
         {screen === "complete" && run && <section className="one-c-complete">
-          <div className="one-c-earned-star" aria-hidden="true">★</div>
+          <div className="ice-penguin-celebration" aria-hidden="true"><img src={POLAR_ART.penguin} alt="" width="1254" height="1254" /><span>★</span></div>
           <div className="one-c-eyebrow">{lesson.title} · Star earned</div>
           <h1 ref={heading} tabIndex={-1}>You did it!</h1>
           <p>You practiced {lesson.kind === "sentences" ? "three whole sentences" : `${lesson.words.length} ${lesson.kind === "numbers" ? "numbers" : "Chinese words"}`}.</p>
           {run.missed.length > 0 && <p className="one-c-small">And you gave the tricky ones another go. That’s how we learn!</p>}
           <div className="one-c-stars">{LESSONS.map((item) => <span key={item.id} className={progress[item.id] ? "earned" : ""} aria-label={`${item.title}: ${progress[item.id] ? "star earned" : "not yet completed"}`}>★</span>)}</div>
-          <p className="one-c-small">{learned === LESSONS.length ? "All five stars! Your school day is complete." : `${learned} of ${LESSONS.length} school-day stars`}</p>
-          <div className="one-c-complete-actions"><button className="one-c-button primary" onClick={() => learned === LESSONS.length ? home() : startLesson(nextLesson)}>{learned === LESSONS.length ? "Choose an activity" : "Next adventure"}<span aria-hidden="true">→</span></button><button className="one-c-button secondary" onClick={startGame}>Play this again</button></div>
+          <p className="one-c-small">{learned === LESSONS.length ? "All five stars! You crossed the whole bay!" : `${learned} of ${LESSONS.length} ice-block stars`}</p>
+          <div className="one-c-complete-actions"><button className="one-c-button primary" onClick={() => showMap(learned === LESSONS.length ? lesson.id : nextLesson.id)}>{learned === LESSONS.length ? "Back to the ice path" : "Hop to the next lesson"}<span aria-hidden="true">→</span></button><button className="one-c-button secondary" onClick={startGame}>Play this again</button></div>
           <details className="one-c-practiced"><summary>Practice your words again</summary>{lesson.words.map((item) => <button className="one-c-review-word" key={item.id} disabled={!audio.enabled} onClick={() => audio.play(speechText(item))}>{pronunciation(item)}<SoundIcon /></button>)}</details>
         </section>}
         <div className="one-c-notices" role="status">{audio.message && <p>{audio.message}</p>}{storageNotice && <p>{storageNotice}</p>}</div>
