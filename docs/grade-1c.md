@@ -35,6 +35,10 @@ Unavailable or corrupt browser storage does not block play. Audio uses browser
 speech synthesis and never requires a microphone or speech recognition model.
 Every listening prompt has a written hint if playback is unavailable. The device
 may use an online speech service, depending on its installed voices.
+The lesson uses the same speech helper as Read and Write. An incomplete browser
+voice list does not disable listening: when no matching voice is listed, playback
+requests `zh-CN` (or `en-US`) and lets the browser select a voice. The lesson only
+shows a playback error after speech actually fails, or if speech is unsupported.
 
 ## Routing and validation
 
