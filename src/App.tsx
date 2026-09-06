@@ -150,8 +150,8 @@ export default function App() {
               className="mt-4 flex min-h-20 items-center justify-between gap-4 rounded-3xl bg-cyan-400/10 p-5 ring-1 ring-cyan-300/30 transition hover:bg-cyan-400/20 focus-visible:outline-2 focus-visible:outline-cyan-300"
             >
               <div>
-                <div className="text-lg font-semibold text-cyan-100">Grade 1C · My first school day</div>
-                <div className="mt-1 text-sm text-slate-300">Play the Week 1 school words, greetings, introductions, and numbers.</div>
+                <div className="text-lg font-semibold text-cyan-100">Grade 1C · Penguin ice adventure</div>
+                <div className="mt-1 text-sm text-slate-300">Hop between five ice blocks to learn school words, greetings, introductions, and numbers.</div>
               </div>
               <span aria-hidden="true" className="text-cyan-200">Play →</span>
             </a>
