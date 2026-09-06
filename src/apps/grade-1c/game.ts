@@ -1,7 +1,7 @@
 import { shuffleInPlace } from "../../lib/random";
 import type { Lesson, Word } from "./curriculum";
 
-export type Question = { id: string; word: Word; mode: "meaning" | "listen" | "recognize" | "build" | "count"; options: Word[]; tiles: string[] };
+export type Question = { id: string; word: Word; mode: "meaning" | "listen" | "recognize" | "count"; options: Word[] };
 
 function shuffled<T>(values: T[]): T[] {
   const result = [...values];
@@ -9,19 +9,14 @@ function shuffled<T>(values: T[]): T[] {
   return result;
 }
 
-function makeQuestion(word: Word, mode: Question["mode"], pool: Word[]): Question {
-  const distractors = shuffled(pool.filter((candidate) => candidate.id !== word.id)).slice(0, 2);
-  const tokens = word.example?.tokens ?? [];
-  let tiles = shuffled(tokens);
-  // A sentence puzzle should never arrive already solved.
-  if (tiles.length > 1 && tiles.every((tile, index) => tile === tokens[index])) {
-    tiles = [...tiles.slice(1), tiles[0]];
-  }
-  return { id: `${word.id}-${mode}`, word, mode, options: shuffled([word, ...distractors]), tiles };
+function makeQuestion(word: Word, mode: Question["mode"], pool: Word[], choices = 3): Question {
+  const distractors = shuffled(pool.filter((candidate) => candidate.id !== word.id)).slice(0, choices - 1);
+  return { id: `${word.id}-${mode}`, word, mode, options: shuffled([word, ...distractors]) };
 }
 
 export function makeRound(lesson: Lesson, listening: boolean): Question[] {
-  if (lesson.kind === "sentences") return shuffled(lesson.words).map((word) => makeQuestion(word, "build", lesson.words));
+  // One tap per sentence, with only two meanings to choose between.
+  if (lesson.kind === "sentences") return shuffled(lesson.words).map((word) => makeQuestion(word, listening ? "listen" : "meaning", lesson.words, 2));
   if (lesson.kind === "numbers") return shuffled(lesson.words).map((word) => makeQuestion(word, "count", lesson.words));
   // Every word gets reading and then listening/recognition practice, without an immediate repeat.
   const first = shuffled(lesson.words);

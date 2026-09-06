@@ -45,15 +45,33 @@ describe("Grade 1C games", () => {
     expect(round.filter((question) => question.mode === "recognize")).toHaveLength(SCHOOL.length);
   });
 
-  it("builds all three complete sentences from solvable, initially shuffled tiles", () => {
-    const round = makeRound(LESSONS[3], true);
-    expect(round).toHaveLength(3);
-    for (const question of round) {
-      const example = question.word.example!;
-      expect([...question.tiles].sort()).toEqual([...example.tokens].sort());
-      expect(question.tiles).not.toEqual(example.tokens);
-      expect(example.tokens.join("")).toBe(example.hanzi.replace(/[，。？]/g, ""));
+  it("practices each complete sentence once with two distinct meanings and one correct answer", () => {
+    for (let iteration = 0; iteration < 40; iteration++) {
+      const round = makeRound(LESSONS[3], true);
+      expect(round).toHaveLength(3);
+      expect(new Set(round.map((question) => question.word.id))).toEqual(new Set(SENTENCES.map((word) => word.id)));
+      for (const question of round) {
+        expect(question.mode).toBe("listen");
+        expect(question.options).toHaveLength(2);
+        expect(new Set(question.options.map((option) => option.choiceLabel)).size).toBe(2);
+        expect(question.options.filter((option) => option.id === question.word.id)).toHaveLength(1);
+        for (const option of question.options) {
+          expect(option.choiceLabel).toBeTruthy();
+          expect(SENTENCES).toContain(option);
+        }
+        expect(question.word.example?.hanzi).toBeTruthy();
+        expect(question.word.example?.hanzi).not.toContain("__");
+      }
     }
+  });
+
+  it("keeps sentence practice to two choices with written prompts when sound is off", () => {
+    const round = makeRound(LESSONS[3], false);
+    expect(round).toHaveLength(3);
+    expect(round.every((question) => question.mode === "meaning" && question.options.length === 2)).toBe(true);
+    const review = makeReview(round, ["my-age", "my-age", "your-name"]);
+    expect(review.map((question) => question.word.id)).toEqual(["my-age", "your-name"]);
+    expect(review.every((question) => question.mode === "meaning" && question.options.length === 2)).toBe(true);
   });
 
   it("practices every quantity, including zero and ten", () => {
