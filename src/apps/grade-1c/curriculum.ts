@@ -1,6 +1,6 @@
 // Source: Grade 1C, Week 1A (9/1–9/4), 2026–27 newsletter, pp. 1–2.
 // The 12 vocabulary entries and three sentence patterns come from page 2.
-// Number examples and sentence-building examples are original practice for p. 1.
+// Number activities and completed sentence examples are original practice.
 export type Word = {
   id: string;
   hanzi: string;
@@ -9,7 +9,8 @@ export type Word = {
   icon: string;
   tip: string;
   value?: number;
-  example?: { hanzi: string; pinyin: string; english: string; tokens: string[] };
+  choiceLabel?: string;
+  example?: { hanzi: string; pinyin: string; english: string };
 };
 
 export const SCHOOL: Word[] = [
@@ -36,18 +37,18 @@ export const ACTIONS: Word[] = [
 export const SENTENCES: Word[] = [
   {
     id: "my-name", hanzi: "你好，我叫__。", pinyin: "Nǐ hǎo, wǒ jiào __.", english: "Hello, my name is __.", icon: "👋",
-    tip: "Say your own name in the blank. In the game, we use the example name 小明 (Xiǎomíng).",
-    example: { hanzi: "你好，我叫小明。", pinyin: "Nǐ hǎo, wǒ jiào Xiǎomíng.", english: "Hello, my name is Xiaoming.", tokens: ["你好", "我", "叫", "小明"] },
+    tip: "Now try saying your own name!", choiceLabel: "My name is Xiaoming.",
+    example: { hanzi: "你好，我叫小明。", pinyin: "Nǐ hǎo, wǒ jiào Xiǎomíng.", english: "Hello, my name is Xiaoming." },
   },
   {
     id: "your-name", hanzi: "请问你叫什么名字？", pinyin: "Qǐngwèn nǐ jiào shénme míngzì?", english: "May I ask what your name is?", icon: "💬",
-    tip: "请问 is a polite way to ask. Try asking a friend their name.",
-    example: { hanzi: "请问你叫什么名字？", pinyin: "Qǐngwèn nǐ jiào shénme míngzì?", english: "May I ask what your name is?", tokens: ["请问", "你", "叫", "什么", "名字"] },
+    tip: "Ask a friend their name!", choiceLabel: "What's your name?",
+    example: { hanzi: "请问你叫什么名字？", pinyin: "Qǐngwèn nǐ jiào shénme míngzì?", english: "May I ask what your name is?" },
   },
   {
     id: "my-age", hanzi: "我今年__岁了。", pinyin: "Wǒ jīn nián __ suì le.", english: "I am __ years old.", icon: "🎂",
-    tip: "Say your own age in the blank. Our game example uses six: 六 (liù).",
-    example: { hanzi: "我今年六岁了。", pinyin: "Wǒ jīn nián liù suì le.", english: "I am six years old.", tokens: ["我", "今年", "六", "岁", "了"] },
+    tip: "Now try saying your own age!", choiceLabel: "I'm six years old.",
+    example: { hanzi: "我今年六岁了。", pinyin: "Wǒ jīn nián liù suì le.", english: "I am six years old." },
   },
 ];
 
@@ -69,6 +70,6 @@ export const LESSONS: Lesson[] = [
   { id: "school", title: "Meet your class", chinese: "上学", description: "School, teacher, and student", color: "cyan", icon: "🎒", words: SCHOOL, kind: "words" },
   { id: "greetings", title: "Say hello", chinese: "早安", description: "Morning, afternoon, and night", color: "amber", icon: "☀️", words: GREETINGS, kind: "words" },
   { id: "actions", title: "Move & play", chinese: "举手", description: "Six things we do at school", color: "green", icon: "🙋", words: ACTIONS, kind: "words" },
-  { id: "friends", title: "Make a friend", chinese: "你好", description: "Build three introductions", color: "violet", icon: "👋", words: SENTENCES, kind: "sentences" },
+  { id: "friends", title: "Make a friend", chinese: "你好", description: "Listen, tap, and say hello", color: "violet", icon: "👋", words: SENTENCES, kind: "sentences" },
   { id: "numbers", title: "Count with me", chinese: "一二三", description: "Numbers 0–10 in Chinese & English", color: "rose", icon: "🔢", words: NUMBERS, kind: "numbers" },
 ];

@@ -74,7 +74,7 @@
 .one-c-study-card, .one-c-play-card { border: 1px solid #35445e; background: #111e32; border-radius: 24px; padding: 2rem; text-align: center; }
 .one-c-study-icon { display: inline-block; font-size: 2.6rem; margin-bottom: .5rem; }
 .one-c-study-hanzi, .one-c-prompt-hanzi { font-size: clamp(3.75rem, 12vw, 6rem); font-weight: 600; line-height: 1.45; color: #f8fafc; overflow-wrap: anywhere; }
-.one-c-study-card.sentence .one-c-study-hanzi { font-size: clamp(1.75rem, 5.7vw, 3rem); line-height: 1.65; }
+.one-c-study-card.sentence .one-c-study-hanzi, .one-c-play-card.sentence .one-c-prompt-hanzi { font-size: clamp(1.75rem, 5.7vw, 3rem); line-height: 1.65; }
 .one-c-numeral { color: var(--lesson-accent); display: inline-block; padding-right: .5em; font-weight: 750; }
 .one-c-pinyin { font-size: 1.15rem; color: var(--lesson-accent); line-height: 1.6; overflow-wrap: anywhere; }
 .one-c-study-english { font-size: 1.25rem; margin: .25rem 0; }
@@ -82,8 +82,6 @@
 .one-c-tip { max-width: 32rem; margin: 1.25rem auto .5rem !important; padding: 1rem; background: #192b43; color: #d0dced; border-radius: 12px; }
 .one-c-text-button { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; padding: .5rem; min-height: 44px; background: transparent; border: none; color: #a5eaf5; font-size: .9rem !important; text-decoration: underline; text-underline-offset: 4px; }
 .one-c-text-button:not(:disabled):hover { color: #fff; }
-.one-c-example { padding: 1rem; border: 1px dashed #5a6d87; border-radius: 12px; }
-.one-c-example .one-c-small { display: block; margin-bottom: .5rem; }
 .one-c-word-answer { display: grid; gap: .1rem; overflow-wrap: anywhere; }
 .one-c-answer-hanzi { font-size: 1.6rem; line-height: 1.55; color: #f8fafc; }
 .one-c-study-nav { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-top: 1.25rem; }
@@ -107,6 +105,9 @@
 .one-c-option { display: flex; flex: 1; align-items: center; gap: .8rem; min-height: 66px; padding: .8rem 1rem; background: none; border: none; text-align: left; color: #f1f5f9; min-width: 0; }
 .one-c-option.chinese { justify-content: center; font-size: 1.85rem; }
 .one-c-option-icon { font-size: 1.5rem; flex-shrink: 0; }
+.one-c-options.sentence-choices .one-c-option { min-height: 88px; font-size: 1.1rem; }
+.one-c-options.sentence-choices .one-c-option-icon { font-size: 2rem; }
+.one-c-options.sentence-choices .one-c-option-label { flex: 1; min-width: 0; }
 .one-c-option-audio { width: 50px; flex-shrink: 0; display: grid; place-items: center; border: none; border-left: 1px solid #3d536f; background: none; color: #c3dcf1; }
 .one-c-option-row.wrong { border-color: #d8887e; background: #462932; }
 .one-c-option-row.correct { border-color: #6ee7b7; background: #123e37; }
@@ -124,13 +125,6 @@
 .one-c-feedback .one-c-button { flex-shrink: 0; }
 .one-c-feedback .one-c-pinyin { font-size: 1rem; }
 .one-c-review-note { color: #d0dced; margin-bottom: 1rem !important; }
-.one-c-sentence-slot { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: .55rem; min-height: 96px; padding: 1rem; margin: 1rem 0; background: #091426; border: 1px dashed #6b809b; border-radius: 14px; }
-.one-c-placeholder { color: #a0b3ce; }
-.one-c-tile-bank { display: flex; justify-content: center; flex-wrap: wrap; gap: .65rem; }
-.one-c-tile { color: #f1f5f9; font-size: 1.4rem !important; border-radius: 10px; border: 1px solid #728ca8; background: #263e5b; min-height: 52px; min-width: 52px; padding: .45rem .75rem; }
-.one-c-tile.selected { background: #21465a; border-color: #a5f3fc; }
-.one-c-tile-bank .one-c-tile:disabled { opacity: .25; }
-.one-c-check { margin-top: 1.4rem; }
 .one-c-complete { text-align: center; max-width: 640px; margin: 2rem auto; padding: 2rem 1.5rem; background: #101e32; border: 1px solid #3c5470; border-radius: 24px; }
 .one-c-earned-star { color: #fcd34d; font-size: 6rem; line-height: 1.3; text-shadow: 0 5px 0 #8e690f; }
 .one-c-complete .one-c-eyebrow { justify-content: center; }
@@ -190,8 +184,6 @@
   .one-c-choice-state { margin-left: 0; }
   .one-c-option.chinese { font-size: 1.7rem; }
   .one-c-prompt-english { font-size: 1.25rem; }
-  .one-c-sentence-slot { padding: .75rem; }
-  .one-c-tile { font-size: 1.2rem !important; padding: .4rem .6rem; }
   .one-c-footer { align-items: flex-start; flex-direction: column; gap: .4rem; }
 }
 @media (prefers-reduced-motion: reduce) {
