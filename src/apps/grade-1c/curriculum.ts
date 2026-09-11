@@ -84,13 +84,13 @@ export const WEEK_1_LESSONS: Lesson[] = [
 // initials, five recognition characters, and five writing characters.
 // Spoken examples teach sounds in syllables, not English letter names.
 export const FINALS: Word[] = [
-  { id: "w2-a", hanzi: "a", pinyin: "ā", english: "Open wide", icon: "🗣️", tip: "Open your mouth wide and say ā.", audioText: "阿", soundCue: "Find the sound in ā." },
-  { id: "w2-o", hanzi: "o", pinyin: "ō", english: "Round lips", icon: "🗣️", tip: "Round your lips and say ō.", audioText: "喔", soundCue: "Find the sound in ō." },
-  { id: "w2-e", hanzi: "e", pinyin: "é", english: "The sound in goose", icon: "🪿", tip: "Listen to é, the word for goose.", audioText: "鹅", soundCue: "Find the sound in é." },
-  { id: "w2-i", hanzi: "i", pinyin: "yī", english: "The sound in clothes", icon: "👕", tip: "Smile as you say yī.", audioText: "衣", soundCue: "Find the final in yī." },
-  { id: "w2-u", hanzi: "u", pinyin: "wū", english: "The sound in house", icon: "🏠", tip: "Make your lips small and round: wū.", audioText: "屋", soundCue: "Find the final in wū." },
-  { id: "w2-umlaut", hanzi: "ü", pinyin: "nǚ", english: "Two dots!", icon: "👧", tip: "Smile, then round your lips. Listen to nǚ.", audioText: "女", soundCue: "Find the final in nǚ." },
-  { id: "w2-er", hanzi: "er", pinyin: "ěr", english: "The sound in ear", icon: "👂", tip: "Listen to ěr and point to your ear.", audioText: "耳", soundCue: "Find the sound in ěr." },
+  { id: "w2-a", hanzi: "a", pinyin: "ā", english: "Open wide: ah", icon: "🗣️", tip: "Open your mouth wide. Keep your tongue low and copy the sound.", audioText: "阿", soundCue: "Find the sound in ā." },
+  { id: "w2-o", hanzi: "o", pinyin: "ō", english: "Round lips: oh", icon: "🗣️", tip: "Make a circle with your lips. Keep it still as you copy the sound.", audioText: "喔", soundCue: "Find the sound in ō." },
+  { id: "w2-e", hanzi: "e", pinyin: "é", english: "Relax your lips", icon: "🗣️", tip: "Open your mouth a little. Keep your tongue back and your lips relaxed. Listen and copy.", audioText: "鹅", soundCue: "Find the sound in é." },
+  { id: "w2-i", hanzi: "i", pinyin: "yī", english: "Smile: ee", icon: "🗣️", tip: "Smile and say “ee,” like in “see.” Listen and copy.", audioText: "衣", soundCue: "Find the ending sound in yī." },
+  { id: "w2-u", hanzi: "u", pinyin: "wū", english: "Round lips: oo", icon: "🗣️", tip: "Round your lips and say “oo,” like in “moon.” Listen and copy.", audioText: "屋", soundCue: "Find the ending sound in wū." },
+  { id: "w2-umlaut", hanzi: "ü", pinyin: "nǚ", english: "Ee with round lips", icon: "🗣️", tip: "Say “ee.” Keep your tongue still, then round your lips. Try it at the end of nǚ.", audioText: "女", soundCue: "Find the ending sound in nǚ." },
+  { id: "w2-er", hanzi: "er", pinyin: "ěr", english: "Lift your tongue tip", icon: "🗣️", tip: "Lift your tongue tip a little without touching the roof of your mouth. Listen and copy.", audioText: "耳", soundCue: "Find the sound in ěr." },
 ];
 export const INITIALS: Word[] = [
   { id: "w2-y", hanzi: "y", pinyin: "yī", english: "Start with y", icon: "👕", tip: "Look at the first letter in yī.", audioText: "衣", soundCue: "What starts yī?" },

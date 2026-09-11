@@ -174,9 +174,9 @@ export default function Grade1CApp() {
     finish();
   }
 
-  function listenButtons(text: string) {
+  function listenButtons(text: string, label = "Listen") {
     return <div className="one-c-audio-controls">
-      <button className="one-c-button secondary" disabled={!audio.enabled} onClick={() => audio.play(text)}><SoundIcon /> Listen</button>
+      <button className="one-c-button secondary" disabled={!audio.enabled} onClick={() => audio.play(text)}><SoundIcon /> {label}</button>
       <button className="one-c-button quiet" disabled={!audio.enabled} onClick={() => audio.play(text, "zh", true)}>Listen slowly</button>
     </div>;
   }
@@ -185,7 +185,7 @@ export default function Grade1CApp() {
     const content = useExample ? item.example ?? item : item;
     return <div className="one-c-word-answer">
       <div lang={item.soundCue ? "zh-Latn-pinyin" : "zh-CN"} className="one-c-answer-hanzi">{content.hanzi}</div>
-      <div lang="zh-Latn-pinyin" className="one-c-pinyin">{content.pinyin}</div>
+      <div className="one-c-pinyin">{item.soundCue && "Hear: "}<span lang="zh-Latn-pinyin">{content.pinyin}</span></div>
       <div>{content.english}</div>
     </div>;
   }
@@ -232,10 +232,10 @@ export default function Grade1CApp() {
           <div className={`one-c-study-card ${lesson.kind === "sentences" ? "sentence" : ""}`}>
             {word.value === undefined && <span className="one-c-study-icon" aria-hidden="true">{word.icon}</span>}
             {word.pair ? <CompareScene pair={word.pair} sign={word.hanzi} /> : word.sequence ? <NumberSequence values={word.sequence} /> : <div className="one-c-study-hanzi" lang={isSound ? "zh-Latn-pinyin" : "zh-CN"}>{word.value !== undefined && <span className="one-c-numeral">{word.value}</span>}{studyWord.hanzi}</div>}
-            <div className="one-c-pinyin" lang="zh-Latn-pinyin">{studyWord.pinyin}</div>
+            <div className="one-c-pinyin">{isSound && "Hear: "}<span lang="zh-Latn-pinyin">{studyWord.pinyin}</span></div>
             <div className="one-c-study-english">{studyWord.english}</div>
             {word.value !== undefined && <TenFrame key={word.id} value={word.value} onCount={(value) => audio.play(NUMBERS[value].hanzi)} />}
-            {listenButtons(speechText(word))}
+            {listenButtons(speechText(word), isSound ? "Listen & copy" : "Listen")}
             <p className="one-c-tip">{word.tip}</p>
             <button className="one-c-text-button" disabled={!audio.enabled} onClick={() => audio.play(`${studyWord.english} ${word.tip}`, "en")}><SoundIcon /> Read this to me</button>
             {word.related && <details className="one-c-related" key={word.id}><summary>More words</summary>
@@ -245,7 +245,7 @@ export default function Grade1CApp() {
           </div>
           <div className="one-c-study-nav">
             <button className="one-c-button secondary" disabled={learnIndex === 0} onClick={() => { setLearnIndex(learnIndex - 1); audio.play(speechText(lesson.words[learnIndex - 1])); }}>Back</button>
-            <button className="one-c-button primary" onClick={() => { if (learnIndex + 1 === lesson.words.length) startGame(); else { setLearnIndex(learnIndex + 1); audio.play(speechText(lesson.words[learnIndex + 1])); } }}>{learnIndex + 1 === lesson.words.length ? "Let’s play!" : isSentence ? "Next" : "Next word"}<span aria-hidden="true">→</span></button>
+            <button className="one-c-button primary" onClick={() => { if (learnIndex + 1 === lesson.words.length) startGame(); else { setLearnIndex(learnIndex + 1); audio.play(speechText(lesson.words[learnIndex + 1])); } }}>{learnIndex + 1 === lesson.words.length ? "Let’s play!" : isSentence ? "Next" : isSound ? "Next sound" : "Next word"}<span aria-hidden="true">→</span></button>
           </div>
           <button className="one-c-text-button one-c-skip" onClick={startGame}>Know these already? Play now</button>
         </section>}

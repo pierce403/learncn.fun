@@ -6,7 +6,7 @@
 .ice-star-total > span { color: #fcd34d; font-size: 2.1rem; line-height: 1.2; }
 .ice-star-total strong { font-size: 1.25rem; }
 .ice-star-total strong span { color: #b6d4e4; font-size: 1rem; font-weight: 500; }
-.ice-journey-layout { display: grid; grid-template-columns: minmax(0, 1fr) 272px; gap: 1.25rem; align-items: start; }
+.ice-journey-layout { max-width: 680px; margin: 0 auto; }
 .ice-ocean { position: relative; isolation: isolate; height: 43.75rem; border: 2px solid #56cee0; border-radius: 26px; background-color: #007ca1; background-size: cover; background-position: center; box-shadow: 0 8px 0 #073c53, 0 20px 45px #0004; overflow: hidden; }
 .ice-map-instruction { position: absolute; z-index: 5; top: 15px; left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 2rem); padding: .4rem .85rem; color: #e6fcff; background: #06445cdd; border: 1px solid #a5f3fc66; border-radius: 999px; text-align: center; font-size: .875rem; font-weight: 650; }
 .one-c .ice-route-lines { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; overflow: visible; }
@@ -22,13 +22,19 @@
 .ice-stop-number { position: absolute; left: 50%; top: 31%; transform: translate(-50%, -50%); color: #0c7497; font-weight: 850; font-size: 1.7rem; line-height: 1; text-shadow: 0 1px #fff; }
 .ice-stop.completed .ice-stop-number { color: #a36a08; }
 .ice-stop-number.occupied { left: 79%; top: 50%; font-size: 1.25rem; }
-.ice-stop-label { position: absolute; display: grid; gap: .13rem; top: 45%; transform: translateY(-50%); width: 172px; color: #eaffff; padding: .65rem .85rem; border-radius: 13px; background: #034964e8; border: 1px solid #8ee9f377; box-shadow: 0 3px 0 #02465d66; }
+.ice-stop-label { position: absolute; display: grid; gap: .5rem; top: 45%; transform: translateY(-50%); width: 172px; overflow-wrap: anywhere; color: #eaffff; padding: .65rem .85rem; border-radius: 13px; background: #034964e8; border: 1px solid #8ee9f377; box-shadow: 0 3px 0 #02465d66; }
+.ice-stop.selected { z-index: 5; }
+.ice-lesson-select { display: grid; gap: .13rem; width: 100%; min-height: 44px; padding: 0; border: 0; border-radius: 4px; background: none; color: inherit; text-align: left; }
+.one-c .ice-lesson-select:disabled { opacity: 1; cursor: wait; }
+.one-c .ice-start-lesson { width: 100%; min-height: 48px; padding: .55rem .3rem; border-color: #fef08a; border-radius: 10px; background: #fde68a; color: #17354a; box-shadow: 0 3px 0 #b78223; font-size: .875rem; line-height: 1.2; scroll-margin-block: 1rem; }
+.one-c .ice-start-lesson:hover { background: #fef3c7; }
+.one-c .ice-start-lesson:active { box-shadow: 0 1px 0 #b78223; }
 .ice-stop.left .ice-stop-label { left: calc(100% + 4px); }
 .ice-stop.right .ice-stop-label { right: calc(100% + 4px); }
 .ice-stop.selected .ice-stop-label { border-color: #fef08a; }
 .ice-stop-caption { font-size: .875rem; line-height: 1.25; color: #c2ecf8; }
 .ice-stop-label strong { font-size: 1rem; line-height: 1.3; font-weight: 750; }
-.ice-stop-label > [lang] { color: #cdfcff; font-size: 1rem; line-height: 1.35; }
+.ice-lesson-select > [lang] { color: #cdfcff; font-size: 1rem; line-height: 1.35; }
 .ice-stop.completed .ice-stop-caption { color: #fde68a; }
 .ice-penguin-position { position: absolute; z-index: 10; width: 100px; height: 100px; transform: translate(-50%, -92%); pointer-events: none; will-change: left, top, transform; }
 .ice-penguin-float { width: 100%; height: 100%; animation: ice-float 3.4s ease-in-out infinite; animation-delay: var(--float-delay); }
@@ -36,15 +42,6 @@
 .ice-penguin-position.hopping { animation: penguin-hop var(--hop-duration) linear both; }
 .ice-penguin-position.hopping .ice-penguin-float { animation: none; }
 .ice-finish-note { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); background: #03465ddd; color: #d6f9ff; padding: .35rem .8rem; border-radius: 999px; font-size: .875rem; white-space: nowrap; }
-.ice-lesson-dock { position: sticky; top: 1.25rem; padding: 1.5rem; border: 1px solid #477487; border-radius: 22px; background: #102c3d; box-shadow: 0 5px 0 #071d2e; }
-.ice-dock-eyebrow { font-size: .875rem; font-weight: 750; line-height: 1.4; color: #a5f3fc; }
-.ice-lesson-dock h2 { font-size: 1.65rem; font-weight: 800; letter-spacing: -.03em; line-height: 1.2; margin: .7rem 0 .5rem; }
-.ice-lesson-dock > p { color: #c2d7e6; font-size: 1rem; }
-.ice-start-lesson { width: 100%; margin-top: 1.4rem; }
-.ice-dock-progress { margin-top: 1.5rem; border-top: 1px solid #365a70; padding-top: .65rem; }
-.ice-dock-progress p { color: #b5d0e2; font-size: .875rem; }
-.ice-dock-progress .one-c-stars { gap: .4rem; }
-.ice-dock-progress .one-c-stars > span { font-size: 1.85rem; }
 .ice-penguin-celebration { position: relative; width: 150px; margin: 0 auto 1rem; animation: penguin-cheer 1s ease-in-out 2; }
 .ice-penguin-celebration img { display: block; width: 100%; height: auto; }
 .ice-penguin-celebration > span { position: absolute; right: -10px; bottom: 8px; font-size: 3rem; color: #fcd34d; text-shadow: 0 3px #a16a09; line-height: 1; }
@@ -59,22 +56,13 @@
 }
 @keyframes penguin-cheer { 0%, 100% { transform: translateY(0) rotate(0deg); } 40% { transform: translateY(-14px) rotate(-6deg); } 70% { transform: translateY(-5px) rotate(5deg); } }
 @media (max-width: 950px) {
-  .ice-journey-layout { grid-template-columns: minmax(0, 1fr) 236px; gap: 1rem; }
   .ice-stop { width: 146px; height: 80px; }
   .ice-stop-label { width: 138px; padding: .6rem .7rem; }
-  .ice-lesson-dock { padding: 1.15rem; }
 }
 @media (max-width: 780px) {
-  .ice-journey-layout { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
   .ice-ocean { height: 42.5rem; }
   .ice-stop { width: 178px; height: 94px; }
   .ice-stop-label { width: 185px; }
-  .ice-lesson-dock { position: sticky; top: auto; bottom: max(.75rem, env(safe-area-inset-bottom)); z-index: 20; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .25rem 1rem; padding: 1rem 1.2rem; background: #0b2a3df5; box-shadow: 0 3px 0 #031e2b, 0 0 25px #00182477; }
-  .ice-dock-eyebrow { grid-column: 1; font-size: .875rem; }
-  .ice-lesson-dock h2 { grid-column: 1; margin: .25rem 0; font-size: 1.3rem; }
-  .ice-lesson-dock > p { grid-column: 1; font-size: .875rem; }
-  .ice-start-lesson { grid-column: 2; grid-row: 1 / 4; align-self: center; margin: 0; width: auto; }
-  .ice-dock-progress { display: none; }
 }
 @media (max-width: 540px) {
   .ice-journey { padding-top: 1.25rem; }
@@ -90,18 +78,14 @@
   .ice-map-instruction { font-size: .875rem; top: 12px; }
   .ice-stop { width: 132px; height: 72px; }
   .ice-penguin-position { width: 84px; height: 84px; }
-  .ice-stop-label { width: 136px; padding: .55rem .6rem; gap: .13rem; }
+  .ice-stop-label { width: 136px; padding: .55rem .6rem; }
   .ice-stop-label strong { font-size: .95rem; }
-  .ice-stop-label > [lang] { font-size: .95rem; }
+  .ice-lesson-select > [lang] { font-size: .95rem; }
   .ice-stop-caption { font-size: .875rem; }
   .ice-stop.left .ice-stop-label { left: calc(100% - 7px); }
   .ice-stop.right .ice-stop-label { right: calc(100% - 7px); }
   .ice-stop-number { font-size: 1.5rem; }
   .ice-stop-number.occupied { font-size: 1.05rem; }
-  .ice-lesson-dock { padding: .85rem; column-gap: .75rem; border-radius: 17px; }
-  .ice-lesson-dock h2 { font-size: 1.2rem; }
-  .ice-start-lesson { font-size: .95rem !important; padding: .7rem .85rem; }
-  .ice-start-lesson > span { display: none; }
 }
 @media (max-width: 370px) {
   .ice-journey-heading { flex-wrap: wrap; }
@@ -110,14 +94,12 @@
   .ice-penguin-position { width: 76px; height: 76px; }
   .ice-stop-label { width: 123px; padding: .5rem; }
   .ice-stop-label strong { font-size: .875rem; }
-  .ice-lesson-dock { grid-template-columns: minmax(0, 1fr); }
-  .ice-start-lesson { grid-column: 1; grid-row: auto; width: 100%; margin-top: .6rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .ice-platform, .ice-penguin-position, .ice-penguin-float, .ice-penguin-celebration { animation: none !important; }
 }
 
-.ice-week-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin-bottom: 1.5rem; }
+.ice-week-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; max-width: 680px; margin: 0 auto 1.5rem; }
 .ice-week-link { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem .6rem; padding: 1rem; border: 2px solid #4695aa; border-radius: 16px; background: #0b3548; color: #ecfeff; text-align: left; }
 .ice-week-link strong { font-size: 1.15rem; }
 .ice-week-link > span { grid-column: 1 / -1; font-size: .875rem; }
@@ -133,10 +115,6 @@
 .ice-stop.week-2 .ice-stop-label { background: #30234ff2; border-color: #b8a1e9; }
 .ice-stop.week-2.selected .ice-stop-label { border-color: #fde68a; }
 .ice-route-lines path { vector-effect: non-scaling-stroke; stroke-width: 3; stroke-dasharray: 2 12; }
-@media (max-width: 780px) {
-  .ice-journey-layout { display: flex; flex-direction: column; }
-  .ice-lesson-dock { order: -1; top: .5rem; bottom: auto; width: 100%; }
-}
 @media (max-width: 370px) {
   .ice-week-link { padding: .75rem; grid-template-columns: minmax(0, 1fr); }
   .ice-week-link small { grid-row: auto; grid-column: 1; }
