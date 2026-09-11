@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ACTIONS, GREETINGS, LESSONS, NUMBERS, SCHOOL, SENTENCES } from "./curriculum";
+import { ACTIONS, GREETINGS, LESSONS, NUMBERS, SCHOOL, SENTENCES, WEEK_1_LESSONS } from "./curriculum";
 import { makeReview, makeRound, parseProgress, saveCompletion } from "./game";
 
 describe("Grade 1C Week 1 curriculum", () => {
@@ -8,7 +8,7 @@ describe("Grade 1C Week 1 curriculum", () => {
       "上学", "老师", "学生", "早安", "午安", "晚安", "起立", "坐下", "举手", "放下", "洗手", "喝水",
     ]);
     expect(SENTENCES.map((word) => word.hanzi)).toEqual(["你好，我叫__。", "请问你叫什么名字？", "我今年__岁了。"]);
-    expect(new Set(LESSONS.flatMap((lesson) => lesson.words.map((word) => word.id))).size).toBe(26);
+    expect(new Set(WEEK_1_LESSONS.flatMap((lesson) => lesson.words.map((word) => word.id))).size).toBe(26);
     for (const word of LESSONS.flatMap((lesson) => lesson.words)) {
       expect(word.pinyin).not.toBe("");
       expect(word.english).not.toBe("");
@@ -31,7 +31,7 @@ describe("Grade 1C games", () => {
         expect(round).toHaveLength(lesson.words.length * 2);
         for (const word of lesson.words) expect(round.filter((question) => question.word.id === word.id).map((question) => question.mode)).toEqual(["meaning", "listen"]);
         round.forEach((question, index) => {
-          expect(new Set(question.options.map((option) => option.id)).size).toBe(3);
+          expect(new Set(question.options.map((option) => option.id)).size).toBe(lesson.week === 2 ? 2 : 3);
           expect(question.options.filter((option) => option.id === question.word.id)).toHaveLength(1);
           if (index > 0) expect(question.word.id).not.toBe(round[index - 1].word.id);
         });
