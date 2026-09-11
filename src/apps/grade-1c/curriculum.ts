@@ -11,6 +11,12 @@ export type Word = {
   value?: number;
   choiceLabel?: string;
   example?: { hanzi: string; pinyin: string; english: string };
+  audioText?: string;
+  soundCue?: string;
+  related?: { hanzi: string; pinyin: string; english: string }[];
+  sentence?: { hanzi: string; pinyin: string; english: string };
+  pair?: [number, number];
+  sequence?: number[];
 };
 
 export const SCHOOL: Word[] = [
@@ -64,12 +70,91 @@ export const NUMBERS: Word[] = NUMBER_ROWS.map(([hanzi, pinyin, english], value)
   tip: value === 0 ? "Zero means none. The counting frame is empty." : "Tap each filled dot and count out loud. Then say the Chinese number.",
 }));
 
-export type Lesson = { id: string; title: string; chinese: string; description: string; color: string; icon: string; words: Word[]; kind: "words" | "sentences" | "numbers" };
+export type Lesson = { id: string; week: number; title: string; chinese: string; description: string; color: string; icon: string; words: Word[]; kind: "words" | "sentences" | "numbers" | "sounds" | "writing" | "compare" | "order" };
 
-export const LESSONS: Lesson[] = [
-  { id: "school", title: "Meet your class", chinese: "上学", description: "School, teacher, and student", color: "cyan", icon: "🎒", words: SCHOOL, kind: "words" },
-  { id: "greetings", title: "Say hello", chinese: "早安", description: "Morning, afternoon, and night", color: "amber", icon: "☀️", words: GREETINGS, kind: "words" },
-  { id: "actions", title: "Move & play", chinese: "举手", description: "Six things we do at school", color: "green", icon: "🙋", words: ACTIONS, kind: "words" },
-  { id: "friends", title: "Make a friend", chinese: "你好", description: "Listen, tap, and say hello", color: "violet", icon: "👋", words: SENTENCES, kind: "sentences" },
-  { id: "numbers", title: "Count with me", chinese: "一二三", description: "Numbers 0–10 in Chinese & English", color: "rose", icon: "🔢", words: NUMBERS, kind: "numbers" },
+export const WEEK_1_LESSONS: Lesson[] = [
+  { id: "school", week: 1, title: "Meet your class", chinese: "上学", description: "School, teacher, and student", color: "cyan", icon: "🎒", words: SCHOOL, kind: "words" },
+  { id: "greetings", week: 1, title: "Say hello", chinese: "早安", description: "Morning, afternoon, and night", color: "amber", icon: "☀️", words: GREETINGS, kind: "words" },
+  { id: "actions", week: 1, title: "Move & play", chinese: "举手", description: "Six things we do at school", color: "green", icon: "🙋", words: ACTIONS, kind: "words" },
+  { id: "friends", week: 1, title: "Make a friend", chinese: "你好", description: "Listen, tap, and say hello", color: "violet", icon: "👋", words: SENTENCES, kind: "sentences" },
+  { id: "numbers", week: 1, title: "Count with me", chinese: "一二三", description: "Numbers 0–10 in Chinese & English", color: "rose", icon: "🔢", words: NUMBERS, kind: "numbers" },
 ];
+
+// Week 2B (9/8–9/11), 2026–27 newsletter, p. 2: seven finals, two
+// initials, five recognition characters, and five writing characters.
+// Spoken examples teach sounds in syllables, not English letter names.
+export const FINALS: Word[] = [
+  { id: "w2-a", hanzi: "a", pinyin: "ā", english: "Open wide", icon: "🗣️", tip: "Open your mouth wide and say ā.", audioText: "阿", soundCue: "Find the sound in ā." },
+  { id: "w2-o", hanzi: "o", pinyin: "ō", english: "Round lips", icon: "🗣️", tip: "Round your lips and say ō.", audioText: "喔", soundCue: "Find the sound in ō." },
+  { id: "w2-e", hanzi: "e", pinyin: "é", english: "The sound in goose", icon: "🪿", tip: "Listen to é, the word for goose.", audioText: "鹅", soundCue: "Find the sound in é." },
+  { id: "w2-i", hanzi: "i", pinyin: "yī", english: "The sound in clothes", icon: "👕", tip: "Smile as you say yī.", audioText: "衣", soundCue: "Find the final in yī." },
+  { id: "w2-u", hanzi: "u", pinyin: "wū", english: "The sound in house", icon: "🏠", tip: "Make your lips small and round: wū.", audioText: "屋", soundCue: "Find the final in wū." },
+  { id: "w2-umlaut", hanzi: "ü", pinyin: "nǚ", english: "Two dots!", icon: "👧", tip: "Smile, then round your lips. Listen to nǚ.", audioText: "女", soundCue: "Find the final in nǚ." },
+  { id: "w2-er", hanzi: "er", pinyin: "ěr", english: "The sound in ear", icon: "👂", tip: "Listen to ěr and point to your ear.", audioText: "耳", soundCue: "Find the sound in ěr." },
+];
+export const INITIALS: Word[] = [
+  { id: "w2-y", hanzi: "y", pinyin: "yī", english: "Start with y", icon: "👕", tip: "Look at the first letter in yī.", audioText: "衣", soundCue: "What starts yī?" },
+  { id: "w2-w", hanzi: "w", pinyin: "wǔ", english: "Start with w", icon: "🖐️", tip: "Look at the first letter in wǔ.", audioText: "五", soundCue: "What starts wǔ?" },
+];
+
+export const WEEK_2_READING: Word[] = [
+  { id: "w2-clothes", hanzi: "衣", pinyin: "yī", english: "Clothes", icon: "👕", tip: "Point to your clothes.",
+    related: [{ hanzi: "衣服", pinyin: "yīfu", english: "clothes" }, { hanzi: "雨衣", pinyin: "yǔyī", english: "raincoat" }],
+    sentence: { hanzi: "我有一件雨衣。", pinyin: "Wǒ yǒu yí jiàn yǔyī.", english: "I have a raincoat." } },
+  { id: "w2-fish", hanzi: "鱼", pinyin: "yú", english: "Fish", icon: "🐟", tip: "Wiggle your hand like a little fish.",
+    related: [{ hanzi: "小鱼", pinyin: "xiǎo yú", english: "little fish" }, { hanzi: "金鱼", pinyin: "jīnyú", english: "goldfish" }],
+    sentence: { hanzi: "我有一条小鱼。", pinyin: "Wǒ yǒu yì tiáo xiǎo yú.", english: "I have a little fish." } },
+  { id: "w2-rain", hanzi: "雨", pinyin: "yǔ", english: "Rain", icon: "🌧️", tip: "Wiggle your fingers like falling rain.",
+    related: [{ hanzi: "下雨", pinyin: "xià yǔ", english: "to rain" }, { hanzi: "雨衣", pinyin: "yǔyī", english: "raincoat" }],
+    sentence: { hanzi: "今天下雨了。", pinyin: "Jīntiān xià yǔ le.", english: "It rained today." } },
+  { id: "w2-ear", hanzi: "耳", pinyin: "ěr", english: "Ear", icon: "👂", tip: "Point to your ear and listen.",
+    related: [{ hanzi: "耳朵", pinyin: "ěrduo", english: "ear" }, { hanzi: "木耳", pinyin: "mù'ěr", english: "wood ear mushroom" }],
+    sentence: { hanzi: "我有两只耳朵。", pinyin: "Wǒ yǒu liǎng zhī ěrduo.", english: "I have two ears." } },
+  { id: "w2-tooth", hanzi: "牙", pinyin: "yá", english: "Tooth", icon: "🦷", tip: "Smile and show your teeth.",
+    related: [{ hanzi: "牙齿", pinyin: "yáchǐ", english: "teeth" }, { hanzi: "刷牙", pinyin: "shuā yá", english: "brush teeth" }],
+    sentence: { hanzi: "我的牙齿很白。", pinyin: "Wǒ de yáchǐ hěn bái.", english: "My teeth are very white." } },
+];
+export const WEEK_2_WRITING: Word[] = [
+  { id: "w2-one", hanzi: "一", pinyin: "yī", english: "One", icon: "☝️", tip: "One stroke, from left to right.",
+    related: [{ hanzi: "一个", pinyin: "yí ge", english: "one (of something)" }, { hanzi: "一天", pinyin: "yì tiān", english: "one day" }],
+    sentence: { hanzi: "我有一个书包。", pinyin: "Wǒ yǒu yí ge shūbāo.", english: "I have a schoolbag." } },
+  { id: "w2-two", hanzi: "二", pinyin: "èr", english: "Two", icon: "✌️", tip: "Write the top line, then the bottom line.",
+    related: [{ hanzi: "二月", pinyin: "èr yuè", english: "February" }, { hanzi: "二人", pinyin: "èr rén", english: "two people" }],
+    sentence: { hanzi: "我排第二。", pinyin: "Wǒ pái dì èr.", english: "I am second in line." } },
+  { id: "w2-five", hanzi: "五", pinyin: "wǔ", english: "Five", icon: "🖐️", tip: "Follow each glowing stroke.",
+    related: [{ hanzi: "五个", pinyin: "wǔ ge", english: "five (of something)" }, { hanzi: "五月", pinyin: "wǔ yuè", english: "May" }],
+    // Correct the newsletter's duplicated 有 in this example.
+    sentence: { hanzi: "我有五个苹果。", pinyin: "Wǒ yǒu wǔ ge píngguǒ.", english: "I have five apples." } },
+  { id: "w2-mouth", hanzi: "口", pinyin: "kǒu", english: "Mouth", icon: "👄", tip: "Three strokes make this little square.",
+    related: [{ hanzi: "门口", pinyin: "ménkǒu", english: "doorway" }, { hanzi: "人口", pinyin: "rénkǒu", english: "population" }],
+    sentence: { hanzi: "我有一张口。", pinyin: "Wǒ yǒu yì zhāng kǒu.", english: "I have a mouth." } },
+  { id: "w2-person", hanzi: "人", pinyin: "rén", english: "Person", icon: "🧍", tip: "Two strokes, like two legs.",
+    related: [{ hanzi: "大人", pinyin: "dàren", english: "adult" }, { hanzi: "家人", pinyin: "jiārén", english: "family member" }],
+    sentence: { hanzi: "我的妈妈是一个大人。", pinyin: "Wǒ de māma shì yí ge dàren.", english: "My mom is an adult." } },
+];
+
+// Original games for the comparison and ordering objectives on p. 1.
+export const COMPARISONS: Word[] = [
+  { id: "w2-more", hanzi: ">", pinyin: "dà yú", english: "More", icon: "➕", audioText: "大于", tip: "Five is more than two. The open side faces the bigger number.", pair: [5, 2] },
+  { id: "w2-less", hanzi: "<", pinyin: "xiǎo yú", english: "Less", icon: "➖", audioText: "小于", tip: "Two is less than five. The small point faces the smaller number.", pair: [2, 5] },
+  { id: "w2-same", hanzi: "=", pinyin: "děng yú", english: "Same", icon: "🟰", audioText: "等于", tip: "Three and three are the same.", pair: [3, 3] },
+];
+export const ORDERING: Word[] = [
+  { id: "w2-up", hanzi: "0 → 1 → 2", pinyin: "líng → yī → èr", english: "Count up", icon: "🔢", audioText: "零，一，二", tip: "Each number gets one bigger.", sequence: [0, 1, 2] },
+  { id: "w2-down", hanzi: "3 → 2 → 1", pinyin: "sān → èr → yī", english: "Count down", icon: "🔢", audioText: "三，二，一", tip: "Each number gets one smaller.", sequence: [3, 2, 1] },
+];
+export const WEEK_2_LESSONS: Lesson[] = [
+  { id: "w2-finals", week: 2, title: "Sound explorers", chinese: "a o e i u ü er", description: "Seven pinyin sounds to hear and tap", color: "cyan", icon: "🗣️", words: FINALS, kind: "sounds" },
+  { id: "w2-initials", week: 2, title: "Hello, y and w", chinese: "y · w", description: "Find the first letter", color: "violet", icon: "👋", words: INITIALS, kind: "sounds" },
+  { id: "w2-reading", week: 2, title: "Fish & friends", chinese: "衣 鱼 雨 耳 牙", description: "Clothes, fish, rain, ears, and teeth", color: "green", icon: "🐟", words: WEEK_2_READING, kind: "words" },
+  { id: "w2-writing", week: 2, title: "Trace with me", chinese: "一 二 五 口 人", description: "Follow the strokes with your finger", color: "amber", icon: "✏️", words: WEEK_2_WRITING, kind: "writing" },
+  { id: "w2-compare", week: 2, title: "More or less?", chinese: "> · < · =", description: "Compare groups of fish", color: "rose", icon: "🐟", words: COMPARISONS, kind: "compare" },
+  { id: "w2-order", week: 2, title: "Number neighbors", chinese: "1 → 2 → 3", description: "Tap the missing number", color: "cyan", icon: "🔢", words: ORDERING, kind: "order" },
+];
+
+export const WEEKS = [
+  { number: 1, title: "I go to school", dates: "Sep 1–4", lessons: WEEK_1_LESSONS },
+  { number: 2, title: "Sounds & new friends", dates: "Sep 8–11", lessons: WEEK_2_LESSONS },
+];
+export const LESSONS: Lesson[] = WEEKS.flatMap((week) => week.lessons);
+export function practiceSpeech(word: Word): string { return word.audioText ?? word.example?.hanzi ?? word.hanzi; }
