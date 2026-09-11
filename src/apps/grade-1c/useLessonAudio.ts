@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { isSpeechSupported, speakChineseSequence, speakEnglishSequence, stopSpeech } from "../../lib/speech";
+import { isSpeechSupported, speakBilingualSequence, stopSpeech, type SpeechSegment } from "../../lib/speech";
 
 export function useLessonAudio() {
   const [enabled, setEnabled] = useState(true);
@@ -13,7 +13,7 @@ export function useLessonAudio() {
 
   useEffect(() => stop, [stop]);
 
-  const play = useCallback((text: string, language: "zh" | "en" = "zh", slow = false) => {
+  const narrate = useCallback((segments: SpeechSegment[]) => {
     stop();
     if (!enabled) return;
     if (!isSpeechSupported()) {
@@ -28,13 +28,15 @@ export function useLessonAudio() {
     };
     // Match the other apps: prefer a listed voice, but let the browser resolve
     // zh-CN/en-US when its voice list is incomplete. Only playback can fail.
-    const speak = language === "zh" ? speakChineseSequence : speakEnglishSequence;
-    void speak([text], {
-      rate: slow ? 0.65 : 0.85,
+    void speakBilingualSequence(segments.map((segment) => ({ ...segment, rate: segment.rate ?? (segment.language === "en" ? 0.95 : 0.85) })), {
       onStart: () => { if (generation.current === current) setMessage(""); },
       onError: playbackFailed,
     }).catch(playbackFailed);
   }, [enabled, stop]);
+
+  const play = useCallback((text: string, language: "zh" | "en" = "zh", slow = false) => {
+    narrate([{ text, language, rate: slow ? 0.65 : language === "en" ? 0.95 : 0.85 }]);
+  }, [narrate]);
 
   // A voice inventory is not a capability check: browser/OS fallback can work
   // even when getVoices() lists only English or has not populated yet.
@@ -46,5 +48,5 @@ export function useLessonAudio() {
     setMessage("");
   }
 
-  return { enabled, canListen, message, play, stop, toggle };
+  return { enabled, canListen, message, play, narrate, stop, toggle };
 }
