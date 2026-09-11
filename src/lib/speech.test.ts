@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { isSpeechSupported, speakChineseSequence, speakEnglishSequence, stopSpeech } from "./speech";
+import { isSpeechSupported, speakBilingualSequence, speakChineseSequence, speakEnglishSequence, stopSpeech } from "./speech";
 
 class FakeUtterance {
   text: string;
@@ -53,6 +53,39 @@ describe("shared speech playback", () => {
     voices = [voice("zh-CN")];
     await speakEnglishSequence(["Teacher"]);
     expect(spoken[0]).toMatchObject({ text: "Teacher", lang: "en-US", voice: null });
+  });
+
+  it("prefers a natural American voice over the British default and a basic US voice", async () => {
+    voices = [{ ...voice("en-GB", "British Natural"), default: true }, voice("en-US", "Basic"), voice("en_US", "American Natural")];
+    await speakEnglishSequence(["Listen, then tap your answer."]);
+    expect(spoken[0].voice).toBe(voices[2]);
+    expect(spoken[0].lang).toBe("en-us");
+  });
+
+  it("requests en-US rather than pinning playback to an advertised British voice", async () => {
+    voices = [voice("en-GB", "British English")];
+    await speakEnglishSequence(["Let's count!"]);
+    expect(spoken[0]).toMatchObject({ lang: "en-US", voice: null });
+  });
+
+  it("does not substitute Cantonese for a Mandarin lesson", async () => {
+    voices = [voice("zh-HK", "Cantonese")];
+    await speakChineseSequence(["你好"]);
+    expect(spoken[0]).toMatchObject({ lang: "zh-CN", voice: null });
+  });
+
+  it("queues English directions before Mandarin without canceling between languages", async () => {
+    voices = [voice("en-US", "American Natural"), voice("zh-CN", "Mandarin")];
+    await speakBilingualSequence([
+      { text: "Listen and copy.", language: "en", rate: 0.95 },
+      { text: "老师", language: "zh", rate: 0.85 },
+    ]);
+    expect(synth.cancel).toHaveBeenCalledOnce();
+    expect(spoken.map((item) => [item.text, item.voice, item.rate])).toEqual([
+      ["Listen and copy.", voices[0], 0.95], ["老师", voices[1], 0.85],
+    ]);
+    stopSpeech();
+    expect(synth.cancel).toHaveBeenCalledTimes(2);
   });
 
   it("prefers the same Mainland Mandarin voice across apps and keeps slow playback", async () => {

@@ -6,6 +6,8 @@ export type SpeakOptions = {
   onError?: (error: SpeechSynthesisErrorCode) => void;
 };
 
+export type SpeechSegment = { text: string; language: "en" | "zh"; rate?: number };
+
 export function isSpeechSupported(): boolean {
   return (
     typeof window !== "undefined" &&
@@ -18,12 +20,23 @@ let speechGeneration = 0;
 const pendingUtterances = new Set<SpeechSynthesisUtterance>();
 
 function normalizeLang(lang: string): string {
-  return lang.trim().toLowerCase();
+  return lang.trim().toLowerCase().replaceAll("_", "-");
+}
+
+function voiceQuality(voice: SpeechSynthesisVoice): number {
+  const name = voice.name.toLowerCase();
+  if (/novelty|whisper|trinoids|zarvox|boing|bubbles|bad news|good news/.test(name)) return -100;
+  if (/natural|neural/.test(name)) return 80;
+  if (/premium/.test(name)) return 60;
+  if (/enhanced/.test(name)) return 40;
+  if (/google/.test(name)) return 30;
+  return voice.default ? 2 : 0;
 }
 
 function pickChineseVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | undefined {
   const candidates = voices.filter((voice) => {
     const lang = normalizeLang(voice.lang);
+    if (lang.startsWith("yue") || /cantonese|粤|廣東話|广东话/i.test(voice.name)) return false;
     return lang === "zh" || lang.startsWith("zh-") || lang === "cmn" || lang.startsWith("cmn-");
   });
 
@@ -34,7 +47,7 @@ function pickChineseVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice 
     const lang = normalizeLang(voice.lang);
     const name = voice.name.trim().toLowerCase();
 
-    let score = 0;
+    let score = voiceQuality(voice) / 10;
 
     if (lang === "cmn-hans-cn") score += 110;
     else if (lang === "zh-cn") score += 105;
@@ -77,12 +90,12 @@ function pickChineseVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice 
 }
 
 function pickEnglishVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | undefined {
-  const enVoices = voices.filter((voice) => normalizeLang(voice.lang).startsWith("en"));
-  return (
-    enVoices.find((voice) => normalizeLang(voice.lang) === "en-us") ??
-    enVoices.find((voice) => normalizeLang(voice.lang).startsWith("en-")) ??
-    enVoices[0]
-  );
+  // Locale comes first; list order and the device's British default must not
+  // override an American voice. Natural/enhanced voices win within en-US.
+  const american = voices.filter((voice) => normalizeLang(voice.lang) === "en-us");
+  // With no advertised US voice, leave voice unset and request en-US so the
+  // browser can resolve an unlisted voice, as it does for Mandarin.
+  return american.sort((a, b) => voiceQuality(b) - voiceQuality(a))[0];
 }
 
 async function getVoices(timeoutMs = 1800): Promise<SpeechSynthesisVoice[]> {
@@ -132,10 +145,8 @@ export function stopSpeech(): void {
   window.speechSynthesis.cancel();
 }
 
-async function speakSequence(
-  texts: string[],
-  voicePicker: (voices: SpeechSynthesisVoice[]) => SpeechSynthesisVoice | undefined,
-  fallbackLang: string,
+export async function speakBilingualSequence(
+  segments: SpeechSegment[],
   options: SpeakOptions = {},
 ): Promise<void> {
   if (!isSpeechSupported()) return;
@@ -148,16 +159,15 @@ async function speakSequence(
 
   const voices = await getVoices();
   if (generation !== speechGeneration) return;
-  const voice = voicePicker(voices);
-
-  for (const text of texts) {
-    const trimmed = text.trim();
+  for (const segment of segments) {
+    const trimmed = segment.text.trim();
     if (!trimmed) continue;
+    const voice = segment.language === "zh" ? pickChineseVoice(voices) : pickEnglishVoice(voices);
 
     const utterance = new SpeechSynthesisUtterance(trimmed);
     if (voice) utterance.voice = voice;
-    utterance.lang = voice?.lang ?? fallbackLang;
-    utterance.rate = rate;
+    utterance.lang = voice ? normalizeLang(voice.lang) : segment.language === "zh" ? "zh-CN" : "en-US";
+    utterance.rate = segment.rate ?? rate;
     utterance.pitch = pitch;
     utterance.volume = volume;
     utterance.onstart = () => {
@@ -180,12 +190,12 @@ export async function speakChineseSequence(
   texts: string[],
   options: SpeakOptions = {},
 ): Promise<void> {
-  await speakSequence(texts, pickChineseVoice, "zh-CN", options);
+  await speakBilingualSequence(texts.map((text) => ({ text, language: "zh" })), options);
 }
 
 export async function speakEnglishSequence(
   texts: string[],
   options: SpeakOptions = {},
 ): Promise<void> {
-  await speakSequence(texts, pickEnglishVoice, "en-US", options);
+  await speakBilingualSequence(texts.map((text) => ({ text, language: "en" })), options);
 }
