@@ -17,18 +17,22 @@ export default function PenguinPath({ progress, initialLessonId, destinationLess
   const [hop, setHop] = useState<{ from: number; to: number } | null>(null);
   const [reduceMotion, setReduceMotion] = useState(() => typeof window !== "undefined" && (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false));
   const selected = ICE_STOPS[destination].lesson;
-  const selectedWeek = WEEKS.find((week) => week.number === selected.week)!;
-  const weekCompleted = selectedWeek.lessons.filter((lesson) => progress[lesson.id]).length;
   const moving = current !== destination;
   const completed = LESSONS.filter((lesson) => progress[lesson.id]).length;
   const startButton = useRef<HTMLButtonElement>(null);
-  const stopElements = useRef<Array<HTMLLIElement | null>>([]);
+  const hasExplored = useRef(false);
   const wasMoving = useRef(false);
 
   useEffect(() => {
-    // Keep later lessons visible on a phone, including when resuming progress.
-    if (destination >= 2) stopElements.current[destination]?.scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" });
+    // Reveal the nearby action without pulling an already visible island away.
+    if (destination >= 2 || hasExplored.current) startButton.current?.scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
   }, [destination, reduceMotion]);
+
+  function exploreLesson(index: number) {
+    hasExplored.current = true;
+    if (index === destination) startButton.current?.scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
+    else setDestination(index);
+  }
 
   useEffect(() => {
     if (wasMoving.current && !moving) startButton.current?.focus({ preventScroll: true });
@@ -77,9 +81,7 @@ export default function PenguinPath({ progress, initialLessonId, destinationLess
 
     <nav className="ice-week-nav" aria-label="Choose a week">{WEEKS.map((week) => <button key={week.number} className={`ice-week-link week-${week.number}`} aria-pressed={selected.week === week.number} disabled={moving} onClick={() => {
       const next = week.lessons.find((lesson) => !progress[lesson.id]) ?? week.lessons[0];
-      const index = lessonIndex(next.id);
-      setDestination(index);
-      stopElements.current[index]?.scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" });
+      exploreLesson(lessonIndex(next.id));
     }}><strong>Week {week.number}</strong><span>{week.title}</span><small>★ {week.lessons.filter((lesson) => progress[lesson.id]).length} / {week.lessons.length}</small></button>)}</nav>
 
     <div className="ice-journey-layout">
@@ -90,24 +92,22 @@ export default function PenguinPath({ progress, initialLessonId, destinationLess
         </div>)}
         <svg className="ice-route-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">{ICE_WEEKS.map((week) => <path key={week.number} d={iceRoutePath(week.stops)} />)}</svg>
         <ol className="ice-stops" aria-label="Lesson path">
-          {ICE_STOPS.map(({ lesson, lessonNumber, x, y }, index) => <li key={lesson.id} ref={(element) => { stopElements.current[index] = element; }} className={`ice-stop ${x < 50 ? "left" : "right"} week-${lesson.week} ${progress[lesson.id] ? "completed" : ""} ${index === destination ? "selected" : ""}`} style={{ left: `${x}%`, top: `${y}%`, "--float-delay": `${index * -.4}s` } as CSSProperties}>
-            <button className="ice-stop-button" disabled={moving} aria-current={index === destination ? "step" : undefined} aria-label={`Week ${lesson.week}, lesson ${lessonNumber}: ${lesson.title}. ${progress[lesson.id] ? "Star earned. Play again." : "Ready to play."}`} onClick={() => setDestination(index)}>
+          {ICE_STOPS.map(({ lesson, lessonNumber, x, y }, index) => <li key={lesson.id} className={`ice-stop ${x < 50 ? "left" : "right"} week-${lesson.week} ${progress[lesson.id] ? "completed" : ""} ${index === destination ? "selected" : ""}`} style={{ left: `${x}%`, top: `${y}%`, "--float-delay": `${index * -.4}s` } as CSSProperties}>
+            <button className="ice-stop-button" disabled={moving} aria-current={index === destination ? "step" : undefined} aria-label={`Week ${lesson.week}, lesson ${lessonNumber}: ${lesson.title}. ${progress[lesson.id] ? "Star earned. Play again." : "Ready to play."}`} onClick={() => exploreLesson(index)}>
               <span className="ice-platform" aria-hidden="true"><img src={POLAR_ART.ice} alt="" width="1254" height="1254" draggable={false} /><span className={`ice-stop-number ${current === index ? "occupied" : ""}`}>{progress[lesson.id] ? "★" : lessonNumber}</span></span>
-              <span className="ice-stop-label"><span className="ice-stop-caption">{progress[lesson.id] ? "★ Star earned" : `Week ${lesson.week} · ${lessonNumber}`}</span><strong>{lesson.title}</strong><span lang={lesson.kind === "sounds" ? "zh-Latn-pinyin" : "zh-CN"}>{lesson.chinese}</span></span>
             </button>
+            <div className="ice-stop-label">
+              <button className="ice-lesson-select" disabled={moving} aria-current={index === destination ? "step" : undefined} onClick={() => exploreLesson(index)}>
+                <span className="ice-stop-caption">{progress[lesson.id] ? "★ Star earned" : `Week ${lesson.week} · ${lessonNumber}`}</span><strong>{lesson.title}</strong><span lang={lesson.kind === "sounds" ? "zh-Latn-pinyin" : "zh-CN"}>{lesson.chinese}</span>
+              </button>
+              {index === destination && <button className="one-c-button primary ice-start-lesson" ref={startButton} aria-label={`${progress[lesson.id] ? "Practice again" : "Start lesson"}: ${lesson.title}`} onClick={() => onStart(lesson)}>{progress[lesson.id] ? "Practice again" : "Start lesson"}</button>}
+            </div>
           </li>)}
         </ol>
         <div key={hop ? `${hop.from}-${hop.to}` : `rest-${current}`} className={`ice-penguin-position ${hop ? "hopping" : ""}`} style={penguinStyle} aria-hidden="true"><div className="ice-penguin-float"><img src={POLAR_ART.penguin} alt="" width="1254" height="1254" draggable={false} /></div></div>
         <span className="ice-finish-note">{completed === LESSONS.length ? "You explored every island!" : "A star on every island"}</span>
       </div>
 
-      <aside className="ice-lesson-dock" aria-labelledby="ice-selected-title">
-        <div className="ice-dock-eyebrow">Week {selected.week} · Lesson {ICE_STOPS[destination].lessonNumber} / {selectedWeek.lessons.length}</div>
-        <h2 id="ice-selected-title">{selected.title}</h2>
-        <p>{selected.description}</p>
-        <button className="one-c-button primary ice-start-lesson" ref={startButton} disabled={moving} onClick={() => onStart(selected)}>{moving ? "Hop, hop…" : progress[selected.id] ? "Practice again" : "Start lesson"}<span aria-hidden="true">→</span></button>
-        <div className="ice-dock-progress"><div className="one-c-stars" aria-hidden="true">{selectedWeek.lessons.map((lesson) => <span key={lesson.id} className={progress[lesson.id] ? "earned" : ""}>★</span>)}</div><p>{weekCompleted === selectedWeek.lessons.length ? `Week ${selected.week} complete! You can practice again.` : `${weekCompleted} of ${selectedWeek.lessons.length} stars in Week ${selected.week}.`}</p></div>
-      </aside>
     </div>
     <p className="sr-only" role="status" aria-live="polite">{moving ? `Hopping to Week ${selected.week}: ${selected.title}.` : `Penguin is on Week ${selected.week}, lesson ${ICE_STOPS[destination].lessonNumber}: ${selected.title}.`}</p>
   </section>;
