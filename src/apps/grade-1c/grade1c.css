@@ -211,3 +211,6 @@
 .one-c-week-stars > strong { color: #c4eaf5; font-size: .95rem; }
 .one-c-week-stars .one-c-stars { margin-top: .25rem; flex-wrap: wrap; gap: .4rem; }
 .one-c-options.sentence-choices .one-c-option.chinese { font-size: 2rem; }
+
+.one-c .one-c-help-button { width: 48px; height: 48px; padding: 0; margin-bottom: .5rem; border: 2px solid #67e8f9; border-radius: 50%; background: #103140; color: #ecfeff; font-size: 1.4rem !important; font-weight: 800; text-decoration: none; }
+.one-c .one-c-help-button:hover:not(:disabled) { background: #19516a; }
