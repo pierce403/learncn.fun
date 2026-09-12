@@ -200,7 +200,6 @@
 .one-c-fish-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .15rem; font-size: 1.6rem; }
 .one-c-fish-grid > span { display: grid; place-items: center; height: 1.85rem; }
 .one-c-missing-sign { font-size: 2.3rem; font-weight: 800; color: #fcd34d; }
-.one-c-sign-label { display: inline-block; margin-left: .8rem; font-size: 1.15rem; vertical-align: middle; }
 .one-c-number-sequence { display: flex; gap: 1.2rem; max-width: 360px; margin: 1rem auto; }
 .one-c-sequence-number { position: relative; display: grid; place-items: center; flex: 1; min-width: 0; min-height: 4.3rem; font-size: 2.3rem; font-weight: 750; color: #e6fdff; background: #154259; border: 2px solid #5fa9b6; border-radius: 13px; }
 .one-c-sequence-number.missing { color: #fde68a; border-color: #fde68a; border-style: dashed; }
@@ -214,3 +213,5 @@
 
 .one-c .one-c-help-button { width: 48px; height: 48px; padding: 0; margin-bottom: .5rem; border: 2px solid #67e8f9; border-radius: 50%; background: #103140; color: #ecfeff; font-size: 1.4rem !important; font-weight: 800; text-decoration: none; }
 .one-c .one-c-help-button:hover:not(:disabled) { background: #19516a; }
+
+.one-c-choice-pinyin { display: block; margin-top: .2rem; font-size: 1rem; line-height: 1.4; font-weight: 500; color: #b6e8f5; }

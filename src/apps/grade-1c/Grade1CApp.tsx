@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { burstConfetti } from "../../lib/confetti";
 import { playDing, playTada } from "../../lib/sfx";
-import { LESSONS, NUMBERS, WEEKS, practiceSpeech, type Lesson, type Word } from "./curriculum";
+import { COMPARISONS, LESSONS, NUMBERS, WEEKS, practiceSpeech, type Lesson, type Word } from "./curriculum";
 import { makeReview, makeRound, parseProgress, PROGRESS_KEY, questionSpeech, saveCompletion, type Progress, type Question } from "./game";
 import { useLessonAudio } from "./useLessonAudio";
 import PenguinPath from "./PenguinPath";
 import { POLAR_ART, nextIceLesson } from "./ice-path";
 import TraceCharacter from "./TraceCharacter";
 import { CompareScene, NumberSequence } from "./NumberScenes";
-import { cardNarration, lessonNarration, questionNarration, spokenText } from "./narration";
+import { comparisonHintNarration, cardNarration, lessonNarration, questionNarration, spokenText } from "./narration";
 
 type Screen = "home" | "learn" | "play" | "complete";
 type Run = { original: Question[]; questions: Question[]; index: number; reviewing: boolean; missed: string[]; firstTry: number };
@@ -144,7 +144,11 @@ export default function Grade1CApp() {
     audio.play("Good try! Tap another answer.", "en");
   }
 
-  function revealHint() { setHint(true); markMissed(); }
+  function revealHint() {
+    setHint(true);
+    markMissed();
+    if (question?.mode === "compare") audio.narrate(comparisonHintNarration());
+  }
 
   function finish() {
     if (!run) return;
@@ -270,23 +274,24 @@ export default function Grade1CApp() {
             {!isListening && <button className="one-c-text-button one-c-read-prompt" disabled={!audio.enabled} onClick={() => audio.narrate(questionNarration(lesson, question, traceFallback, false))}><SoundIcon /> Hear the question</button>}
 
             {(question.mode !== "trace" || traceFallback) && <div className={`one-c-options ${isSentence || lesson.week === 2 ? "sentence-choices" : ""}`} role="group" aria-label="Answer choices">{question.options.map((option) => {
-              const chinese = question.mode === "recognize" || question.mode === "count" || question.mode === "trace";
-              const symbol = isSound || question.mode === "compare" || question.mode === "order";
+              const chinese = question.mode === "recognize" || question.mode === "count" || question.mode === "trace" || question.mode === "compare";
+              const symbol = isSound || question.mode === "order";
               const label = option.choiceLabel ?? option.english;
               const isWrong = wrong.includes(option.id);
               const isCorrect = feedback === "correct" && option.id === question.word.id;
               return <div key={option.id} className={`one-c-option-row ${isWrong ? "wrong" : ""} ${isCorrect ? "correct" : ""}`}>
                 <button className={`one-c-option ${chinese || symbol ? "chinese" : ""}`} disabled={isWrong || feedback === "correct"} onClick={() => answer(option.id)}>
                   {!chinese && !symbol && <span className="one-c-option-icon" aria-hidden="true">{option.icon}</span>}
-                  <span className="one-c-option-label" lang={isSound ? "zh-Latn-pinyin" : chinese ? "zh-CN" : "en"}>{question.mode === "order" ? option.value : chinese || symbol ? option.hanzi : label}{question.mode === "compare" && <span className="one-c-sign-label">{label}</span>}</span>
+                  <span className="one-c-option-label" lang={isSound ? "zh-Latn-pinyin" : chinese ? "zh-CN" : "en"}>{question.mode === "order" ? option.value : chinese || symbol ? option.hanzi : label}{question.mode === "compare" && <span className="one-c-choice-pinyin" lang="zh-Latn-pinyin">{option.pinyin}</span>}</span>
                   {isWrong && <span className="one-c-choice-state">Try again</span>}{isCorrect && <span className="one-c-choice-state">✓ Correct</span>}
                 </button>
+                {question.mode === "compare" && <button className="one-c-option-audio" aria-label={`Hear ${option.hanzi}`} disabled={!audio.enabled} onClick={() => audio.play(speechText(option))}><SoundIcon /></button>}
                 {!chinese && !isSound && question.mode !== "order" && <button className="one-c-option-audio" aria-label={`Hear option: ${label}`} disabled={!audio.enabled} onClick={() => audio.narrate(spokenText(label))}><SoundIcon /></button>}
               </div>;
             })}</div>}
 
             {feedback !== "correct" && (question.mode !== "trace" || traceFallback) && <div className="one-c-hint">
-              {!hint ? <button className="one-c-text-button" onClick={revealHint}>{isListening && !showSentenceText ? hintLabel : "Need a hint?"}</button> : <div>{questionDetails(question)}{listenButtons(questionSpeech(question))}</div>}
+              {!hint ? <button className="one-c-text-button" onClick={revealHint}>{isListening && !showSentenceText ? hintLabel : "Need a hint?"}</button> : question.mode === "compare" ? <div>{COMPARISONS.map((item) => <button key={item.id} className="one-c-review-word" disabled={!audio.enabled} onClick={() => audio.narrate(comparisonHintNarration([item]))}><span><span lang="zh-CN">{item.hanzi}</span> · <span lang="zh-Latn-pinyin">{item.pinyin}</span><br />{item.english}</span><SoundIcon /></button>)}</div> : <div>{questionDetails(question)}{listenButtons(questionSpeech(question))}</div>}
               {question.mode === "listen" && !isSentence && (!audio.canListen || audio.message) && !hint && <p className="one-c-small">No audio? Tap “Show the word” to keep playing.</p>}
             </div>}
           </div>

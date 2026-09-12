@@ -1,9 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { LESSONS, practiceSpeech } from "./curriculum";
 import { makeRound } from "./game";
-import { cardNarration, lessonDirections, lessonNarration, questionNarration, spokenText } from "./narration";
+import { comparisonHintNarration, cardNarration, lessonDirections, lessonNarration, questionNarration, spokenText } from "./narration";
 
 describe("spoken directions for beginning readers", () => {
+  it("translates all three Chinese comparison choices only in the hint narration", () => {
+    expect(comparisonHintNarration()).toEqual([
+      { text: "大于", language: "zh" }, { text: "More", language: "en" },
+      { text: "小于", language: "zh" }, { text: "Less", language: "en" },
+      { text: "等于", language: "zh" }, { text: "Same", language: "en" },
+    ]);
+  });
   it("plays only Mandarin on later listening questions while preserving full directions for replay", () => {
     for (const lesson of LESSONS) {
       for (const question of makeRound(lesson, true).filter((item) => ["meaning", "listen", "sound", "trace"].includes(item.mode))) {

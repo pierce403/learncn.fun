@@ -45,13 +45,13 @@ describe("Week 2 newsletter coverage", () => {
   it("compares numbers correctly across all three relations, including zero and ten", () => {
     const round = makeRound(WEEK_2_LESSONS.find((lesson) => lesson.kind === "compare")!, false);
     expect(round).toHaveLength(6);
-    expect(new Set(round.map((q) => q.word.hanzi))).toEqual(new Set([">", "<", "="]));
+    expect(new Set(round.map((q) => q.word.hanzi))).toEqual(new Set(["大于", "小于", "等于"]));
     expect(round.flatMap((q) => q.pair!)).toContain(0);
     expect(round.flatMap((q) => q.pair!)).toContain(10);
     for (const q of round) {
       const [left, right] = q.pair!;
-      expect(q.word.hanzi).toBe(left > right ? ">" : left < right ? "<" : "=");
-      expect(new Set(q.options.map((word) => word.hanzi))).toEqual(new Set([">", "<", "="]));
+      expect(q.word.hanzi).toBe(left > right ? "大于" : left < right ? "小于" : "等于");
+      expect(new Set(q.options.map((word) => word.hanzi))).toEqual(new Set(["大于", "小于", "等于"]));
       expect(questionSpeech(q)).toMatch(/^[\p{Script=Han}]+$/u);
     }
   });
