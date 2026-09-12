@@ -1,6 +1,13 @@
 import type { SpeechSegment } from "../../lib/speech";
 import { COMPARISONS, practiceSpeech, type Lesson, type Word } from "./curriculum";
 import type { Question } from "./game";
+import { MANDARIN_LESSON_DIRECTIONS, mandarinCardNarration, mandarinQuestionNarration } from "./mandarin-directions";
+
+export type InstructionLanguage = "en" | "zh";
+export const INSTRUCTION_LANGUAGE_KEY = "learncn.1c.instruction-language";
+export function parseInstructionLanguage(value: string | null): InstructionLanguage {
+  return value === "zh" ? "zh" : "en";
+}
 
 const LESSON_DIRECTIONS: Record<string, string> = {
   school: "Let's learn words for school! Listen, then say the word with me. Tap Next when you're ready.",
@@ -30,7 +37,8 @@ const SOUND_DIRECTIONS: Record<string, string> = {
   w: "This is the letter double you. Look for it at the start of the word. Listen.",
 };
 
-export function lessonDirections(lesson: Lesson): string {
+export function lessonDirections(lesson: Lesson, language: InstructionLanguage = "en"): string {
+  if (language === "zh") return MANDARIN_LESSON_DIRECTIONS[lesson.id] ?? "一起来学中文！听一听，跟着读。准备好了，就点下一张。";
   return LESSON_DIRECTIONS[lesson.id] ?? "Let's learn together! Listen, then try saying it. Tap Next when you're ready.";
 }
 
@@ -41,7 +49,8 @@ export function spokenText(text: string): SpeechSegment[] {
   }));
 }
 
-export function cardNarration(word: Word, includeTip = true): SpeechSegment[] {
+export function cardNarration(word: Word, includeTip = true, language: InstructionLanguage = "en"): SpeechSegment[] {
+  if (language === "zh") return mandarinCardNarration(word, includeTip);
   const study = word.example ?? word;
   const explanation = word.soundCue
     ? [{ text: SOUND_DIRECTIONS[word.hanzi] ?? "Listen and copy the sound.", language: "en" as const }]
@@ -49,11 +58,12 @@ export function cardNarration(word: Word, includeTip = true): SpeechSegment[] {
   return [...explanation, { text: practiceSpeech(word), language: "zh" }];
 }
 
-export function lessonNarration(lesson: Lesson, word = lesson.words[0]): SpeechSegment[] {
-  return [{ text: lessonDirections(lesson), language: "en" }, ...cardNarration(word, false)];
+export function lessonNarration(lesson: Lesson, word = lesson.words[0], language: InstructionLanguage = "en"): SpeechSegment[] {
+  return [{ text: lessonDirections(lesson, language), language }, ...cardNarration(word, false, language)];
 }
 
-export function questionNarration(lesson: Lesson, question: Question, traceFallback = false, fullDirections = true): SpeechSegment[] {
+export function questionNarration(lesson: Lesson, question: Question, traceFallback = false, fullDirections = true, language: InstructionLanguage = "en"): SpeechSegment[] {
+  if (language === "zh") return mandarinQuestionNarration(lesson, question, traceFallback, fullDirections);
   // After the first question, speak only the content needed to answer.
   // Full directions remain available through the explicit replay button.
   if (!fullDirections) {

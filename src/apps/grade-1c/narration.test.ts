@@ -1,9 +1,52 @@
 import { describe, expect, it } from "vitest";
 import { LESSONS, practiceSpeech } from "./curriculum";
 import { makeRound } from "./game";
-import { comparisonHintNarration, cardNarration, lessonDirections, lessonNarration, questionNarration, spokenText } from "./narration";
+import { parseInstructionLanguage, comparisonHintNarration, cardNarration, lessonDirections, lessonNarration, questionNarration, spokenText } from "./narration";
 
 describe("spoken directions for beginning readers", () => {
+  it("defaults to English and restores only a valid Mandarin preference", () => {
+    expect(parseInstructionLanguage("zh")).toBe("zh");
+    for (const value of [null, "en", "", "invalid"]) expect(parseInstructionLanguage(value)).toBe("en");
+  });
+
+  it("has Mandarin introductions and card guidance for every lesson", () => {
+    expect(new Set(LESSONS.map((lesson) => lessonDirections(lesson, "zh"))).size).toBe(LESSONS.length);
+    for (const lesson of LESSONS) {
+      const opening = lessonNarration(lesson, lesson.words[0], "zh");
+      expect(opening[0]).toEqual({ text: lessonDirections(lesson, "zh"), language: "zh" });
+      for (const word of lesson.words) {
+        const parts = cardNarration(word, true, "zh");
+        expect(parts.every((part) => part.language === "zh")).toBe(true);
+        expect(parts[0].text).not.toBe("听一听，跟着读。");
+        expect(parts.at(-1)?.text).toBe(practiceSpeech(word));
+        expect(parts.map((part) => part.text).join("")).not.toMatch(/[A-Za-zāáǎàēéěèīíǐìōóǒòūúǔùüǖǘǚǜ]/);
+      }
+    }
+  });
+
+  it("localizes full and brief game directions without translating away recognition targets", () => {
+    for (const lesson of LESSONS) {
+      for (const question of [...makeRound(lesson, true), ...makeRound(lesson, false)]) {
+        for (const full of [true, false]) {
+          const parts = questionNarration(lesson, question, false, full, "zh");
+          expect(parts[0].language).toBe("zh");
+          if (question.mode === "recognize") {
+            expect(parts.at(-1)).toEqual({ text: question.word.english, language: "en" });
+            expect(parts.map((part) => part.text).join("")).not.toContain(practiceSpeech(question.word));
+          } else expect(parts.every((part) => part.language === "zh")).toBe(true);
+          if (!full && ["meaning", "listen", "sound", "trace"].includes(question.mode)) {
+            expect(parts).toEqual([{ text: practiceSpeech(question.word), language: "zh" }]);
+          }
+          if (!full && ["count", "compare", "order", "sound-read"].includes(question.mode)) expect(parts[0].text.length).toBeLessThanOrEqual(16);
+        }
+      }
+    }
+    const lesson = LESSONS.find((item) => item.kind === "writing")!;
+    const question = makeRound(lesson, true)[0];
+    const fallback = questionNarration(lesson, question, true, true, "zh");
+    expect(fallback[0].language).toBe("zh");
+    expect(fallback.at(-1)).toEqual({ text: question.word.english, language: "en" });
+  });
   it("translates all three Chinese comparison choices only in the hint narration", () => {
     expect(comparisonHintNarration()).toEqual([
       { text: "大于", language: "zh" }, { text: "More", language: "en" },
@@ -36,7 +79,7 @@ describe("spoken directions for beginning readers", () => {
   });
 
   it("introduces every island in English before its Mandarin example", () => {
-    expect(new Set(LESSONS.map(lessonDirections)).size).toBe(LESSONS.length);
+    expect(new Set(LESSONS.map((lesson) => lessonDirections(lesson))).size).toBe(LESSONS.length);
     for (const lesson of LESSONS) {
       const narration = lessonNarration(lesson);
       expect(narration[0]).toEqual({ text: lessonDirections(lesson), language: "en" });

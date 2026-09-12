@@ -215,3 +215,9 @@
 .one-c .one-c-help-button:hover:not(:disabled) { background: #19516a; }
 
 .one-c-choice-pinyin { display: block; margin-top: .2rem; font-size: 1rem; line-height: 1.4; font-weight: 500; color: #b6e8f5; }
+
+.one-c-language-setting { display: flex; align-items: center; gap: .5rem; }
+.one-c-language-setting > span { font-size: .875rem; color: #b7c7db; }
+.one-c-language-toggle { display: flex; gap: .2rem; padding: .2rem; border: 1px solid #477487; border-radius: 14px; background: #102c3d; }
+.one-c .one-c-language-toggle button { min-height: 44px; min-width: 56px; padding: .45rem .65rem; border: 0; border-radius: 10px; background: transparent; color: #c7e5ef; font-size: .875rem; }
+.one-c .one-c-language-toggle button[aria-pressed="true"] { background: #67e8f9; color: #082f49; font-weight: 700; }
