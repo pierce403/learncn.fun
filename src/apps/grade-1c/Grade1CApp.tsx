@@ -8,7 +8,7 @@ import PenguinPath from "./PenguinPath";
 import { POLAR_ART, nextIceLesson } from "./ice-path";
 import TraceCharacter from "./TraceCharacter";
 import { CompareScene, NumberSequence } from "./NumberScenes";
-import { comparisonHintNarration, cardNarration, lessonNarration, questionNarration, spokenText } from "./narration";
+import { INSTRUCTION_LANGUAGE_KEY, parseInstructionLanguage, type InstructionLanguage, comparisonHintNarration, cardNarration, lessonNarration, questionNarration, spokenText } from "./narration";
 
 type Screen = "home" | "learn" | "play" | "complete";
 type Run = { original: Question[]; questions: Question[]; index: number; reviewing: boolean; missed: string[]; firstTry: number };
@@ -40,6 +40,10 @@ function readProgress(): Progress {
 }
 
 export default function Grade1CApp() {
+  const [instructionLanguage, setInstructionLanguage] = useState<InstructionLanguage>(() => {
+    try { return parseInstructionLanguage(localStorage.getItem(INSTRUCTION_LANGUAGE_KEY)); }
+    catch { return "en"; }
+  });
   const [screen, setScreen] = useState<Screen>("home");
   const [lesson, setLesson] = useState<Lesson>(LESSONS[0]);
   const [learnIndex, setLearnIndex] = useState(0);
@@ -81,6 +85,20 @@ export default function Grade1CApp() {
     if (feedback === "correct") nextButton.current?.focus({ preventScroll: true });
   }, [feedback]);
 
+  useEffect(() => {
+    try { localStorage.setItem(INSTRUCTION_LANGUAGE_KEY, instructionLanguage); }
+    catch { /* The current choice still works when storage is unavailable. */ }
+  }, [instructionLanguage]);
+
+  function chooseInstructionLanguage(language: InstructionLanguage) {
+    if (language === instructionLanguage) return;
+    audio.stop();
+    setInstructionLanguage(language);
+    if (screen === "learn") audio.narrate(lessonNarration(lesson, word, language));
+    else if (screen === "play" && question) audio.narrate(questionNarration(lesson, question, traceFallback, true, language));
+    else audio.play(language === "zh" ? "中文说明。" : "English directions.", language);
+  }
+
   function resetAnswer() {
     setWrong([]);
     setFeedback("");
@@ -105,7 +123,7 @@ export default function Grade1CApp() {
     setScreen("learn");
     setRun(null);
     resetAnswer();
-    audio.narrate(lessonNarration(item));
+    audio.narrate(lessonNarration(item, item.words[0], instructionLanguage));
   }
 
   function startGame() {
@@ -118,7 +136,7 @@ export default function Grade1CApp() {
   }
 
   function readQuestion(item: Question, fullDirections = false) {
-    audio.narrate(questionNarration(lesson, item, false, fullDirections));
+    audio.narrate(questionNarration(lesson, item, false, fullDirections, instructionLanguage));
   }
 
   function markMissed() {
@@ -141,7 +159,7 @@ export default function Grade1CApp() {
     setWrong((previous) => previous.includes(id) ? previous : [...previous, id]);
     setFeedback("wrong");
     markMissed();
-    audio.play("Good try! Tap another answer.", "en");
+    audio.play(instructionLanguage === "zh" ? "再试试！选另一个答案。" : "Good try! Tap another answer.", instructionLanguage);
   }
 
   function revealHint() {
@@ -215,6 +233,13 @@ export default function Grade1CApp() {
       <header className="one-c-header">
         <a className="one-c-brand" href="/">learncn<span>.fun</span></a>
         <div className="one-c-header-actions">
+          <div className="one-c-language-setting">
+            <span lang={instructionLanguage === "zh" ? "zh-CN" : "en"}>{instructionLanguage === "zh" ? "说明" : "Directions"}</span>
+            <div className="one-c-language-toggle" role="group" aria-label="Spoken instruction language">
+              <button lang="en-US" aria-label="English instructions" aria-pressed={instructionLanguage === "en"} onClick={() => chooseInstructionLanguage("en")}>English</button>
+              <button lang="zh-CN" aria-label="Mandarin instructions" aria-pressed={instructionLanguage === "zh"} onClick={() => chooseInstructionLanguage("zh")}>中文</button>
+            </div>
+          </div>
           {screen !== "home" && <button className="one-c-button quiet" onClick={home}>Ice path</button>}
           <button className="one-c-sound-toggle" aria-label={audio.enabled ? "Turn sound off" : "Turn sound on"} aria-pressed={audio.enabled} onClick={audio.toggle}><SoundIcon /><span>Sound {audio.enabled ? "on" : "off"}</span></button>
         </div>
@@ -234,7 +259,7 @@ export default function Grade1CApp() {
 
         {screen === "learn" && <section className="one-c-activity" aria-label={lesson.title}>
           <div className="one-c-activity-heading"><div><div className="one-c-eyebrow">Week {lesson.week} · {lesson.title} · Learn</div><h1 ref={heading} tabIndex={-1}>{isSentence ? "Let’s say it together." : isSound ? "Meet your new sounds." : lesson.kind === "compare" || lesson.kind === "order" ? "Let’s try it together." : "Meet your new words."}</h1></div><span className="one-c-step-count">{learnIndex + 1} / {lesson.words.length}</span></div>
-          <button className="one-c-text-button one-c-help-button" aria-label="Hear directions" title="Hear directions" disabled={!audio.enabled} onClick={() => audio.narrate(lessonNarration(lesson, word))}><span aria-hidden="true">?</span></button>
+          <button className="one-c-text-button one-c-help-button" aria-label="Hear directions" title="Hear directions" disabled={!audio.enabled} onClick={() => audio.narrate(lessonNarration(lesson, word, instructionLanguage))}><span aria-hidden="true">?</span></button>
           <progress className="one-c-progress" value={learnIndex + 1} max={lesson.words.length} aria-label="Teaching card progress" />
           <div className={`one-c-study-card ${lesson.kind === "sentences" ? "sentence" : ""}`}>
             {word.value === undefined && <span className="one-c-study-icon" aria-hidden="true">{word.icon}</span>}
@@ -244,22 +269,22 @@ export default function Grade1CApp() {
             {word.value !== undefined && <TenFrame key={word.id} value={word.value} onCount={(value) => audio.play(NUMBERS[value].hanzi)} />}
             {listenButtons(speechText(word), isSound ? "Listen & copy" : "Listen")}
             <p className="one-c-tip">{word.tip}</p>
-            <button className="one-c-text-button" disabled={!audio.enabled} onClick={() => audio.narrate(cardNarration(word))}><SoundIcon /> Read this to me</button>
+            <button className="one-c-text-button" disabled={!audio.enabled} onClick={() => audio.narrate(cardNarration(word, true, instructionLanguage))}><SoundIcon /> Read this to me</button>
             {word.related && <details className="one-c-related" key={word.id}><summary>More words</summary>
               {word.related.map((item) => <button key={item.hanzi} className="one-c-review-word" disabled={!audio.enabled} onClick={() => audio.play(item.hanzi)}><span><span lang="zh-CN">{item.hanzi}</span> · <span lang="zh-Latn-pinyin">{item.pinyin}</span><br />{item.english}</span><SoundIcon /></button>)}
               {word.sentence && <button className="one-c-review-word" disabled={!audio.enabled} onClick={() => audio.play(word.sentence!.hanzi)}><span><span lang="zh-CN">{word.sentence.hanzi}</span><br /><span lang="zh-Latn-pinyin">{word.sentence.pinyin}</span><br />{word.sentence.english}</span><SoundIcon /></button>}
             </details>}
           </div>
           <div className="one-c-study-nav">
-            <button className="one-c-button secondary" disabled={learnIndex === 0} onClick={() => { setLearnIndex(learnIndex - 1); audio.narrate(cardNarration(lesson.words[learnIndex - 1], false)); }}>Back</button>
-            <button className="one-c-button primary" onClick={() => { if (learnIndex + 1 === lesson.words.length) startGame(); else { setLearnIndex(learnIndex + 1); audio.narrate(cardNarration(lesson.words[learnIndex + 1], false)); } }}>{learnIndex + 1 === lesson.words.length ? "Let’s play!" : isSentence ? "Next" : isSound ? "Next sound" : "Next word"}<span aria-hidden="true">→</span></button>
+            <button className="one-c-button secondary" disabled={learnIndex === 0} onClick={() => { setLearnIndex(learnIndex - 1); audio.narrate(cardNarration(lesson.words[learnIndex - 1], false, instructionLanguage)); }}>Back</button>
+            <button className="one-c-button primary" onClick={() => { if (learnIndex + 1 === lesson.words.length) startGame(); else { setLearnIndex(learnIndex + 1); audio.narrate(cardNarration(lesson.words[learnIndex + 1], false, instructionLanguage)); } }}>{learnIndex + 1 === lesson.words.length ? "Let’s play!" : isSentence ? "Next" : isSound ? "Next sound" : "Next word"}<span aria-hidden="true">→</span></button>
           </div>
           <button className="one-c-text-button one-c-skip" onClick={startGame}>Know these already? Play now</button>
         </section>}
 
         {screen === "play" && run && question && <section className="one-c-activity">
           <div className="one-c-activity-heading"><div><div className="one-c-eyebrow">Week {lesson.week} · {lesson.title} · {run.reviewing ? "One more practice" : "Play"}</div><h1 ref={heading} tabIndex={-1}>{prompt}</h1></div><span className="one-c-step-count">{run.index + 1} / {run.questions.length}</span></div>
-          <button className="one-c-text-button one-c-help-button" aria-label="Hear directions" title="Hear directions" disabled={!audio.enabled} onClick={() => audio.narrate(questionNarration(lesson, question, traceFallback))}><span aria-hidden="true">?</span></button>
+          <button className="one-c-text-button one-c-help-button" aria-label="Hear directions" title="Hear directions" disabled={!audio.enabled} onClick={() => audio.narrate(questionNarration(lesson, question, traceFallback, true, instructionLanguage))}><span aria-hidden="true">?</span></button>
           <progress className="one-c-progress" value={run.index + (feedback === "correct" ? 1 : 0)} max={run.questions.length} aria-label={run.reviewing ? "Review progress" : "Game progress"} />
           {run.reviewing && <p className="one-c-review-note">{isSentence ? "Let’s try again!" : "Let’s try the words you needed a little help with."}</p>}
           <div className={`one-c-play-card ${isSentence ? "sentence" : ""}`}>
@@ -267,11 +292,11 @@ export default function Grade1CApp() {
             {(question.mode === "recognize" || question.mode === "trace") && <div className="one-c-prompt-english">{question.word.icon} {question.word.english}</div>}
             {isListening && <div className="one-c-listen-prompt"><button className="one-c-big-listen" disabled={!audio.enabled} aria-label={isSentence ? "Hear the sentence again" : "Listen to the Chinese sounds"} onClick={() => audio.play(speechText(question.word))}><SoundIcon /></button><p>{isSentence || isSound ? "Hear it again" : "Tap to hear the Chinese words."}</p><button className="one-c-text-button" disabled={!audio.enabled} onClick={() => audio.play(speechText(question.word), "zh", true)}>Listen slowly</button></div>}
             {isSound && (question.mode === "sound-read" || !audio.canListen || audio.message) && <p className="one-c-prompt-english">{question.word.soundCue}</p>}
-            {question.mode === "trace" && !traceFallback && <TraceCharacter key={question.id} hanzi={question.word.hanzi} onComplete={solved} onHelp={() => { markMissed(); setWrong(["trace"]); }} onFallback={() => { setTraceFallback(true); audio.narrate(questionNarration(lesson, question, true)); }} />}
+            {question.mode === "trace" && !traceFallback && <TraceCharacter key={question.id} hanzi={question.word.hanzi} onComplete={solved} onHelp={() => { markMissed(); setWrong(["trace"]); }} onFallback={() => { setTraceFallback(true); audio.narrate(questionNarration(lesson, question, true, true, instructionLanguage)); }} />}
             {question.pair && <CompareScene pair={question.pair} sign={feedback === "correct" ? question.word.hanzi : "?"} />}
             {question.sequence && <NumberSequence values={question.sequence} answer={feedback === "correct" ? question.word.value : undefined} />}
             {question.mode === "count" && <TenFrame key={question.id} value={question.word.value!} />}
-            {!isListening && <button className="one-c-text-button one-c-read-prompt" disabled={!audio.enabled} onClick={() => audio.narrate(questionNarration(lesson, question, traceFallback, false))}><SoundIcon /> Hear the question</button>}
+            {!isListening && <button className="one-c-text-button one-c-read-prompt" disabled={!audio.enabled} onClick={() => audio.narrate(questionNarration(lesson, question, traceFallback, false, instructionLanguage))}><SoundIcon /> Hear the question</button>}
 
             {(question.mode !== "trace" || traceFallback) && <div className={`one-c-options ${isSentence || lesson.week === 2 ? "sentence-choices" : ""}`} role="group" aria-label="Answer choices">{question.options.map((option) => {
               const chinese = question.mode === "recognize" || question.mode === "count" || question.mode === "trace" || question.mode === "compare";
