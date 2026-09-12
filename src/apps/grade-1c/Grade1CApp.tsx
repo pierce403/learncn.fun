@@ -114,11 +114,11 @@ export default function Grade1CApp() {
     resetAnswer();
     setScreen("play");
     audio.stop();
-    readQuestion(questions[0]);
+    readQuestion(questions[0], true);
   }
 
-  function readQuestion(item: Question) {
-    audio.narrate(questionNarration(lesson, item));
+  function readQuestion(item: Question, fullDirections = false) {
+    audio.narrate(questionNarration(lesson, item, false, fullDirections));
   }
 
   function markMissed() {
@@ -230,7 +230,7 @@ export default function Grade1CApp() {
 
         {screen === "learn" && <section className="one-c-activity" aria-label={lesson.title}>
           <div className="one-c-activity-heading"><div><div className="one-c-eyebrow">Week {lesson.week} · {lesson.title} · Learn</div><h1 ref={heading} tabIndex={-1}>{isSentence ? "Let’s say it together." : isSound ? "Meet your new sounds." : lesson.kind === "compare" || lesson.kind === "order" ? "Let’s try it together." : "Meet your new words."}</h1></div><span className="one-c-step-count">{learnIndex + 1} / {lesson.words.length}</span></div>
-          <button className="one-c-text-button" disabled={!audio.enabled} onClick={() => audio.narrate(lessonNarration(lesson, word))}><SoundIcon /> Hear directions</button>
+          <button className="one-c-text-button one-c-help-button" aria-label="Hear directions" title="Hear directions" disabled={!audio.enabled} onClick={() => audio.narrate(lessonNarration(lesson, word))}><span aria-hidden="true">?</span></button>
           <progress className="one-c-progress" value={learnIndex + 1} max={lesson.words.length} aria-label="Teaching card progress" />
           <div className={`one-c-study-card ${lesson.kind === "sentences" ? "sentence" : ""}`}>
             {word.value === undefined && <span className="one-c-study-icon" aria-hidden="true">{word.icon}</span>}
@@ -255,7 +255,7 @@ export default function Grade1CApp() {
 
         {screen === "play" && run && question && <section className="one-c-activity">
           <div className="one-c-activity-heading"><div><div className="one-c-eyebrow">Week {lesson.week} · {lesson.title} · {run.reviewing ? "One more practice" : "Play"}</div><h1 ref={heading} tabIndex={-1}>{prompt}</h1></div><span className="one-c-step-count">{run.index + 1} / {run.questions.length}</span></div>
-          <button className="one-c-text-button" disabled={!audio.enabled} onClick={() => audio.narrate(questionNarration(lesson, question, traceFallback))}><SoundIcon /> Hear directions</button>
+          <button className="one-c-text-button one-c-help-button" aria-label="Hear directions" title="Hear directions" disabled={!audio.enabled} onClick={() => audio.narrate(questionNarration(lesson, question, traceFallback))}><span aria-hidden="true">?</span></button>
           <progress className="one-c-progress" value={run.index + (feedback === "correct" ? 1 : 0)} max={run.questions.length} aria-label={run.reviewing ? "Review progress" : "Game progress"} />
           {run.reviewing && <p className="one-c-review-note">{isSentence ? "Let’s try again!" : "Let’s try the words you needed a little help with."}</p>}
           <div className={`one-c-play-card ${isSentence ? "sentence" : ""}`}>
@@ -267,7 +267,7 @@ export default function Grade1CApp() {
             {question.pair && <CompareScene pair={question.pair} sign={feedback === "correct" ? question.word.hanzi : "?"} />}
             {question.sequence && <NumberSequence values={question.sequence} answer={feedback === "correct" ? question.word.value : undefined} />}
             {question.mode === "count" && <TenFrame key={question.id} value={question.word.value!} />}
-            {!isListening && <button className="one-c-text-button one-c-read-prompt" disabled={!audio.enabled} onClick={() => audio.narrate(questionNarration(lesson, question, traceFallback))}><SoundIcon /> Hear the question</button>}
+            {!isListening && <button className="one-c-text-button one-c-read-prompt" disabled={!audio.enabled} onClick={() => audio.narrate(questionNarration(lesson, question, traceFallback, false))}><SoundIcon /> Hear the question</button>}
 
             {(question.mode !== "trace" || traceFallback) && <div className={`one-c-options ${isSentence || lesson.week === 2 ? "sentence-choices" : ""}`} role="group" aria-label="Answer choices">{question.options.map((option) => {
               const chinese = question.mode === "recognize" || question.mode === "count" || question.mode === "trace";

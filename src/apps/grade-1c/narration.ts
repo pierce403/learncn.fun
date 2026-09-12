@@ -53,7 +53,22 @@ export function lessonNarration(lesson: Lesson, word = lesson.words[0]): SpeechS
   return [{ text: lessonDirections(lesson), language: "en" }, ...cardNarration(word, false)];
 }
 
-export function questionNarration(lesson: Lesson, question: Question, traceFallback = false): SpeechSegment[] {
+export function questionNarration(lesson: Lesson, question: Question, traceFallback = false, fullDirections = true): SpeechSegment[] {
+  // After the first question, speak only the content needed to answer.
+  // Full directions remain available through the explicit replay button.
+  if (!fullDirections) {
+    switch (question.mode) {
+      case "meaning":
+      case "listen":
+      case "sound": return [{ text: practiceSpeech(question.word), language: "zh" }];
+      case "trace": return traceFallback ? spokenText(`Find ${question.word.english}.`) : [{ text: practiceSpeech(question.word), language: "zh" }];
+      case "recognize": return spokenText(`Find ${question.word.english}.`);
+      case "count": return spokenText("How many dots?");
+      case "compare": return spokenText("More, less, or the same?");
+      case "order": return spokenText("What's missing?");
+      case "sound-read": return spokenText("Find the sound.");
+    }
+  }
   let instruction: string;
   let example = false;
   switch (question.mode) {
