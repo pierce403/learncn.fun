@@ -1,5 +1,5 @@
 import type { SpeechSegment } from "../../lib/speech";
-import { practiceSpeech, type Lesson, type Word } from "./curriculum";
+import { COMPARISONS, practiceSpeech, type Lesson, type Word } from "./curriculum";
 import type { Question } from "./game";
 
 const LESSON_DIRECTIONS: Record<string, string> = {
@@ -85,8 +85,15 @@ export function questionNarration(lesson: Lesson, question: Question, traceFallb
       instruction = traceFallback ? `Tap the Chinese word for ${question.word.english}.` : "Use your finger to follow the glowing line. Then trace the next line.";
       example = !traceFallback;
       break;
-    case "compare": instruction = "Count both groups. Does the left side have more, less, or the same? Tap a sign. Tap a small speaker to hear a choice."; break;
+    case "compare": instruction = "Count both groups. Does the left side have more, less, or the same? Tap the Chinese words. Tap a small speaker to hear them."; break;
     case "order": instruction = "Count along the row. Tap the number that fills the empty spot."; break;
   }
   return [...spokenText(instruction), ...(example ? [{ text: practiceSpeech(question.word), language: "zh" as const }] : [])];
+}
+
+export function comparisonHintNarration(words = COMPARISONS): SpeechSegment[] {
+  return words.flatMap((word) => [
+    { text: practiceSpeech(word), language: "zh" as const },
+    { text: word.english, language: "en" as const },
+  ]);
 }

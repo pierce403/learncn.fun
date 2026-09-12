@@ -6,7 +6,7 @@ export function FishGroup({ value, label }: { value: number; label: string }) {
 }
 
 export function CompareScene({ pair, sign = "?" }: { pair: [number, number]; sign?: string }) {
-  return <div className="one-c-compare-scene"><FishGroup value={pair[0]} label="Left" /><span className="one-c-missing-sign">{sign}</span><FishGroup value={pair[1]} label="Right" /></div>;
+  return <div className="one-c-compare-scene"><FishGroup value={pair[0]} label="Left" /><span className="one-c-missing-sign" lang="zh-CN">{sign}</span><FishGroup value={pair[1]} label="Right" /></div>;
 }
 
 export function NumberSequence({ values, answer }: { values: (number | null)[]; answer?: number }) {

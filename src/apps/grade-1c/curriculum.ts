@@ -135,9 +135,9 @@ export const WEEK_2_WRITING: Word[] = [
 
 // Original games for the comparison and ordering objectives on p. 1.
 export const COMPARISONS: Word[] = [
-  { id: "w2-more", hanzi: ">", pinyin: "dà yú", english: "More", icon: "➕", audioText: "大于", tip: "Five is more than two. The open side faces the bigger number.", pair: [5, 2] },
-  { id: "w2-less", hanzi: "<", pinyin: "xiǎo yú", english: "Less", icon: "➖", audioText: "小于", tip: "Two is less than five. The small point faces the smaller number.", pair: [2, 5] },
-  { id: "w2-same", hanzi: "=", pinyin: "děng yú", english: "Same", icon: "🟰", audioText: "等于", tip: "Three and three are the same.", pair: [3, 3] },
+  { id: "w2-more", hanzi: "大于", pinyin: "dà yú", english: "More", icon: "🐟", audioText: "大于", tip: "The left group has more fish than the right group.", pair: [5, 2] },
+  { id: "w2-less", hanzi: "小于", pinyin: "xiǎo yú", english: "Less", icon: "🐟", audioText: "小于", tip: "The left group has fewer fish than the right group.", pair: [2, 5] },
+  { id: "w2-same", hanzi: "等于", pinyin: "děng yú", english: "Same", icon: "🐟", audioText: "等于", tip: "Three and three are the same.", pair: [3, 3] },
 ];
 export const ORDERING: Word[] = [
   { id: "w2-up", hanzi: "0 → 1 → 2", pinyin: "líng → yī → èr", english: "Count up", icon: "🔢", audioText: "零，一，二", tip: "Each number gets one bigger.", sequence: [0, 1, 2] },
@@ -148,7 +148,7 @@ export const WEEK_2_LESSONS: Lesson[] = [
   { id: "w2-initials", week: 2, title: "Hello, y and w", chinese: "y · w", description: "Find the first letter", color: "violet", icon: "👋", words: INITIALS, kind: "sounds" },
   { id: "w2-reading", week: 2, title: "Fish & friends", chinese: "衣 鱼 雨 耳 牙", description: "Clothes, fish, rain, ears, and teeth", color: "green", icon: "🐟", words: WEEK_2_READING, kind: "words" },
   { id: "w2-writing", week: 2, title: "Trace with me", chinese: "一 二 五 口 人", description: "Follow the strokes with your finger", color: "amber", icon: "✏️", words: WEEK_2_WRITING, kind: "writing" },
-  { id: "w2-compare", week: 2, title: "More or less?", chinese: "> · < · =", description: "Compare groups of fish", color: "rose", icon: "🐟", words: COMPARISONS, kind: "compare" },
+  { id: "w2-compare", week: 2, title: "More or less?", chinese: "大于 小于 等于", description: "Compare groups of fish", color: "rose", icon: "🐟", words: COMPARISONS, kind: "compare" },
   { id: "w2-order", week: 2, title: "Number neighbors", chinese: "1 → 2 → 3", description: "Tap the missing number", color: "cyan", icon: "🔢", words: ORDERING, kind: "order" },
 ];
 
