@@ -53,11 +53,11 @@ export default function TraceCharacter({ hanzi, onComplete, onHelp, onFallback }
   }, [hanzi]);
 
   return <div className="one-c-trace">
-    <div className="one-c-trace-board" ref={board} role="img" aria-label={`Finger-tracing area for ${hanzi}. You can also choose Tap instead.`} />
+    <div className="one-c-trace-board" ref={board} role="img" aria-label={`Finger-tracing area for ${hanzi}. You can also choose Tap.`} />
     <p className="one-c-small" role="status">{status}</p>
     <div className="one-c-audio-controls">
-      <button className="one-c-button secondary" disabled={!ready || done} onClick={() => { callbacks.current.onHelp(); void writer.current?.highlightStroke(nextStroke.current); }}>Show the stroke</button>
-      <button className="one-c-text-button" disabled={done} onClick={onFallback}>Tap instead</button>
+      <button className="one-c-button secondary" disabled={!ready || done} aria-label="Show the next stroke" onClick={() => { callbacks.current.onHelp(); void writer.current?.highlightStroke(nextStroke.current); }}>Show</button>
+      <button className="one-c-text-button" disabled={done} aria-label="Tap an answer instead of tracing" onClick={onFallback}>Tap</button>
     </div>
   </div>;
 }

@@ -100,7 +100,7 @@ export default function PenguinPath({ progress, initialLessonId, destinationLess
               <button className="ice-lesson-select" disabled={moving} aria-current={index === destination ? "step" : undefined} onClick={() => exploreLesson(index)}>
                 <span className="ice-stop-caption">{progress[lesson.id] ? "★ Star earned" : `Week ${lesson.week} · ${lessonNumber}`}</span><strong>{lesson.title}</strong><span lang={lesson.kind === "sounds" ? "zh-Latn-pinyin" : "zh-CN"}>{lesson.chinese}</span>
               </button>
-              {index === destination && <button className="one-c-button primary ice-start-lesson" ref={startButton} aria-label={`${progress[lesson.id] ? "Practice again" : "Start lesson"}: ${lesson.title}`} onClick={() => onStart(lesson)}>{progress[lesson.id] ? "Practice again" : "Start lesson"}</button>}
+              {index === destination && <button className="one-c-button primary ice-start-lesson" ref={startButton} aria-label={`${progress[lesson.id] ? "Practice again" : "Start lesson"}: ${lesson.title}`} onClick={() => onStart(lesson)}>{progress[lesson.id] ? "Again" : "Start"}</button>}
             </div>
           </li>)}
         </ol>
