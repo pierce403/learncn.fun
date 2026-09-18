@@ -14,6 +14,13 @@ export const MANDARIN_LESSON_DIRECTIONS: Record<string, string> = {
   "w2-writing": "一起来写汉字！先看看每个字，听听怎么读。准备好了，就点下一张。",
   "w2-compare": "一起来比一比！数数两边的鱼。左边更多、更少，还是一样多？准备好了，就点下一张。",
   "w2-order": "一起来排数字！跟着每一行数一数。准备好了，就点下一张。",
+  "w3-grownups": "一起来认识家人！听听爷爷奶奶、爸爸妈妈怎么说。准备好了，就点下一张。",
+  "w3-siblings": "一起来认识兄弟姐妹！听一听，谁比你大，谁比你小？准备好了，就点下一张。",
+  "w3-family": "一起来学更多家人的词语！听一听，跟着说。准备好了，就点下一张。",
+  "w3-sentences": "一起来介绍家人！听一句，跟着说一句。准备好了，就点下一张。",
+  "w3-measures": "一起来学量词！数字和事物之间，要用合适的量词。听一听，再点下一张。",
+  "w3-bonds": "一起来分一分、合一合！圆点和菱形合起来，一共有几个？准备好了，就点下一张。",
+  "w3-addition": "一起来做加法！把两组放在一起，数数一共有几个。准备好了，就点下一张。",
 };
 
 const SOUND_TIPS: Record<string, string> = {
@@ -59,10 +66,30 @@ const WORD_TIPS: Record<string, string> = {
   "w2-same": "三和三一样多。",
   "w2-up": "每次增加一。",
   "w2-down": "每次减少一。",
+  "w3-grandfather": "爸爸的爸爸叫爷爷。",
+  "w3-grandmother": "爸爸的妈妈叫奶奶。",
+  "w3-father": "这是爸爸。跟着说一说。",
+  "w3-mother": "这是妈妈。跟着说一说。",
+  "w3-older-brother": "比你大的兄弟叫哥哥。",
+  "w3-older-sister": "比你大的姐妹叫姐姐。",
+  "w3-younger-brother": "比你小的兄弟叫弟弟。",
+  "w3-younger-sister": "比你小的姐妹叫妹妹。",
+  "w3-family": "家里的人是家人。每个家庭都不一样。",
+  "w3-parents": "爸爸和妈妈是父母。",
+  "w3-son": "男孩子是父母的儿子。",
+  "w3-daughter": "女孩子是父母的女儿。",
+  "w3-who": "问一问，他是谁？",
+  "w3-my-grandfather": "试着介绍一个故事里的家人。",
+  "w3-family-question": "问问一个家里有几个人。",
+  "w3-family-six": "六个人只是一个例子。每个家庭的人数可能不一样。",
+  "w3-measure-person": "数人可以用量词个。",
+  "w3-measure-fish": "数鱼可以用量词条。",
+  "w3-measure-raincoat": "数雨衣可以用量词件。",
+  "w3-measure-ears": "数耳朵可以用量词只。",
 };
 
 export function mandarinCardNarration(word: Word, includeTip: boolean): SpeechSegment[] {
-  const tip = word.soundCue ? SOUND_TIPS[word.hanzi] : word.value !== undefined
+  const tip = word.parts ? "把两组放在一起，数数一共有几个。" : word.soundCue ? SOUND_TIPS[word.hanzi] : word.value !== undefined
     ? word.value === 0 ? "零就是一个也没有。这里没有圆点。" : "一个一个地点圆点，数一数，再读出这个数字。"
     : WORD_TIPS[word.id];
   return [
@@ -88,6 +115,9 @@ export function mandarinQuestionNarration(lesson: Lesson, question: Question, tr
     case "compare": return say(fullDirections ? "数数两边的鱼。左边更多、更少，还是一样多？选出对应的汉字。点小喇叭可以听发音。" : "更多、更少，还是一样多？");
     case "order": return say(fullDirections ? "顺着这一行数一数，选出空格里缺少的数字。" : "少了哪个数字？");
     case "sound-read": return say(fullDirections ? "看看上面的音节，选出对应的字母。" : "找出对应的字母。");
+    case "measure": return say(fullDirections ? "看看空格前后的汉字，选出合适的量词。" : "选哪个量词？");
+    case "bonds": return say(fullDirections ? "数数菱形，选出空格里缺少的中文数字。" : "有几个菱形？");
+    case "addition": return say(fullDirections ? "把两组放在一起数一数，选出一共有几个。" : "一共有几个？");
     default: return [];
   }
 }

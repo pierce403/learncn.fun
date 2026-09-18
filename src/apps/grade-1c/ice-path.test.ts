@@ -1,17 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { ICE_MAP_HEIGHT, ICE_STOPS, ICE_WEEKS, lessonIndex, nextHop, nextIceLesson } from "./ice-path";
-import { WEEK_1_LESSONS, WEEK_2_LESSONS } from "./curriculum";
+import { LESSONS, WEEK_1_LESSONS, WEEK_2_LESSONS, WEEK_3_LESSONS } from "./curriculum";
 
 describe("penguin lesson path", () => {
-  it("keeps five Week 1 islands and adds six Week 2 islands within the water", () => {
+  it("keeps prior islands and adds seven Week 3 islands within the water", () => {
     expect(ICE_STOPS.slice(0, 5).map(({ lesson }) => lesson.id)).toEqual(["school", "greetings", "actions", "friends", "numbers"]);
-    expect(ICE_STOPS.slice(5).map(({ lesson }) => lesson.id)).toEqual(WEEK_2_LESSONS.map((lesson) => lesson.id));
-    expect(new Set(ICE_STOPS.map(({ lesson }) => lesson.id)).size).toBe(11);
+    expect(ICE_STOPS.slice(5, 11).map(({ lesson }) => lesson.id)).toEqual(WEEK_2_LESSONS.map((lesson) => lesson.id));
+    expect(ICE_STOPS.slice(11).map(({ lesson }) => lesson.id)).toEqual(WEEK_3_LESSONS.map((lesson) => lesson.id));
+    expect(new Set(ICE_STOPS.map(({ lesson }) => lesson.id)).size).toBe(18);
     for (const [index, stop] of ICE_STOPS.entries()) {
       expect(stop.x).toBeGreaterThan(15);
       expect(stop.x).toBeLessThan(85);
-      expect(stop.y).toBeGreaterThan(10);
-      expect(stop.y).toBeLessThan(96);
+      expect(stop.y * ICE_MAP_HEIGHT / 100).toBeGreaterThanOrEqual(12);
+      expect((100 - stop.y) * ICE_MAP_HEIGHT / 100).toBeGreaterThanOrEqual(8);
       if (index > 0) {
         if (stop.lesson.week === ICE_STOPS[index - 1].lesson.week) expect(stop.x).not.toBe(ICE_STOPS[index - 1].x);
         expect(stop.y).toBeGreaterThan(ICE_STOPS[index - 1].y);
@@ -50,11 +51,14 @@ describe("penguin lesson path", () => {
     expect(nextIceLesson({})).toBe("school");
     expect(nextIceLesson({ school: { completions: 2, best: 1 }, actions: { completions: 1, best: .5 } })).toBe("greetings");
     const complete = Object.fromEntries(ICE_STOPS.map(({ lesson }) => [lesson.id, { completions: 1, best: 1 }]));
-    expect(nextIceLesson(complete)).toBe("w2-order");
+    expect(nextIceLesson(complete)).toBe(LESSONS.at(-1)!.id);
     const weekOneComplete = Object.fromEntries(WEEK_1_LESSONS.map((lesson) => [lesson.id, { completions: 2, best: .8 }]));
     expect(nextIceLesson(weekOneComplete)).toBe("w2-finals");
     expect(nextIceLesson(weekOneComplete, "numbers")).toBe("w2-finals");
     expect(nextIceLesson({}, "w2-reading")).toBe("w2-writing");
+    const earlierWeeks = Object.fromEntries([...WEEK_1_LESSONS, ...WEEK_2_LESSONS].map((lesson) => [lesson.id, { completions: 1, best: 1 }]));
+    expect(nextIceLesson(earlierWeeks)).toBe("w3-grownups");
+    expect(nextIceLesson(earlierWeeks, "w2-order")).toBe("w3-grownups");
     expect(lessonIndex("numbers")).toBe(4);
     expect(lessonIndex("obsolete-lesson")).toBe(0);
   });

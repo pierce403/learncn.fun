@@ -99,12 +99,13 @@
   .ice-platform, .ice-penguin-position, .ice-penguin-float, .ice-penguin-celebration { animation: none !important; }
 }
 
-.ice-week-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; max-width: 680px; margin: 0 auto 1.5rem; }
+.ice-week-nav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; max-width: 680px; margin: 0 auto 1.5rem; }
 .ice-week-link { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem .6rem; padding: 1rem; border: 2px solid #4695aa; border-radius: 16px; background: #0b3548; color: #ecfeff; text-align: left; }
 .ice-week-link strong { font-size: 1.15rem; }
 .ice-week-link > span { grid-column: 1 / -1; font-size: .875rem; }
 .ice-week-link small { grid-row: 1; grid-column: 2; align-self: center; font-size: .875rem; color: #fde68a; }
 .ice-week-link.week-2 { background: #302453; border-color: #9883d6; }
+.ice-week-link.week-3 { background: #123f3b; border-color: #6ee7b7; }
 .ice-week-link[aria-pressed="true"] { border-color: #fde68a; box-shadow: 0 0 0 2px #fde68a33; }
 .ice-ocean { width: 100%; background-size: 100% auto; background-repeat: repeat-y; }
 .ice-week-banner { position: absolute; left: 1rem; right: 1rem; transform: translateY(-50%); display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .85rem 1rem; border: 2px solid #aff5ff; border-radius: 15px; background: #064159f5; color: #ecfeff; z-index: 5; }
@@ -114,7 +115,14 @@
 .ice-week-banner.week-2 { background: #332159f5; border-color: #c8b5ff; box-shadow: 0 -1.5rem 0 .4rem #194360, 0 1.5rem 0 .4rem #194360; }
 .ice-stop.week-2 .ice-stop-label { background: #30234ff2; border-color: #b8a1e9; }
 .ice-stop.week-2.selected .ice-stop-label { border-color: #fde68a; }
+.ice-week-banner.week-3 { background: #123f3bf5; border-color: #6ee7b7; box-shadow: 0 -1.5rem 0 .4rem #194360, 0 1.5rem 0 .4rem #194360; }
+.ice-stop.week-3 .ice-stop-label { background: #123f3bf2; border-color: #6ee7b7; }
+.ice-stop.week-3.selected .ice-stop-label { border-color: #fde68a; }
 .ice-route-lines path { vector-effect: non-scaling-stroke; stroke-width: 3; stroke-dasharray: 2 12; }
+@media (max-width: 540px) {
+  .ice-week-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ice-week-link.week-3 { grid-column: 1 / -1; }
+}
 @media (max-width: 370px) {
   .ice-week-link { padding: .75rem; grid-template-columns: minmax(0, 1fr); }
   .ice-week-link small { grid-row: auto; grid-column: 1; }

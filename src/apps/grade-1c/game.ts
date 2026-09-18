@@ -1,7 +1,7 @@
 import { shuffleInPlace } from "../../lib/random";
 import { COMPARISONS, NUMBERS, practiceSpeech, type Lesson, type Word } from "./curriculum";
 
-export type Question = { id: string; word: Word; mode: "meaning" | "listen" | "recognize" | "count" | "sound" | "sound-read" | "trace" | "compare" | "order"; options: Word[]; pair?: [number, number]; sequence?: (number | null)[] };
+export type Question = { id: string; word: Word; mode: "meaning" | "listen" | "recognize" | "count" | "sound" | "sound-read" | "trace" | "compare" | "order" | "measure" | "bonds" | "addition"; options: Word[]; pair?: [number, number]; sequence?: (number | null)[]; parts?: [number, number] };
 
 function shuffled<T>(values: T[]): T[] {
   const result = [...values];
@@ -15,6 +15,17 @@ function makeQuestion(word: Word, mode: Question["mode"], pool: Word[], choices 
 }
 
 export function makeRound(lesson: Lesson, listening: boolean): Question[] {
+  if (lesson.kind === "measures") return shuffled(lesson.words).map((word) => makeQuestion(word, "measure", lesson.words, 2));
+  if (lesson.kind === "bonds" || lesson.kind === "addition") {
+    const mode = lesson.kind;
+    return shuffled(lesson.words).map((card) => {
+      const parts = card.parts!;
+      const value = mode === "bonds" ? parts[1] : parts[0] + parts[1];
+      // Keep each puzzle's identity for review, even when two answers are equal.
+      const answer = { ...NUMBERS[value], id: `${card.id}-answer` };
+      return { ...makeQuestion(answer, mode, NUMBERS.filter((word) => word.value !== value), 2), parts };
+    });
+  }
   if (lesson.kind === "sounds") return shuffled(lesson.words).map((word) => makeQuestion(word, listening ? "sound" : "sound-read", lesson.words, 2));
   if (lesson.kind === "writing") return lesson.words.map((word) => makeQuestion(word, "trace", lesson.words, 2));
   if (lesson.kind === "compare") {
@@ -40,12 +51,13 @@ export function makeRound(lesson: Lesson, listening: boolean): Question[] {
   const second = shuffled(lesson.words);
   if (second.length > 1 && first.at(-1)?.id === second[0].id) [second[0], second[1]] = [second[1], second[0]];
   return [
-    ...first.map((word) => makeQuestion(word, "meaning", lesson.words, lesson.week === 2 ? 2 : 3)),
-    ...second.map((word) => makeQuestion(word, listening ? "listen" : "recognize", lesson.words, lesson.week === 2 ? 2 : 3)),
+    ...first.map((word) => makeQuestion(word, "meaning", lesson.words, lesson.week >= 2 ? 2 : 3)),
+    ...second.map((word) => makeQuestion(word, listening ? "listen" : "recognize", lesson.words, lesson.week >= 2 ? 2 : 3)),
   ];
 }
 
 export function questionSpeech(question: Question): string {
+  if (question.parts) return `${NUMBERS[question.parts[0]].hanzi}加${NUMBERS[question.parts[1]].hanzi}等于${NUMBERS[question.parts[0] + question.parts[1]].hanzi}`;
   if (question.pair) return `${NUMBERS[question.pair[0]].hanzi}${practiceSpeech(question.word)}${NUMBERS[question.pair[1]].hanzi}`;
   if (question.sequence) return question.sequence.map((value) => NUMBERS[value ?? question.word.value!].hanzi).join("，");
   return practiceSpeech(question.word);

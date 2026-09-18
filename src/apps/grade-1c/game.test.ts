@@ -31,7 +31,7 @@ describe("Grade 1C games", () => {
         expect(round).toHaveLength(lesson.words.length * 2);
         for (const word of lesson.words) expect(round.filter((question) => question.word.id === word.id).map((question) => question.mode)).toEqual(["meaning", "listen"]);
         round.forEach((question, index) => {
-          expect(new Set(question.options.map((option) => option.id)).size).toBe(lesson.week === 2 ? 2 : 3);
+          expect(new Set(question.options.map((option) => option.id)).size).toBe(lesson.week >= 2 ? 2 : 3);
           expect(question.options.filter((option) => option.id === question.word.id)).toHaveLength(1);
           if (index > 0) expect(question.word.id).not.toBe(round[index - 1].word.id);
         });

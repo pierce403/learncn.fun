@@ -21,6 +21,13 @@ const LESSON_DIRECTIONS: Record<string, string> = {
   "w2-writing": "Let's get ready to write! First, look at each word and listen. Tap Next when you're ready.",
   "w2-compare": "Let's compare! Count the fish on each side. Is the left side more, less, or the same? Tap Next when you're ready.",
   "w2-order": "Let's put numbers in order! Count along with each row. Tap Next when you're ready.",
+  "w3-grownups": "Let's meet the family! Listen, then say each word with me. Tap Next when you're ready.",
+  "w3-siblings": "Let's meet brothers and sisters! Listen for older and younger. Tap Next when you're ready.",
+  "w3-family": "Let's learn more family words! Listen, then try saying each word. Tap Next when you're ready.",
+  "w3-sentences": "Let's talk about a family! Listen to each sentence, then say it with me. Tap Next when you're ready.",
+  "w3-measures": "Let's learn counting words! Chinese uses a little word between a number and a thing. Listen, then tap Next.",
+  "w3-bonds": "Let's make a number! Circles and diamonds make one whole group. Count them, then tap Next.",
+  "w3-addition": "Let's add! Count both groups together to find the total. Tap Next when you're ready.",
 };
 
 // Written pinyin is for the screen. The English narrator gives mouth cues;
@@ -77,6 +84,9 @@ export function questionNarration(lesson: Lesson, question: Question, traceFallb
       case "compare": return spokenText("More, less, or the same?");
       case "order": return spokenText("What's missing?");
       case "sound-read": return spokenText("Find the sound.");
+      case "measure": return spokenText(`Find the counting word. ${question.word.english}.`);
+      case "bonds": return spokenText("How many diamonds?");
+      case "addition": return spokenText("How many altogether?");
     }
   }
   let instruction: string;
@@ -97,6 +107,9 @@ export function questionNarration(lesson: Lesson, question: Question, traceFallb
       break;
     case "compare": instruction = "Count both groups. Does the left side have more, less, or the same? Tap the Chinese words. Tap a small speaker to hear them."; break;
     case "order": instruction = "Count along the row. Tap the number that fills the empty spot."; break;
+    case "measure": instruction = `Pick the missing counting word for ${question.word.english.toLowerCase()}.`; break;
+    case "bonds": instruction = "Count the diamonds. Tap the Chinese number for the missing part."; break;
+    case "addition": instruction = "Count both groups together. Tap the Chinese number for the total."; break;
   }
   return [...spokenText(instruction), ...(example ? [{ text: practiceSpeech(question.word), language: "zh" as const }] : [])];
 }

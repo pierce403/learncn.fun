@@ -17,6 +17,8 @@ export type Word = {
   sentence?: { hanzi: string; pinyin: string; english: string };
   pair?: [number, number];
   sequence?: number[];
+  measure?: { before: string; after: string };
+  parts?: [number, number];
 };
 
 export const SCHOOL: Word[] = [
@@ -70,7 +72,7 @@ export const NUMBERS: Word[] = NUMBER_ROWS.map(([hanzi, pinyin, english], value)
   tip: value === 0 ? "Zero means none. The counting frame is empty." : "Tap each filled dot and count out loud. Then say the Chinese number.",
 }));
 
-export type Lesson = { id: string; week: number; title: string; chinese: string; description: string; color: string; icon: string; words: Word[]; kind: "words" | "sentences" | "numbers" | "sounds" | "writing" | "compare" | "order" };
+export type Lesson = { id: string; week: number; title: string; chinese: string; description: string; color: string; icon: string; words: Word[]; kind: "words" | "sentences" | "numbers" | "sounds" | "writing" | "compare" | "order" | "measures" | "bonds" | "addition" };
 
 export const WEEK_1_LESSONS: Lesson[] = [
   { id: "school", week: 1, title: "Meet your class", chinese: "上学", description: "School, teacher, and student", color: "cyan", icon: "🎒", words: SCHOOL, kind: "words" },
@@ -152,9 +154,69 @@ export const WEEK_2_LESSONS: Lesson[] = [
   { id: "w2-order", week: 2, title: "Number neighbors", chinese: "1 → 2 → 3", description: "Tap the missing number", color: "cyan", icon: "🔢", words: ORDERING, kind: "order" },
 ];
 
+// Week 3A (9/14–9/18), 2026–27 newsletter, p. 2: Lesson 2 family
+// vocabulary and four sentence patterns. Pinyin preserves the sheet's tones.
+export const WEEK_3_GROWNUPS: Word[] = [
+  { id: "w3-grandfather", hanzi: "爷爷", pinyin: "yé yé", english: "Grandfather", icon: "👴", tip: "Your dad's dad is your grandfather." },
+  { id: "w3-grandmother", hanzi: "奶奶", pinyin: "nǎi nǎi", english: "Grandmother", icon: "👵", tip: "Your dad's mom is your grandmother." },
+  { id: "w3-father", hanzi: "爸爸", pinyin: "bà bà", english: "Father", icon: "👨", tip: "This is how to say dad." },
+  { id: "w3-mother", hanzi: "妈妈", pinyin: "mā mā", english: "Mother", icon: "👩", tip: "This is how to say mom." },
+];
+export const WEEK_3_SIBLINGS: Word[] = [
+  { id: "w3-older-brother", hanzi: "哥哥", pinyin: "gē gē", english: "Older brother", icon: "👦", tip: "A brother who is older than you." },
+  { id: "w3-older-sister", hanzi: "姐姐", pinyin: "jiě jiě", english: "Older sister", icon: "👧", tip: "A sister who is older than you." },
+  { id: "w3-younger-brother", hanzi: "弟弟", pinyin: "dì di", english: "Younger brother", icon: "👦", tip: "A brother who is younger than you." },
+  { id: "w3-younger-sister", hanzi: "妹妹", pinyin: "mèi mèi", english: "Younger sister", icon: "👧", tip: "A sister who is younger than you." },
+];
+export const WEEK_3_FAMILY: Word[] = [
+  { id: "w3-family", hanzi: "家人", pinyin: "jiā rén", english: "Family members", icon: "🏠", tip: "The people in a family. Every family is different." },
+  { id: "w3-parents", hanzi: "父母", pinyin: "fù mǔ", english: "Parents", icon: "🧑‍🧑‍🧒", tip: "A mother and a father are parents." },
+  { id: "w3-son", hanzi: "儿子", pinyin: "ér zi", english: "Son", icon: "👦", tip: "A parent's boy is their son." },
+  { id: "w3-daughter", hanzi: "女儿", pinyin: "nǚ ér", english: "Daughter", icon: "👧", tip: "A parent's girl is their daughter." },
+];
+export const WEEK_3_SENTENCES: Word[] = [
+  { id: "w3-who", hanzi: "他是谁？", pinyin: "Tā shì shuí?", english: "Who is he?", icon: "❓", tip: "Ask who someone is.", choiceLabel: "Who is he?" },
+  { id: "w3-my-grandfather", hanzi: "他是我的爷爷。", pinyin: "Tā shì wǒ de yé yé.", english: "He is my grandfather.", icon: "👴", tip: "Try introducing someone in a pretend family.", choiceLabel: "He is my grandfather." },
+  { id: "w3-family-question", hanzi: "你家有几个人？", pinyin: "Nǐ jiā yǒu jǐ gè rén?", english: "How many people are in your family?", icon: "🏠", tip: "Ask how many people are in a family.", choiceLabel: "How many people are in your family?" },
+  { id: "w3-family-six", hanzi: "我家有六个人。", pinyin: "Wǒ jiā yǒu liù gè rén.", english: "There are six people in my family.", icon: "🖐️", tip: "Six is just our example. Families can be different sizes.", choiceLabel: "There are six people in my family." },
+];
+
+// Page 1 names measure words without prescribing a list. These original
+// exercises reuse people and the fish, raincoat, and ears from Week 2 examples.
+export const WEEK_3_MEASURES: Word[] = [
+  { id: "w3-measure-person", hanzi: "个", pinyin: "gè", english: "One person", icon: "🧍", tip: "Use 个 to count people.", measure: { before: "一", after: "人" }, example: { hanzi: "一个人", pinyin: "yí ge rén", english: "One person" } },
+  { id: "w3-measure-fish", hanzi: "条", pinyin: "tiáo", english: "One fish", icon: "🐟", tip: "Use 条 to count fish.", measure: { before: "一", after: "鱼" }, example: { hanzi: "一条鱼", pinyin: "yì tiáo yú", english: "One fish" } },
+  { id: "w3-measure-raincoat", hanzi: "件", pinyin: "jiàn", english: "One raincoat", icon: "🧥", tip: "Use 件 to count raincoats.", measure: { before: "一", after: "雨衣" }, example: { hanzi: "一件雨衣", pinyin: "yí jiàn yǔyī", english: "One raincoat" } },
+  { id: "w3-measure-ears", hanzi: "只", pinyin: "zhī", english: "Two ears", icon: "👂", tip: "Use 只 to count ears.", measure: { before: "两", after: "耳朵" }, example: { hanzi: "两只耳朵", pinyin: "liǎng zhī ěrduo", english: "Two ears" } },
+];
+
+// Original visual practice for number composition and addition within 10 (p. 1).
+function sumCards(id: string, pairs: [number, number][]): Word[] {
+  return pairs.map(([left, right]) => ({
+    id: `${id}-${left}-${right}`, parts: [left, right], icon: "🔢",
+    hanzi: `${NUMBERS[left].hanzi}加${NUMBERS[right].hanzi}等于${NUMBERS[left + right].hanzi}`,
+    pinyin: `${NUMBERS[left].pinyin} jiā ${NUMBERS[right].pinyin} děng yú ${NUMBERS[left + right].pinyin}`,
+    english: `${left} plus ${right} equals ${left + right}`,
+    tip: id === "w3-bond" ? "Two small groups make one whole group." : "Count both colors together to find the total.",
+  }));
+}
+export const WEEK_3_BONDS = sumCards("w3-bond", [[1, 2], [2, 3], [4, 2], [3, 4], [5, 5]]);
+export const WEEK_3_ADDITION = sumCards("w3-add", [[2, 1], [3, 2], [4, 0], [2, 4], [4, 4], [6, 4], [0, 0]]);
+
+export const WEEK_3_LESSONS: Lesson[] = [
+  { id: "w3-grownups", week: 3, title: "Meet the family", chinese: "爷爷 奶奶 爸爸 妈妈", description: "Grandparents, dad, and mom", color: "green", icon: "🏠", words: WEEK_3_GROWNUPS, kind: "words" },
+  { id: "w3-siblings", week: 3, title: "Brothers & sisters", chinese: "哥哥 姐姐 弟弟 妹妹", description: "Older and younger siblings", color: "cyan", icon: "👧", words: WEEK_3_SIBLINGS, kind: "words" },
+  { id: "w3-family", week: 3, title: "Family words", chinese: "家人 父母 儿子 女儿", description: "Family, parents, son, and daughter", color: "rose", icon: "🏡", words: WEEK_3_FAMILY, kind: "words" },
+  { id: "w3-sentences", week: 3, title: "Who is he?", chinese: "他是谁？", description: "Talk about a family", color: "violet", icon: "💬", words: WEEK_3_SENTENCES, kind: "sentences" },
+  { id: "w3-measures", week: 3, title: "Counting words", chinese: "个 条 件 只", description: "Pick the little word in the gap", color: "amber", icon: "🐟", words: WEEK_3_MEASURES, kind: "measures" },
+  { id: "w3-bonds", week: 3, title: "Make a number", chinese: "分一分 合一合", description: "Find the missing part", color: "green", icon: "🧩", words: WEEK_3_BONDS, kind: "bonds" },
+  { id: "w3-addition", week: 3, title: "Add with me", chinese: "十以内加法", description: "Put two groups together", color: "cyan", icon: "➕", words: WEEK_3_ADDITION, kind: "addition" },
+];
+
 export const WEEKS = [
   { number: 1, title: "I go to school", dates: "Sep 1–4", lessons: WEEK_1_LESSONS },
   { number: 2, title: "Sounds & new friends", dates: "Sep 8–11", lessons: WEEK_2_LESSONS },
+  { number: 3, title: "Family & counting", dates: "Sep 14–18", lessons: WEEK_3_LESSONS },
 ];
 export const LESSONS: Lesson[] = WEEKS.flatMap((week) => week.lessons);
 export function practiceSpeech(word: Word): string { return word.audioText ?? word.example?.hanzi ?? word.hanzi; }

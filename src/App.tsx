@@ -151,7 +151,7 @@ export default function App() {
             >
               <div>
                 <div className="text-lg font-semibold text-cyan-100">Grade 1C · Penguin ice adventure</div>
-                <div className="mt-1 text-sm text-slate-300">Explore Week 1 and Week 2: Chinese words, pinyin, writing, and number games.</div>
+                <div className="mt-1 text-sm text-slate-300">Explore Weeks 1–3: Chinese words, pinyin, writing, family, and number games.</div>
               </div>
               <span aria-hidden="true" className="text-cyan-200">Play →</span>
             </a>
