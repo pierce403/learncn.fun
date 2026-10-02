@@ -99,7 +99,7 @@
   .ice-platform, .ice-penguin-position, .ice-penguin-float, .ice-penguin-celebration { animation: none !important; }
 }
 
-.ice-week-nav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; max-width: 680px; margin: 0 auto 1.5rem; }
+.ice-week-nav { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; max-width: 860px; margin: 0 auto 1.5rem; }
 .ice-week-link { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem .6rem; padding: 1rem; border: 2px solid #4695aa; border-radius: 16px; background: #0b3548; color: #ecfeff; text-align: left; }
 .ice-week-link strong { font-size: 1.15rem; }
 .ice-week-link > span { grid-column: 1 / -1; font-size: .875rem; }
@@ -119,12 +119,20 @@
 .ice-stop.week-3 .ice-stop-label { background: #123f3bf2; border-color: #6ee7b7; }
 .ice-stop.week-3.selected .ice-stop-label { border-color: #fde68a; }
 .ice-route-lines path { vector-effect: non-scaling-stroke; stroke-width: 3; stroke-dasharray: 2 12; }
-@media (max-width: 540px) {
+@media (max-width: 800px) {
   .ice-week-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .ice-week-link.week-3 { grid-column: 1 / -1; }
+}
+@media (max-width: 540px) {
+  .ice-week-link strong { grid-column: 1 / -1; }
+  .ice-week-link small { grid-row: auto; grid-column: 1 / -1; }
 }
 @media (max-width: 370px) {
   .ice-week-link { padding: .75rem; grid-template-columns: minmax(0, 1fr); }
   .ice-week-link small { grid-row: auto; grid-column: 1; }
   .ice-week-banner { left: .6rem; right: .6rem; padding: .75rem; }
 }
+
+.ice-week-link.week-4, .ice-week-banner.week-4, .ice-stop.week-4 .ice-stop-label { background: #49351ff2; border-color: #fcd34d; }
+.ice-stop.week-4.selected .ice-stop-label { border-color: #fde68a; }
+
+.ice-week-banner.week-4 { box-shadow: 0 -1.5rem 0 .4rem #194360, 0 1.5rem 0 .4rem #194360; }

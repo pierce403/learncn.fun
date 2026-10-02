@@ -235,3 +235,15 @@
 .one-c-sum-check { position: absolute; right: .15rem; top: -.15rem; font-size: .75rem; }
 .one-c-sum-empty { background: #162a3d; }
 .one-c-sum-scene > p { margin-top: .65rem; }
+
+/* Week 4 addition tools: large touch targets even on narrow phones. */
+.one-c-story { max-width: 34rem; margin: 0 auto 1rem; font-size: clamp(1.15rem, 3vw, 1.45rem); line-height: 1.55; }
+.one-c-number-line { max-width: 540px; margin: 0 auto; color: #e2e8f0; }
+.one-c-number-line svg { display: block; width: 100%; height: auto; }
+.one-c-number-line .one-c-button { margin: .5rem auto 0; }
+.one-c-dice-pair { display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; margin: 1rem auto; }
+.one-c-die { display: grid; grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(3, 44px); padding: 5px; border: 2px solid #67e8f9; border-radius: 16px; background: #123647; }
+.one-c-die.die-1 { border-color: #fcd34d; background: #392f1a; }
+.one-c-die button { border: 0; border-radius: 50%; background: transparent; color: #a5f3fc; font-size: 2.3rem; line-height: 1; min-width: 44px; min-height: 44px; cursor: pointer; }
+.one-c-die.die-1 button { color: #fde68a; }
+.one-c-die button[aria-pressed="true"] { background: #ffffff20; font-size: 1.6rem; }

@@ -8,8 +8,8 @@ Tiny Chinese practice apps aligned to the 14-level character-count path printed 
 - Read: multiple-choice character quiz (English or Pinyin answers)
 - Read Out Loud: local Mandarin voice practice using Vosk
 - Write: guided stroke-order practice (HanziWriter)
-- Grade 1C (`/1c/`): eighteen penguin islands across Weeks 1–3, covering school and
-  family vocabulary, listening, pinyin, writing, measure words, and math within 10.
+- Grade 1C (`/1c/`): 29 penguin islands across Weeks 1–4, covering school and
+  family vocabulary, listening, pinyin, writing, measure words, and math within 10 using number lines, dice, and stories.
   See [`docs/grade-1c.md`](docs/grade-1c.md).
 
 Every app shares one persisted book-level picker. Practice can cover either the characters newly

@@ -1,8 +1,8 @@
-# Grade 1C · Weeks 1–3
+# Grade 1C · Weeks 1–4
 
 The standalone page at `/1c/` uses the user-supplied Grade 1C newsletters for
 2026–27. The original newsletters remain private and are not included in this
-repository. The map has 18 islands grouped into three weeks.
+repository. The map has 29 islands grouped into four weeks.
 
 ## Week 1A · September 1–4
 
@@ -54,8 +54,33 @@ Page 1 mentions measure words without giving a list. The four gap exercises are
 original practice using people and the fish, raincoat, and ears already encountered
 in Week 2. Contextual 一 changes tone in the displayed phrase pinyin; 只 is read zhī.
 The composition and addition puzzles are also original, based on p. 1's math goals.
-Existing Week 2 sequences remain available for ordering review. Lesson 2 initials
-and character-writing lists are not supplied yet and are not invented here.
+Existing Week 2 sequences remain available for ordering review. The Lesson 2 initials
+and character-writing lists arrive in Week 4.
+
+## Week 4B · September 21–25
+
+Source: **1C-Week 4 Newsletter 26-27.pdf**, pp. 1–2, from the supplied newsletter
+Drive folder. Eleven new islands cover:
+
+- Pops & hums / Tongue taps: b, p, m, f, d, t, n, l, spoken in Mandarin syllables.
+- You & me / At home / My family: 马、巴、你、我、他、弟、爸、她、妈、的、父、母.
+- Little strokes / Write some more: 木、土、八、也、不、女、儿, with guided tracing
+  and the existing tap-answer fallback.
+- I have…: three original completed sentences using 我有 and familiar vocabulary.
+- Hop & add: addition on an interactive 0–10 number line, including zero hops.
+- Dice buddies: count dots on two standard dice, with totals no greater than 10.
+- Number stories: four original addition stories, readable and narrated in either
+  instruction language, with tappable counters.
+
+All recognition and writing characters, word combinations, and Chinese example
+sentences come from page 2. The sentence translations and pinyin are supplied by
+the game; pinyin uses natural neutral tones and contextual 一/不 tone changes.
+巴 is taught as a character in 巴士 and 嘴巴, not as “bus” on its own. 的 is spoken
+in 我的 to disambiguate its pronunciation. 他/她 always receive written practice
+rather than audio-only identification. 爸/妈 and 父/母 appear in separate lessons
+to avoid competing equivalent meanings. The math problems and “I have…” examples
+are original practice for page 1's goals. Subtraction belongs to the following
+week's preview and is not added as Week 4 material.
 
 ## Game behavior
 
@@ -70,7 +95,7 @@ Completing an activity earns a star regardless of mistakes.
 
 Only aggregate completion counts and best first-try results are stored locally,
 under `learncn.1c.week1.v1`. This is separate from the main apps' book-level state.
-Week 1 and Week 2 IDs remain unchanged, so existing stars survive the new week.
+Week 1–3 IDs remain unchanged, so existing stars survive the new week.
 Unavailable or corrupt browser storage does not block play. Audio uses browser
 speech synthesis and never requires a microphone or speech recognition model.
 Every listening prompt has a written hint if playback is unavailable. The device

@@ -1,7 +1,7 @@
 import { shuffleInPlace } from "../../lib/random";
 import { COMPARISONS, NUMBERS, practiceSpeech, type Lesson, type Word } from "./curriculum";
 
-export type Question = { id: string; word: Word; mode: "meaning" | "listen" | "recognize" | "count" | "sound" | "sound-read" | "trace" | "compare" | "order" | "measure" | "bonds" | "addition"; options: Word[]; pair?: [number, number]; sequence?: (number | null)[]; parts?: [number, number] };
+export type Question = { id: string; word: Word; mode: "meaning" | "listen" | "recognize" | "count" | "sound" | "sound-read" | "trace" | "compare" | "order" | "measure" | "bonds" | "addition"; options: Word[]; pair?: [number, number]; sequence?: (number | null)[]; parts?: [number, number]; mathModel?: Word["mathModel"]; story?: Word["story"] };
 
 function shuffled<T>(values: T[]): T[] {
   const result = [...values];
@@ -23,7 +23,7 @@ export function makeRound(lesson: Lesson, listening: boolean): Question[] {
       const value = mode === "bonds" ? parts[1] : parts[0] + parts[1];
       // Keep each puzzle's identity for review, even when two answers are equal.
       const answer = { ...NUMBERS[value], id: `${card.id}-answer` };
-      return { ...makeQuestion(answer, mode, NUMBERS.filter((word) => word.value !== value), 2), parts };
+      return { ...makeQuestion(answer, mode, NUMBERS.filter((word) => word.value !== value), 2), parts, mathModel: card.mathModel, story: card.story };
     });
   }
   if (lesson.kind === "sounds") return shuffled(lesson.words).map((word) => makeQuestion(word, listening ? "sound" : "sound-read", lesson.words, 2));
@@ -52,7 +52,7 @@ export function makeRound(lesson: Lesson, listening: boolean): Question[] {
   if (second.length > 1 && first.at(-1)?.id === second[0].id) [second[0], second[1]] = [second[1], second[0]];
   return [
     ...first.map((word) => makeQuestion(word, "meaning", lesson.words, lesson.week >= 2 ? 2 : 3)),
-    ...second.map((word) => makeQuestion(word, listening ? "listen" : "recognize", lesson.words, lesson.week >= 2 ? 2 : 3)),
+    ...second.map((word) => makeQuestion(word, listening && !word.requiresWrittenPrompt ? "listen" : "recognize", lesson.words, lesson.week >= 2 ? 2 : 3)),
   ];
 }
 

@@ -21,6 +21,17 @@ export const MANDARIN_LESSON_DIRECTIONS: Record<string, string> = {
   "w3-measures": "一起来学量词！数字和事物之间，要用合适的量词。听一听，再点下一张。",
   "w3-bonds": "一起来分一分、合一合！圆点和菱形合起来，一共有几个？准备好了，就点下一张。",
   "w3-addition": "一起来做加法！把两组放在一起，数数一共有几个。准备好了，就点下一张。",
+  "w4-lip-sounds": "一起来学声母！用嘴唇发音，试试送气和不送气。听一听，跟着读，再点下一张。",
+  "w4-tongue-sounds": "一起来学更多声母！舌尖轻轻碰上面的牙齿后面。听一听，跟着读，再点下一张。",
+  "w4-you-and-me": "一起来认汉字！听一听，找找汉字在词语里的位置。准备好了，就点下一张。",
+  "w4-at-home": "一起来认识家人的汉字！仔细看，听一听，跟着读。准备好了，就点下一张。",
+  "w4-my-family": "一起来认更多汉字！他和她的读音一样，看看左边有什么不同。准备好了，就点下一张。",
+  "w4-trace-nature": "一起来写四个汉字！先看看字，听听怎么读。准备好了，就点下一张。",
+  "w4-trace-family": "一起来写三个汉字！先看看字，听听怎么读。准备好了，就点下一张。",
+  "w4-i-have": "一起来说我有！听一句，跟着说一句。准备好了，就点下一张。",
+  "w4-number-line": "一起来跳数线！从第一个数开始，往前跳，看看到了几。准备好了，就点下一张。",
+  "w4-dice": "一起来数骰子！点一点两颗骰子的圆点，数数一共有几个。准备好了，就点下一张。",
+  "w4-stories": "一起来听加法故事！找出两组，把它们加起来。准备好了，就点下一张。",
 };
 
 const SOUND_TIPS: Record<string, string> = {
@@ -33,6 +44,14 @@ const SOUND_TIPS: Record<string, string> = {
   er: "舌尖轻轻翘起来，不碰上面。听一听，跟着读。",
   y: "看看这个声母，找找它在音节开头的位置。听一听。",
   w: "看看这个声母，找找它在音节开头的位置。听一听。",
+  b: "双唇闭上再打开，轻轻发音，不要用力送气。",
+  p: "双唇闭上再打开，送出一口气，试试用手感觉气流。",
+  m: "双唇闭上，用鼻子哼一哼，再打开嘴。",
+  f: "上面的牙齿轻轻碰下嘴唇，让气流出来。",
+  d: "舌尖碰上齿后面，再轻轻放开，不要用力送气。",
+  t: "舌尖碰上齿后面，再放开，送出一口气。",
+  n: "舌尖碰上齿后面，用鼻子哼一哼。",
+  l: "舌尖碰上齿后面，让气从舌头两边出来。",
 };
 
 const WORD_TIPS: Record<string, string> = {
@@ -86,13 +105,36 @@ const WORD_TIPS: Record<string, string> = {
   "w3-measure-fish": "数鱼可以用量词条。",
   "w3-measure-raincoat": "数雨衣可以用量词件。",
   "w3-measure-ears": "数耳朵可以用量词只。",
+  "w4-horse": "找找木马和马路里的马字。",
+  "w4-ba": "巴是巴士和嘴巴里的一个字。",
+  "w4-you": "对着和你说话的人，可以说你。",
+  "w4-me": "指指自己，跟着说我。",
+  "w4-he": "他和她的读音一样。看看这个他的左边，是单人旁。",
+  "w4-brother": "两个弟字组成弟弟，指比你小的兄弟。",
+  "w4-dad": "这是爸爸里的爸字。",
+  "w4-she": "她和他的读音一样。看看这个她的左边，是女字旁。",
+  "w4-mom": "这是妈妈里的妈字。",
+  "w4-de": "我后面加一个的，就变成我的。",
+  "w4-father": "父母里的第一个字是父。",
+  "w4-mother": "父母里的第二个字是母。",
+  "w4-wood": "四笔写成木，像一棵有树枝的树。",
+  "w4-earth": "三笔写成土，下面的一横像地面。",
+  "w4-eight": "八的两笔向两边分开。",
+  "w4-also": "跟着亮起来的笔画写也。试着说，他也是我的同学。",
+  "w4-not": "不表示否定。在另一个第四声前面，这个字的读音变成第二声。",
+  "w4-female": "女儿里有女字，她的左边也是女字旁。",
+  "w4-child": "儿子和女儿里都有儿字。",
+  "w4-have-brother": "试着介绍一个故事里的家人。",
+  "w4-have-bag": "说说你有什么。",
+  "w4-have-fish": "数鱼可以用量词条。",
 };
 
 export function mandarinCardNarration(word: Word, includeTip: boolean): SpeechSegment[] {
-  const tip = word.parts ? "把两组放在一起，数数一共有几个。" : word.soundCue ? SOUND_TIPS[word.hanzi] : word.value !== undefined
+  const tip = word.mathModel === "number-line" ? "从第一个数开始，往前跳，看看到了几。" : word.mathModel === "dice" ? "数数两颗骰子的圆点，一共有几个？" : word.parts ? "把两组放在一起，数数一共有几个。" : word.soundCue ? SOUND_TIPS[word.hanzi] : word.value !== undefined
     ? word.value === 0 ? "零就是一个也没有。这里没有圆点。" : "一个一个地点圆点，数一数，再读出这个数字。"
     : WORD_TIPS[word.id];
   return [
+    ...(word.story ? [{ text: word.story.zh, language: "zh" as const }] : []),
     ...(includeTip || word.soundCue ? [{ text: tip ?? "听一听，跟着读。", language: "zh" as const }] : []),
     { text: practiceSpeech(word), language: "zh" },
   ];
@@ -100,6 +142,12 @@ export function mandarinCardNarration(word: Word, includeTip: boolean): SpeechSe
 
 export function mandarinQuestionNarration(lesson: Lesson, question: Question, traceFallback: boolean, fullDirections: boolean): SpeechSegment[] {
   const say = (text: string): SpeechSegment[] => [{ text, language: "zh" }];
+  if (question.mode === "addition" && (question.story || question.mathModel)) {
+    const text = question.story?.zh ?? (question.mathModel === "number-line"
+      ? `从${question.parts![0]}开始，往前跳${question.parts![1]}次。到了几？`
+      : "数数两颗骰子的圆点，一共有几个？");
+    return say(`${text}${fullDirections ? "选出对应的中文数字。" : ""}`);
+  }
   const example: SpeechSegment = { text: practiceSpeech(question.word), language: "zh" };
   // English target words remain study content. Saying their Chinese translation
   // here would give away the answer to a recognition question.

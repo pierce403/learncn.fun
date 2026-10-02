@@ -256,6 +256,7 @@ export default function Grade1CApp() {
             <summary>For grown-ups · What we’re practicing</summary>
             <p>Based on the Grade 1C newsletters (2026–27). Week 1: school words, greetings, introductions, and numbers 0–10. Week 2: pinyin finals a, o, e, i, u, ü, er; initials y and w; recognizing 衣、鱼、雨、耳、牙; writing 一、二、五、口、人; and comparing and ordering numbers within 10.</p>
             <p>Week 3: twelve family words, asking who someone is and how many people are in a family, measure words, number parts, and addition within 10. The counting-word and math puzzles are practice examples for the newsletter’s learning goals.</p>
+            <p>Week 4: initials b, p, m, f, d, t, n, l; twelve reading characters and seven writing characters; “I have…” sentences; and addition within 10 using number lines, dice, and little stories.</p>
             <p>Learn the cards together, then play. Incorrect answers get a gentle retry and a short review. The numbers use a counting frame, numerals, and Chinese and English number words. Listening uses your device’s Mandarin voice; every audio question has a written hint.</p>
             <p>Stars are saved in this browser. Introductions use the example name Xiaoming and age six; the family sentence uses six people as an example. Children can practice their own details out loud; the game does not collect them.</p>
             <p>Pinyin audio uses example syllables in a Mandarin voice. The ü sound keeps its dots in nǚ; after y, its dots disappear, as in yú (鱼) and yǔ (雨). Open “Words” on a character card for the newsletter’s word combinations and example sentence.</p>
@@ -268,7 +269,7 @@ export default function Grade1CApp() {
           <progress className="one-c-progress" value={learnIndex + 1} max={lesson.words.length} aria-label="Teaching card progress" />
           <div className={`one-c-study-card ${isSentence || word.measure ? "sentence" : ""}`}>
             {word.value === undefined && <span className="one-c-study-icon" aria-hidden="true">{word.icon}</span>}
-            {word.parts ? <SumScene key={word.id} parts={word.parts} missing={lesson.kind === "bonds" ? "part" : "total"} reveal onCount={(value) => audio.play(NUMBERS[value].hanzi)} /> : word.pair ? <CompareScene pair={word.pair} sign={word.hanzi} /> : word.sequence ? <NumberSequence values={word.sequence} /> : <div className="one-c-study-hanzi" lang={isSound ? "zh-Latn-pinyin" : "zh-CN"}>{word.value !== undefined && <span className="one-c-numeral">{word.value}</span>}{studyWord.hanzi}</div>}
+            {word.parts ? <SumScene key={word.id} parts={word.parts} mathModel={word.mathModel} story={word.story} language={instructionLanguage} missing={lesson.kind === "bonds" ? "part" : "total"} reveal onCount={(value) => audio.play(NUMBERS[value].hanzi)} /> : word.pair ? <CompareScene pair={word.pair} sign={word.hanzi} /> : word.sequence ? <NumberSequence values={word.sequence} /> : <div className="one-c-study-hanzi" lang={isSound ? "zh-Latn-pinyin" : "zh-CN"}>{word.value !== undefined && <span className="one-c-numeral">{word.value}</span>}{studyWord.hanzi}</div>}
             {word.parts && <div className="one-c-pinyin" lang="zh-CN">{word.hanzi}</div>}
             <div className="one-c-pinyin">{isSound && "Hear: "}<span lang="zh-Latn-pinyin">{studyWord.pinyin}</span></div>
             <div className="one-c-study-english">{studyWord.english}</div>
@@ -294,14 +295,14 @@ export default function Grade1CApp() {
           <progress className="one-c-progress" value={run.index + (feedback === "correct" ? 1 : 0)} max={run.questions.length} aria-label={run.reviewing ? "Review progress" : "Game progress"} />
           {run.reviewing && <p className="one-c-review-note">{isSentence ? "Let’s try again!" : "Let’s try the words you needed a little help with."}</p>}
           <div className={`one-c-play-card ${isSentence ? "sentence" : ""}`}>
-            {(question.mode === "meaning" || showSentenceText) && <><div className="one-c-prompt-hanzi" lang="zh-CN">{speechText(question.word)}</div>{isSentence && <div className="one-c-pinyin" lang="zh-Latn-pinyin">{question.word.example?.pinyin ?? question.word.pinyin}</div>}</>}
+            {(question.mode === "meaning" || showSentenceText) && <><div className="one-c-prompt-hanzi" lang="zh-CN">{question.word.example?.hanzi ?? question.word.hanzi}</div>{isSentence && <div className="one-c-pinyin" lang="zh-Latn-pinyin">{question.word.example?.pinyin ?? question.word.pinyin}</div>}</>}
             {(question.mode === "recognize" || question.mode === "trace") && <div className="one-c-prompt-english">{question.word.icon} {question.word.english}</div>}
             {isListening && <div className="one-c-listen-prompt"><button className="one-c-big-listen" disabled={!audio.enabled} aria-label={isSentence ? "Hear the sentence again" : "Listen to the Chinese sounds"} onClick={() => audio.play(speechText(question.word))}><SoundIcon /></button><p>{isSentence || isSound ? "Hear it again" : "Tap to hear the Chinese words."}</p><button className="one-c-text-button" disabled={!audio.enabled} aria-label="Listen slowly" onClick={() => audio.play(speechText(question.word), "zh", true)}>Slow</button></div>}
             {isSound && (question.mode === "sound-read" || !audio.canListen || audio.message) && <p className="one-c-prompt-english">{question.word.soundCue}</p>}
             {question.mode === "trace" && !traceFallback && <TraceCharacter key={question.id} hanzi={question.word.hanzi} onComplete={solved} onHelp={() => { markMissed(); setWrong(["trace"]); }} onFallback={() => { setTraceFallback(true); audio.narrate(questionNarration(lesson, question, true, true, instructionLanguage)); }} />}
             {question.pair && <CompareScene pair={question.pair} sign={feedback === "correct" ? question.word.hanzi : "?"} />}
             {question.sequence && <NumberSequence values={question.sequence} answer={feedback === "correct" ? question.word.value : undefined} />}
-            {question.parts && <SumScene key={question.id} parts={question.parts} missing={question.mode === "bonds" ? "part" : "total"} reveal={feedback === "correct"} onCount={(value) => audio.play(NUMBERS[value].hanzi)} />}
+            {question.parts && <SumScene key={question.id} parts={question.parts} mathModel={question.mathModel} story={question.story} language={instructionLanguage} missing={question.mode === "bonds" ? "part" : "total"} reveal={feedback === "correct"} onCount={(value) => audio.play(NUMBERS[value].hanzi)} />}
             {question.mode === "measure" && question.word.measure && <>
               <div className="one-c-measure-prompt" lang="zh-CN" aria-label={feedback === "correct" ? speechText(question.word) : `${question.word.measure.before}，空格，${question.word.measure.after}`}>
                 {question.word.measure.before}<span className="one-c-measure-gap">{feedback === "correct" ? question.word.hanzi : "?"}</span>{question.word.measure.after}
@@ -313,7 +314,7 @@ export default function Grade1CApp() {
 
             {(question.mode !== "trace" || traceFallback) && <div className={`one-c-options ${isSentence || lesson.week >= 2 ? "sentence-choices" : ""}`} role="group" aria-label="Answer choices">{question.options.map((option) => {
               const chinese = question.mode === "recognize" || question.mode === "count" || question.mode === "trace" || question.mode === "compare" || question.mode === "measure" || Boolean(question.parts);
-              const showPinyin = question.mode === "compare" || question.mode === "measure" || lesson.week === 3 && chinese;
+              const showPinyin = question.mode === "compare" || question.mode === "measure" || lesson.week >= 3 && chinese;
               const symbol = isSound || question.mode === "order";
               const label = option.choiceLabel ?? option.english;
               const isWrong = wrong.includes(option.id);

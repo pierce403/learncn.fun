@@ -24,12 +24,12 @@ describe("Grade 1C Week 1 curriculum", () => {
 });
 
 describe("Grade 1C games", () => {
-  it("covers every word in both reading and listening, with unique valid choices and no immediate repeat", () => {
+  it("covers every word in reading and listening or written recognition, with unique choices and no immediate repeat", () => {
     for (let iteration = 0; iteration < 40; iteration++) {
       for (const lesson of LESSONS.filter((lesson) => lesson.kind === "words")) {
         const round = makeRound(lesson, true);
         expect(round).toHaveLength(lesson.words.length * 2);
-        for (const word of lesson.words) expect(round.filter((question) => question.word.id === word.id).map((question) => question.mode)).toEqual(["meaning", "listen"]);
+        for (const word of lesson.words) expect(round.filter((question) => question.word.id === word.id).map((question) => question.mode)).toEqual(["meaning", word.requiresWrittenPrompt ? "recognize" : "listen"]);
         round.forEach((question, index) => {
           expect(new Set(question.options.map((option) => option.id)).size).toBe(lesson.week >= 2 ? 2 : 3);
           expect(question.options.filter((option) => option.id === question.word.id)).toHaveLength(1);
