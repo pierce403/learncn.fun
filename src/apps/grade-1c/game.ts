@@ -1,5 +1,5 @@
 import { shuffleInPlace } from "../../lib/random";
-import { COMPARISONS, NUMBERS, practiceSpeech, type Lesson, type Word } from "./curriculum";
+import { COMPARISONS, NUMBERS, WEEK_4_PREVIOUS_LESSONS, practiceSpeech, type Lesson, type Word } from "./curriculum";
 
 export type Question = { id: string; word: Word; mode: "meaning" | "listen" | "recognize" | "count" | "sound" | "sound-read" | "trace" | "compare" | "order" | "measure" | "bonds" | "addition"; options: Word[]; pair?: [number, number]; sequence?: (number | null)[]; parts?: [number, number]; mathModel?: Word["mathModel"]; story?: Word["story"] };
 
@@ -10,7 +10,7 @@ function shuffled<T>(values: T[]): T[] {
 }
 
 function makeQuestion(word: Word, mode: Question["mode"], pool: Word[], choices = 3): Question {
-  const distractors = shuffled(pool.filter((candidate) => candidate.id !== word.id)).slice(0, choices - 1);
+  const distractors = shuffled(pool.filter((candidate) => candidate.id !== word.id && (!word.meaningGroup || candidate.meaningGroup !== word.meaningGroup))).slice(0, choices - 1);
   return { id: `${word.id}-${mode}`, word, mode, options: shuffled([word, ...distractors]) };
 }
 
@@ -78,12 +78,22 @@ export function parseProgress(raw: string | null, lessons: Lesson[]): Progress {
   try {
     const value: unknown = JSON.parse(raw ?? "{}");
     if (!value || typeof value !== "object" || Array.isArray(value)) return {};
-    const entries = value as Record<string, { completions?: unknown; best?: unknown }>;
+    const entries = value as Record<string, unknown>;
+    const valid = (item: unknown): item is Progress[string] => {
+      if (!item || typeof item !== "object") return false;
+      const candidate = item as Partial<Progress[string]>;
+      return Number.isSafeInteger(candidate.completions) && Number(candidate.completions) >= 1 &&
+        typeof candidate.best === "number" && Number.isFinite(candidate.best) && candidate.best >= 0 && candidate.best <= 1;
+    };
     return Object.fromEntries(lessons.flatMap(({ id }) => {
-      const item = entries[id];
-      if (!item || !Number.isSafeInteger(item.completions) || Number(item.completions) < 1 ||
-          typeof item.best !== "number" || !Number.isFinite(item.best) || item.best < 0 || item.best > 1) return [];
-      return [[id, { completions: Number(item.completions), best: item.best }]];
+      const current = entries[id];
+      if (valid(current)) return [[id, { completions: current.completions, best: current.best }]];
+      const previous = (WEEK_4_PREVIOUS_LESSONS[id] ?? []).map(oldId => entries[oldId]).filter(valid);
+      if (!previous.length) return [];
+      return [[id, {
+        completions: Math.max(...previous.map(item => item.completions)),
+        best: Math.max(...previous.map(item => item.best)),
+      }]];
     }));
   } catch {
     return {};

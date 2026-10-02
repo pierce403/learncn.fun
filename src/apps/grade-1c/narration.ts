@@ -28,17 +28,11 @@ const LESSON_DIRECTIONS: Record<string, string> = {
   "w3-measures": "Let's learn counting words! Chinese uses a little word between a number and a thing. Listen, then tap Next.",
   "w3-bonds": "Let's make a number! Circles and diamonds make one whole group. Count them, then tap Next.",
   "w3-addition": "Let's add! Count both groups together to find the total. Tap Next when you're ready.",
-  "w4-lip-sounds": "Let's make sounds with our lips! Listen for gentle sounds, puffs of air, and hums. Tap Next when you're ready.",
-  "w4-tongue-sounds": "Let's make sounds with our tongues! Listen, then copy each starting sound. Tap Next when you're ready.",
-  "w4-you-and-me": "Let's read four new characters! Listen and look for each character in bigger words. Tap Next when you're ready.",
-  "w4-at-home": "Let's read characters about family! Look carefully, listen, and say each one. Tap Next when you're ready.",
-  "w4-my-family": "Let's read more family characters! He and she sound the same, so look at how they are written. Tap Next when you're ready.",
-  "w4-trace-nature": "Let's get ready to write four characters! Look and listen first. Tap Next when you're ready.",
-  "w4-trace-family": "Let's get ready to write three more characters! Look and listen first. Tap Next when you're ready.",
   "w4-i-have": "Let's say what we have! Listen to each whole sentence, then try saying it too. Tap Next when you're ready.",
-  "w4-number-line": "Let's hop and add! Start at the first number and hop forward. Tap Next when you're ready.",
-  "w4-dice": "Let's add the dots on two dice! Tap each dot and count both dice together. Tap Next when you're ready.",
-  "w4-stories": "Let's solve little number stories! Listen for the two groups and add them together. Tap Next when you're ready.",
+  "w4-sounds": "Let's explore eight starting sounds! Listen, then copy each sound with your lips and tongue. Tap Next when you're ready.",
+  "w4-reading": "Let's read characters about you and your family! Look carefully, listen, and say each one. Tap Next when you're ready.",
+  "w4-writing": "Let's get ready to write seven characters! Look and listen first. Tap Next when you're ready.",
+  "w4-addition": "Let's add! Try number-line hops, dots on dice, and little number stories. Tap Next when you're ready.",
 };
 
 // Written pinyin is for the screen. The English narrator gives mouth cues;

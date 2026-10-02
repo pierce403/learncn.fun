@@ -22,6 +22,7 @@ export type Word = {
   mathModel?: "number-line" | "dice";
   story?: { en: string; zh: string };
   requiresWrittenPrompt?: boolean;
+  meaningGroup?: string;
 };
 
 export const SCHOOL: Word[] = [
@@ -247,22 +248,22 @@ export const WEEK_4_READING: Word[] = [
   { id: "w4-brother", hanzi: "弟", pinyin: "dì", english: "Younger brother", icon: "👦", tip: "Say it twice to make 弟弟, younger brother.",
     related: [{ hanzi: "弟弟", pinyin: "dìdi", english: "younger brother" }, { hanzi: "兄弟", pinyin: "xiōngdì", english: "brothers" }],
     sentence: { hanzi: "弟弟今年五岁。", pinyin: "Dìdi jīnnián wǔ suì.", english: "Little brother is five years old this year." } },
-  { id: "w4-dad", hanzi: "爸", pinyin: "bà", english: "Dad", icon: "👨", tip: "This is the character in 爸爸, dad.",
+  { id: "w4-dad", meaningGroup: "father", hanzi: "爸", pinyin: "bà", english: "Dad", icon: "👨", tip: "This is the character in 爸爸, dad.",
     related: [{ hanzi: "爸爸", pinyin: "bàba", english: "dad" }, { hanzi: "爸妈", pinyin: "bàmā", english: "dad and mom" }],
     sentence: { hanzi: "爸爸在看书。", pinyin: "Bàba zài kàn shū.", english: "Dad is reading a book." } },
   { id: "w4-she", hanzi: "她", pinyin: "tā", english: "She", icon: "👧", tip: "She and he sound the same. Look at the left side: 她 has the 女 part.", requiresWrittenPrompt: true,
     related: [{ hanzi: "她们", pinyin: "tāmen", english: "they (female)" }, { hanzi: "她的", pinyin: "tā de", english: "her / hers" }],
     sentence: { hanzi: "她们都是我的朋友。", pinyin: "Tāmen dōu shì wǒ de péngyou.", english: "They are all my friends." } },
-  { id: "w4-mom", hanzi: "妈", pinyin: "mā", english: "Mom", icon: "👩", tip: "This is the character in 妈妈, mom.",
+  { id: "w4-mom", meaningGroup: "mother", hanzi: "妈", pinyin: "mā", english: "Mom", icon: "👩", tip: "This is the character in 妈妈, mom.",
     related: [{ hanzi: "妈妈", pinyin: "māma", english: "mom" }, { hanzi: "爸妈", pinyin: "bàmā", english: "dad and mom" }],
     sentence: { hanzi: "妈妈在做饭。", pinyin: "Māma zài zuò fàn.", english: "Mom is cooking." } },
   { id: "w4-de", hanzi: "的", pinyin: "de", english: "Belonging word", icon: "🎒", tip: "Put 的 after 我 to make 我的: my or mine.", audioText: "我的",
     related: [{ hanzi: "我的", pinyin: "wǒ de", english: "my / mine" }, { hanzi: "你的", pinyin: "nǐ de", english: "your / yours" }],
     sentence: { hanzi: "这是我的书包。", pinyin: "Zhè shì wǒ de shūbāo.", english: "This is my schoolbag." } },
-  { id: "w4-father", hanzi: "父", pinyin: "fù", english: "Father", icon: "👨", tip: "Find this character at the start of 父母, parents.",
+  { id: "w4-father", meaningGroup: "father", hanzi: "父", pinyin: "fù", english: "Father", icon: "👨", tip: "Find this character at the start of 父母, parents.",
     related: [{ hanzi: "父母", pinyin: "fùmǔ", english: "parents" }, { hanzi: "父亲", pinyin: "fùqīn", english: "father" }],
     sentence: { hanzi: "这是我的父母。", pinyin: "Zhè shì wǒ de fùmǔ.", english: "These are my parents." } },
-  { id: "w4-mother", hanzi: "母", pinyin: "mǔ", english: "Mother", icon: "👩", tip: "Find this character at the end of 父母, parents.",
+  { id: "w4-mother", meaningGroup: "mother", hanzi: "母", pinyin: "mǔ", english: "Mother", icon: "👩", tip: "Find this character at the end of 父母, parents.",
     related: [{ hanzi: "父母", pinyin: "fùmǔ", english: "parents" }, { hanzi: "母亲", pinyin: "mǔqīn", english: "mother" }],
     sentence: { hanzi: "我爱我的父母。", pinyin: "Wǒ ài wǒ de fùmǔ.", english: "I love my parents." } },
 ];
@@ -304,20 +305,21 @@ export const WEEK_4_STORIES: Word[] = sumCards("w4-story", [[2, 3], [4, 1], [3, 
   { en: "There are three apples in a basket. Put in three more. How many apples are there?", zh: "篮子里有三个苹果，再放进三个。一共有几个苹果？" },
   { en: "There are six books on a desk. Add two more. How many books are there?", zh: "桌上有六本书，再放两本。一共有几本书？" },
 ][index] }));
-const reading = (indices: number[]) => indices.map(index => WEEK_4_READING[index]);
 export const WEEK_4_LESSONS: Lesson[] = [
-  { id: "w4-lip-sounds", week: 4, title: "Pops & hums", chinese: "b p m f", description: "Four sounds with your lips", color: "cyan", icon: "🗣️", words: WEEK_4_INITIALS.slice(0, 4), kind: "sounds" },
-  { id: "w4-tongue-sounds", week: 4, title: "Tongue taps", chinese: "d t n l", description: "Four more starting sounds", color: "violet", icon: "🗣️", words: WEEK_4_INITIALS.slice(4), kind: "sounds" },
-  { id: "w4-you-and-me", week: 4, title: "You & me", chinese: "马 巴 你 我", description: "Horses, buses, you, and me", color: "green", icon: "🐴", words: reading([0, 1, 2, 3]), kind: "words" },
-  { id: "w4-at-home", week: 4, title: "At home", chinese: "他 弟 爸 妈", description: "He, little brother, dad, and mom", color: "rose", icon: "🏠", words: reading([4, 5, 6, 8]), kind: "words" },
-  { id: "w4-my-family", week: 4, title: "My family", chinese: "她 的 父 母", description: "She, belonging, father, and mother", color: "amber", icon: "🏡", words: reading([7, 9, 10, 11]), kind: "words" },
-  { id: "w4-trace-nature", week: 4, title: "Little strokes", chinese: "木 土 八 也", description: "Trace four new characters", color: "green", icon: "✏️", words: WEEK_4_WRITING.slice(0, 4), kind: "writing" },
-  { id: "w4-trace-family", week: 4, title: "Write some more", chinese: "不 女 儿", description: "Trace three more characters", color: "rose", icon: "✏️", words: WEEK_4_WRITING.slice(4), kind: "writing" },
+  { id: "w4-sounds", week: 4, title: "Sound explorers", chinese: "b p m f · d t n l", description: "Eight sounds with your lips and tongue", color: "cyan", icon: "🗣️", words: WEEK_4_INITIALS, kind: "sounds" },
+  { id: "w4-reading", week: 4, title: "Read with me", chinese: "你 我 他 她", description: "Twelve characters about you and your family", color: "green", icon: "🏠", words: WEEK_4_READING, kind: "words" },
+  { id: "w4-writing", week: 4, title: "Trace with me", chinese: "木 土 八 也 不 女 儿", description: "Seven characters to trace", color: "rose", icon: "✏️", words: WEEK_4_WRITING, kind: "writing" },
   { id: "w4-i-have", week: 4, title: "I have…", chinese: "我有……", description: "Listen, tap, and say a sentence", color: "violet", icon: "🎒", words: WEEK_4_SENTENCES, kind: "sentences" },
-  { id: "w4-number-line", week: 4, title: "Hop & add", chinese: "数线上加一加", description: "Hop forward on a number line", color: "cyan", icon: "🐧", words: WEEK_4_NUMBER_LINE, kind: "addition" },
-  { id: "w4-dice", week: 4, title: "Dice buddies", chinese: "数骰子", description: "Add the dots on two dice", color: "amber", icon: "🎲", words: WEEK_4_DICE, kind: "addition" },
-  { id: "w4-stories", week: 4, title: "Number stories", chinese: "加法故事", description: "Solve little addition stories", color: "green", icon: "📖", words: WEEK_4_STORIES, kind: "addition" },
+  { id: "w4-addition", week: 4, title: "Add & explore", chinese: "十以内加法", description: "Number-line hops, dice, and little stories", color: "amber", icon: "➕", words: [...WEEK_4_NUMBER_LINE, ...WEEK_4_DICE, ...WEEK_4_STORIES], kind: "addition" },
 ];
+
+// Credit any earned star from the original eleven-island Week 4 layout.
+export const WEEK_4_PREVIOUS_LESSONS: Record<string, string[]> = {
+  "w4-sounds": ["w4-lip-sounds", "w4-tongue-sounds"],
+  "w4-reading": ["w4-you-and-me", "w4-at-home", "w4-my-family"],
+  "w4-writing": ["w4-trace-nature", "w4-trace-family"],
+  "w4-addition": ["w4-number-line", "w4-dice", "w4-stories"],
+};
 
 export const WEEKS = [
   { number: 1, title: "I go to school", dates: "Sep 1–4", lessons: WEEK_1_LESSONS },

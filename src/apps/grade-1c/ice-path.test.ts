@@ -3,12 +3,12 @@ import { ICE_MAP_HEIGHT, ICE_STOPS, ICE_WEEKS, lessonIndex, nextHop, nextIceLess
 import { LESSONS, WEEK_1_LESSONS, WEEK_2_LESSONS, WEEK_3_LESSONS, WEEK_4_LESSONS } from "./curriculum";
 
 describe("penguin lesson path", () => {
-  it("keeps prior islands and adds eleven Week 4 islands within the water", () => {
+  it("keeps prior islands and adds five Week 4 islands within the water", () => {
     expect(ICE_STOPS.slice(0, 5).map(({ lesson }) => lesson.id)).toEqual(["school", "greetings", "actions", "friends", "numbers"]);
     expect(ICE_STOPS.slice(5, 11).map(({ lesson }) => lesson.id)).toEqual(WEEK_2_LESSONS.map((lesson) => lesson.id));
     expect(ICE_STOPS.slice(11, 18).map(({ lesson }) => lesson.id)).toEqual(WEEK_3_LESSONS.map((lesson) => lesson.id));
     expect(ICE_STOPS.slice(18).map(({ lesson }) => lesson.id)).toEqual(WEEK_4_LESSONS.map((lesson) => lesson.id));
-    expect(new Set(ICE_STOPS.map(({ lesson }) => lesson.id)).size).toBe(29);
+    expect(new Set(ICE_STOPS.map(({ lesson }) => lesson.id)).size).toBe(23);
     for (const [index, stop] of ICE_STOPS.entries()) {
       expect(stop.x).toBeGreaterThan(15);
       expect(stop.x).toBeLessThan(85);

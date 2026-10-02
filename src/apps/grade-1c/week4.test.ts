@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { LESSONS, WEEK_4_INITIALS, WEEK_4_READING, WEEK_4_WRITING, WEEK_4_LESSONS, practiceSpeech } from "./curriculum";
+import { LESSONS, WEEK_4_INITIALS, WEEK_4_READING, WEEK_4_WRITING, WEEK_4_LESSONS, WEEK_4_PREVIOUS_LESSONS, WEEK_4_NUMBER_LINE, WEEK_4_DICE, WEEK_4_STORIES, practiceSpeech } from "./curriculum";
 import { makeRound, makeReview, parseProgress, saveCompletion, questionSpeech } from "./game";
 import { cardNarration, lessonDirections, questionNarration } from "./narration";
 import { nextIceLesson } from "./ice-path";
 
 describe("Week 4 newsletter and games", () => {
   it("covers the exact published initials and recognition/writing characters once", () => {
+    expect(WEEK_4_LESSONS.map(l => l.kind)).toEqual(["sounds", "words", "writing", "sentences", "addition"]);
     expect(WEEK_4_INITIALS.map(w => w.hanzi)).toEqual(["b", "p", "m", "f", "d", "t", "n", "l"]);
     expect(WEEK_4_READING.map(w => w.hanzi)).toEqual(["马", "巴", "你", "我", "他", "弟", "爸", "她", "妈", "的", "父", "母"]);
     expect(WEEK_4_WRITING.map(w => w.hanzi)).toEqual(["木", "土", "八", "也", "不", "女", "儿"]);
@@ -38,6 +39,7 @@ describe("Week 4 newsletter and games", () => {
       for (const listening of [true, false]) {
         for (const question of makeRound(lesson, listening)) {
           expect(question.options).toHaveLength(2);
+          if (question.word.meaningGroup) expect(question.options.filter(w => w.meaningGroup === question.word.meaningGroup)).toHaveLength(1);
           expect(new Set(question.options.map(w => w.hanzi)).size).toBe(2);
           expect(new Set(question.options.map(w => w.english)).size).toBe(2);
           expect(question.options.filter(w => w.id === question.word.id)).toHaveLength(1);
@@ -52,7 +54,8 @@ describe("Week 4 newsletter and games", () => {
 
   it("keeps number-line, dice, and story totals within ten and retains their models in review", () => {
     const math = WEEK_4_LESSONS.filter(l => l.kind === "addition");
-    expect(math).toHaveLength(3);
+    expect(math).toHaveLength(1);
+    expect(math[0].words).toEqual([...WEEK_4_NUMBER_LINE, ...WEEK_4_DICE, ...WEEK_4_STORIES]);
     for (const lesson of math) {
       const round = makeRound(lesson, false);
       for (const q of round) {
@@ -92,9 +95,43 @@ describe("Week 4 newsletter and games", () => {
     expect(nextIceLesson(progress, earlier.at(-1)!.id)).toBe(WEEK_4_LESSONS[0].id);
     for (const lesson of WEEK_4_LESSONS) progress = saveCompletion(progress, lesson.id, .5);
     for (const lesson of earlier) expect(progress[lesson.id]).toEqual(previous[lesson.id]);
-    expect(Object.keys(progress)).toHaveLength(29);
+    expect(Object.keys(progress)).toHaveLength(23);
     expect(parseProgress(JSON.stringify(progress), LESSONS)).toEqual(progress);
     const ids = LESSONS.flatMap(l => l.words.map(w => w.id));
     expect(new Set(ids).size).toBe(ids.length);
   });
+
+  it("carries earned Week 4 stars into the five-island layout, including partial progress", () => {
+    const old = { completions: 2, best: .75 };
+    for (const [combined, previous] of Object.entries(WEEK_4_PREVIOUS_LESSONS)) {
+      for (const id of previous) {
+        const migrated = parseProgress(JSON.stringify({ [id]: old }), LESSONS);
+        expect(migrated).toEqual({ [combined]: old });
+        expect(parseProgress(JSON.stringify(migrated), LESSONS)).toEqual(migrated);
+      }
+      const invalid = { [previous[0]]: { completions: -1, best: 1 } };
+      expect(parseProgress(JSON.stringify(invalid), LESSONS)).toEqual({});
+      expect(parseProgress(JSON.stringify({ ...invalid, [previous[1]]: old }), LESSONS)).toEqual({ [combined]: old });
+      const current = { completions: 3, best: .5 };
+      expect(parseProgress(JSON.stringify({ [combined]: current, [previous[0]]: old }), LESSONS)).toEqual({ [combined]: current });
+    }
+    const allPrevious = Object.fromEntries(Object.values(WEEK_4_PREVIOUS_LESSONS).flat().map(id => [id, old]));
+    const migrated = parseProgress(JSON.stringify({ ...allPrevious, "w4-i-have": old }), LESSONS);
+    expect(Object.keys(migrated).sort()).toEqual(WEEK_4_LESSONS.map(l => l.id).sort());
+    expect(parseProgress(JSON.stringify(migrated), LESSONS)).toEqual(migrated);
+  });
+
+  it("never pits equivalent parent words against each other", () => {
+    const lesson = WEEK_4_LESSONS.find(l => l.kind === "words")!;
+    for (let repeat = 0; repeat < 30; repeat++) {
+      for (const listening of [true, false]) {
+        for (const q of makeRound(lesson, listening)) {
+          const choices = q.options.map(w => w.hanzi);
+          expect(choices.includes("爸") && choices.includes("父")).toBe(false);
+          expect(choices.includes("妈") && choices.includes("母")).toBe(false);
+        }
+      }
+    }
+  });
+
 });
