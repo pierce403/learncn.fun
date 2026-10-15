@@ -1,0 +1,9 @@
+{
+  "files": [
+    {
+      "path": "/models/vosk-model-small-cn-0.22.tar.gz",
+      "source": "public/models/vosk-model-small-cn-0.22.tar.gz",
+      "contentType": "application/gzip"
+    }
+  ]
+}

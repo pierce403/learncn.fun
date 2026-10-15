@@ -56,3 +56,12 @@ In GitHub:
 2. Set Source to **GitHub Actions**
 
 Custom domain is configured via `public/CNAME`.
+
+## Cloudflare hosting
+
+Native main builds run npm ci, npm run build:cloudflare, npm run test:hosting,
+and npm run deploy. Credentials remain in Cloudflare and previews stay disabled.
+The existing Pages recovery and original frontend build are preserved. The large
+/models/vosk-model-small-cn-0.22.tar.gz file keeps its original URL, bytes and MIME; a typed
+Worker streams generated content-addressed16MiBchunks with Range/HEAD/CORS support.
+Usage is measured through zone requests without browser analytics.

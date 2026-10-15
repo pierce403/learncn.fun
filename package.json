@@ -8,7 +8,11 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "test": "vitest run",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:cloudflare": "npm run build && node scripts/cloudflare-assets.mjs && node cloudflare/split-large-assets.mjs && node cloudflare/check-types.mjs",
+    "test:hosting": "node cloudflare/verify-large-asset.mjs",
+    "deploy": "wrangler deploy",
+    "check:deploy": "npm run build:cloudflare && wrangler deploy --dry-run"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
@@ -24,9 +28,10 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
     "tailwindcss": "^4.1.18",
-    "typescript": "^5.9.3",
+    "typescript": "5.9.3",
     "vite": "^7.3.1",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "wrangler": "4.151.0"
   },
   "overrides": {
     "uuid": "14.0.0"
