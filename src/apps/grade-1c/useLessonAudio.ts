@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { isSpeechSupported, speakBilingualSequence, stopSpeech, type SpeechSegment } from "../../lib/speech";
 
-export function useLessonAudio() {
-  const [enabled, setEnabled] = useState(true);
+export function useLessonAudio(initialEnabled = true) {
+  const [enabled, setEnabled] = useState(initialEnabled);
   const [message, setMessage] = useState("");
   const generation = useRef(0);
 

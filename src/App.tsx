@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import ReadApp from "./apps/read/ReadApp";
 import ReadOutLoudApp from "./apps/read-out-loud/ReadOutLoudApp";
 import WriteApp from "./apps/write/WriteApp";
+import StrokesApp from "./apps/strokes/StrokesApp";
 
-type AppId = "read" | "readOutLoud" | "write";
+type AppId = "read" | "readOutLoud" | "write" | "strokes";
 
 type AppMeta = {
   id: AppId;
@@ -66,13 +67,25 @@ export default function App() {
         description: "Hear a prompt, then write the character in the grid with guided stroke order.",
         accent: "from-emerald-400/20 via-slate-900/40 to-slate-900/20 ring-emerald-400/30",
       },
+      {
+        id: "strokes",
+        title: "Learn strokes",
+        subtitle: "Listen & match",
+        description: "Meet the strokes, hear their names, and find the matching shapes.",
+        accent: "from-cyan-400/20 via-slate-900/40 to-slate-900/20 ring-cyan-400/30",
+      },
     ],
     [],
   );
 
   const [activeApp, setActiveApp] = useState<AppId | null>(null);
+  const [strokeReturn, setStrokeReturn] = useState<AppId | null>(null);
 
   useEffect(() => {
+    if (activeApp === "strokes") {
+      document.title = "Learn strokes • learncn.fun";
+      return;
+    }
     if (activeApp === "read") {
       document.title = "Read • learncn.fun";
       return;
@@ -93,7 +106,11 @@ export default function App() {
   }
 
   if (activeApp === "write") {
-    return <WriteApp onHome={() => setActiveApp(null)} />;
+    return <WriteApp onHome={() => setActiveApp(null)} onLearnStrokes={() => { setStrokeReturn("write"); setActiveApp("strokes"); }} />;
+  }
+
+  if (activeApp === "strokes") {
+    return <StrokesApp onHome={() => setActiveApp(strokeReturn)} homeLabel={strokeReturn === "write" ? "Write" : "Apps"} />;
   }
 
   if (activeApp === "readOutLoud") {
@@ -116,12 +133,12 @@ export default function App() {
               Popular apps
             </div>
 
-            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
               {apps.map((app) => (
                 <button
                   key={app.id}
                   type="button"
-                  onClick={() => setActiveApp(app.id)}
+                  onClick={() => { setStrokeReturn(null); setActiveApp(app.id); }}
                   className={[
                     "group w-full touch-manipulation rounded-3xl bg-gradient-to-br p-5 text-left shadow-lg ring-1 transition",
                     "focus:outline-none focus:ring-2 focus:ring-slate-300/40",

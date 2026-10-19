@@ -7,10 +7,11 @@ import { useLessonAudio } from "./useLessonAudio";
 import PenguinPath from "./PenguinPath";
 import { POLAR_ART, nextIceLesson } from "./ice-path";
 import TraceCharacter from "./TraceCharacter";
+import StrokesApp from "../strokes/StrokesApp";
 import { CompareScene, NumberSequence, SumScene } from "./NumberScenes";
 import { INSTRUCTION_LANGUAGE_KEY, parseInstructionLanguage, type InstructionLanguage, comparisonHintNarration, cardNarration, lessonNarration, questionNarration, spokenText } from "./narration";
 
-type Screen = "home" | "learn" | "play" | "complete";
+type Screen = "home" | "learn" | "play" | "complete" | "strokes";
 type Run = { original: Question[]; questions: Question[]; index: number; reviewing: boolean; missed: string[]; firstTry: number };
 const COLORS: Record<string, string> = { cyan: "#67e8f9", amber: "#fcd34d", green: "#6ee7b7", violet: "#c4b5fd", rose: "#fda4af" };
 
@@ -145,12 +146,15 @@ export default function Grade1CApp() {
       ? { ...current, missed: [...current.missed, question.word.id] } : current);
   }
 
-  function solved() {
+  function solved(lastStrokeName?: string) {
     if (!question || feedback === "correct") return;
     if (!wrong.length && !hint) setRun((current) => current && !current.reviewing ? { ...current, firstTry: current.firstTry + 1 } : current);
     setFeedback("correct");
     if (audio.enabled) playDing();
-    audio.play(questionSpeech(question));
+    audio.narrate([
+      ...(lastStrokeName ? [{ text: lastStrokeName, language: "zh" as const }] : []),
+      { text: questionSpeech(question), language: "zh" },
+    ]);
   }
 
   function answer(id: string) {
@@ -232,6 +236,8 @@ export default function Grade1CApp() {
     : question?.mode === "count" ? "How many dots?" : question?.mode === "recognize" ? "Find the Chinese words" : question?.mode === "listen" ? "Listen. What does it mean?" : "What does this mean?";
   const hintLabel = isSentence ? "Show the sentence" : isSound ? "Show the sound" : "Show the word";
 
+  if (screen === "strokes") return <StrokesApp homeLabel="Map" initialAudio={audio.enabled} onHome={() => setScreen("home")} />;
+
   return <div className="one-c" style={{ "--lesson-accent": accent } as CSSProperties}>
     <div className="one-c-shell">
       <header className="one-c-header">
@@ -251,6 +257,7 @@ export default function Grade1CApp() {
 
       <main>
         {screen === "home" && <>
+          <div className="one-c-audio-controls"><button className="one-c-button secondary" onClick={() => { audio.stop(); setScreen("strokes"); }}>✏️ Learn strokes · 笔画</button></div>
           <PenguinPath progress={progress} initialLessonId={mapPosition.from} destinationLessonId={mapPosition.to} onStart={startLesson} headingRef={heading} />
           <details className="one-c-family-note">
             <summary>For grown-ups · What we’re practicing</summary>
@@ -299,7 +306,7 @@ export default function Grade1CApp() {
             {(question.mode === "recognize" || question.mode === "trace") && <div className="one-c-prompt-english">{question.word.icon} {question.word.english}</div>}
             {isListening && <div className="one-c-listen-prompt"><button className="one-c-big-listen" disabled={!audio.enabled} aria-label={isSentence ? "Hear the sentence again" : "Listen to the Chinese sounds"} onClick={() => audio.play(speechText(question.word))}><SoundIcon /></button><p>{isSentence || isSound ? "Hear it again" : "Tap to hear the Chinese words."}</p><button className="one-c-text-button" disabled={!audio.enabled} aria-label="Listen slowly" onClick={() => audio.play(speechText(question.word), "zh", true)}>Slow</button></div>}
             {isSound && (question.mode === "sound-read" || !audio.canListen || audio.message) && <p className="one-c-prompt-english">{question.word.soundCue}</p>}
-            {question.mode === "trace" && !traceFallback && <TraceCharacter key={question.id} hanzi={question.word.hanzi} onComplete={solved} onHelp={() => { markMissed(); setWrong(["trace"]); }} onFallback={() => { setTraceFallback(true); audio.narrate(questionNarration(lesson, question, true, true, instructionLanguage)); }} />}
+            {question.mode === "trace" && !traceFallback && <TraceCharacter key={question.id} hanzi={question.word.hanzi} onStrokeName={(name) => audio.play(name)} onComplete={solved} onHelp={() => { markMissed(); setWrong(["trace"]); }} onFallback={() => { setTraceFallback(true); audio.narrate(questionNarration(lesson, question, true, true, instructionLanguage)); }} />}
             {question.pair && <CompareScene pair={question.pair} sign={feedback === "correct" ? question.word.hanzi : "?"} />}
             {question.sequence && <NumberSequence values={question.sequence} answer={feedback === "correct" ? question.word.value : undefined} />}
             {question.parts && <SumScene key={question.id} parts={question.parts} mathModel={question.mathModel} story={question.story} language={instructionLanguage} missing={question.mode === "bonds" ? "part" : "total"} reveal={feedback === "correct"} onCount={(value) => audio.play(NUMBERS[value].hanzi)} />}

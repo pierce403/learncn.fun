@@ -1,0 +1,38 @@
+.strokes-app { min-height:100dvh; background:radial-gradient(ellipse at top,#13334b,#071423 75%); color:#e6f6ff; font-family:system-ui,sans-serif; padding: max(16px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom)); }
+.strokes-shell { max-width:680px; margin:auto; }
+.strokes-header { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:22px; font-size:13px; color:#9bb8cc; }
+.strokes-panel { border:1px solid #345268; background:#102236; border-radius:28px; padding:clamp(18px,4vw,32px); text-align:center; box-shadow:0 20px 65px #0004; }
+.strokes-panel h1 { font-size:clamp(26px,5vw,36px); font-weight:800; margin:8px 0 18px; letter-spacing:-.03em; }
+.strokes-panel p { color:#b6ccdc; margin:14px 0; }
+.strokes-eyebrow { color:#74e3e8; text-transform:uppercase; font-size:12px; letter-spacing:.12em; font-weight:750; }
+.strokes-button { border:1px solid #9ceaf2; border-radius:16px; background:#a7f3d0; color:#102c2c; padding:11px 18px; font-weight:750; min-height:46px; cursor:pointer; touch-action:manipulation; }
+.strokes-button.quiet { background:#1c344c; color:#e6f6ff; border-color:#3a556e; }
+.strokes-button[aria-pressed=true] { border-color:#a7f3d0; background:#234a4c; }
+.strokes-button:disabled { opacity:.4; cursor:default; }
+.strokes-app button:focus-visible { outline:3px solid #fcd34d; outline-offset:4px; }
+.strokes-tabs { display:flex; justify-content:center; flex-wrap:wrap; gap:8px; margin:0 0 16px; }
+.stroke-study { width:min(210px,65vw); margin:18px auto; background:#09182b; border:1px solid #35506c; border-radius:22px; padding:12px; }
+.stroke-shape { display:block; width:100%; aspect-ratio:1; fill:none; }
+.stroke-grid { stroke:#3a506b; stroke-width:.7; stroke-dasharray:3 3; }
+.stroke-shadow { stroke:#45617b; stroke-width:7; stroke-linecap:round; stroke-linejoin:round; }
+.stroke-ink { stroke:#a7f3d0; stroke-width:6; stroke-linecap:round; stroke-linejoin:round; }
+.stroke-start { fill:#fcd34d; stroke:#09182b; stroke-width:1; }
+.stroke-ink.drawing { stroke-dasharray:1; animation:stroke-draw 2.8s ease-in-out infinite; }
+@keyframes stroke-draw { 0%,10% { stroke-dashoffset:1; } 70%,100% { stroke-dashoffset:0; } }
+.stroke-name { font-size:36px; font-weight:750; }
+.stroke-pinyin { font-size:22px; color:#fcd34d; }
+.strokes-nav { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:24px; }
+.strokes-nav>span { color:#9bb8cc; white-space:nowrap; }
+.strokes-text-button { color:#9dd7e7; text-decoration:underline; padding:14px; cursor:pointer; }
+.strokes-panel progress { display:block; width:100%; height:8px; accent-color:#a7f3d0; margin:24px 0 12px; }
+.strokes-fish { display:flex; justify-content:center; gap:8px; font-size:26px; }
+.strokes-fish span { filter:grayscale(1); opacity:.28; }.strokes-fish .found { filter:none; opacity:1; }
+.strokes-listen { display:flex; flex-direction:column; gap:2px; align-items:center; margin:16px auto 0; padding:8px 24px; border-radius:20px; cursor:pointer; }
+.strokes-listen>span:first-child { font-size:38px; font-weight:750; }.strokes-listen>span:nth-child(2) { color:#fcd34d; font-size:22px; }.strokes-listen small { color:#97d5e9; margin-top:6px; }
+.stroke-options { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:20px; }
+.stroke-choice { background:#09182b; border:2px solid #35506c; border-radius:18px; padding:10px; cursor:pointer; touch-action:manipulation; min-width:0; }
+.stroke-choice>span { display:block; font-size:13px; margin-top:4px; color:#bfd2e6; }.stroke-choice.wrong { border-color:#fda4af; opacity:.55; }.stroke-choice.correct { border-color:#a7f3d0; background:#153e3c; }
+.strokes-feedback { min-height:24px; }.strokes-celebration { font-size:56px; margin:24px 0; }.strokes-summary { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+.strokes-audio-notice { font-size:13px; }
+@media(prefers-reduced-motion:reduce) { .stroke-ink.drawing { animation:none; stroke-dashoffset:0; } }
+@media(max-width:380px) { .strokes-header>span { display:none; }.stroke-options { gap:6px; }.stroke-choice { padding:6px; }.strokes-button { padding:10px 12px; }.strokes-nav { flex-wrap:wrap; } }

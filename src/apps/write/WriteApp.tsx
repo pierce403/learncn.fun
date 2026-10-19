@@ -7,9 +7,11 @@ import { burstConfetti } from "../../lib/confetti";
 import { shuffleInPlace } from "../../lib/random";
 import { playDing, playPop, playTada } from "../../lib/sfx";
 import { speakChineseSequence, stopSpeech } from "../../lib/speech";
+import { getCharacterStroke, type Stroke } from "../../data/strokes";
 
 export type WriteAppProps = {
   onHome?: () => void;
+  onLearnStrokes?: () => void;
 };
 
 const AUDIO_STORAGE_KEY = "learncn.write.audioEnabled";
@@ -18,12 +20,12 @@ const PROMPT_ZH = "这个字怎么写？";
 const STREAK_MILESTONE = 10;
 const CELEBRATION_STEP_MS = 260;
 const CELEBRATION_BUFFER_MS = 220;
-const NEXT_DELAY_MS = 900;
-const NEXT_CHARACTER_DELAY_MS = 520;
+const NEXT_DELAY_MS = 2400;
+const NEXT_CHARACTER_DELAY_MS = 1800;
 const MAX_CHARACTER_ATTEMPTS = 3;
 const FLASH_DURATION_MS = 650;
 const USER_BRUSH_FILTER_ID = "learncn-user-brush";
-const RETRY_RESTART_DELAY_MS = 820;
+const RETRY_RESTART_DELAY_MS = 1800;
 
 function ensureUserBrushFilter(container: HTMLElement): void {
   const svg = container.querySelector("svg");
@@ -140,7 +142,7 @@ function computeTotalStrokesFallback(strokeData: StrokeData): number {
   return Math.max(1, strokeData.strokeNum + strokeData.strokesRemaining + 1);
 }
 
-export default function WriteApp({ onHome }: WriteAppProps) {
+export default function WriteApp({ onHome, onLearnStrokes }: WriteAppProps) {
   const { level, scope, setLevel, setScope } = useVocabularySelection();
 
   const activeWords = useMemo(() => getWriteWordsForLevel(level, scope), [level, scope]);
@@ -169,6 +171,7 @@ export default function WriteApp({ onHome }: WriteAppProps) {
   const [totalStrokes, setTotalStrokes] = useState<number | null>(null);
   const [strokeProgress, setStrokeProgress] = useState<{ done: number; total: number } | null>(null);
   const [mistakePulse, setMistakePulse] = useState<{ token: number; strokeNum: number } | null>(null);
+  const [strokeLabel, setStrokeLabel] = useState<Stroke | null>(null);
 
   const [correctCount, setCorrectCount] = useState(0);
   const [mistakeCount, setMistakeCount] = useState(0);
@@ -262,6 +265,7 @@ export default function WriteApp({ onHome }: WriteAppProps) {
     setTotalStrokes(null);
     setStrokeProgress(null);
     setMistakePulse(null);
+    setStrokeLabel(null);
 
     if (deckRef.current.length === 0) {
       deckRef.current = makeDeck(lastWordIdRef.current, activeWordIdsRef.current);
@@ -346,6 +350,9 @@ export default function WriteApp({ onHome }: WriteAppProps) {
   function hintStroke(): void {
     const writer = writerRef.current;
     if (!writer) return;
+    const stroke = currentCharacter ? getCharacterStroke(currentCharacter, nextStrokeNumRef.current, totalStrokesRef.current ?? undefined) : null;
+    setStrokeLabel(stroke);
+    if (stroke && audioEnabledRef.current) void speakChineseSequence([stroke.name], { rate: 0.85 });
     void writer.highlightStroke(nextStrokeNumRef.current);
   }
 
@@ -460,12 +467,14 @@ export default function WriteApp({ onHome }: WriteAppProps) {
     setTotalStrokes(null);
     setStrokeProgress(null);
     setMistakePulse(null);
+    setStrokeLabel(null);
 
     let canceled = false;
     void writer
       .getCharacterData()
       .then((character) => {
         if (canceled) return;
+        totalStrokesRef.current = character.strokes.length;
         setTotalStrokes(character.strokes.length);
       })
       .catch(() => {
@@ -488,6 +497,12 @@ export default function WriteApp({ onHome }: WriteAppProps) {
         if (strokeData.totalMistakes === 2) void writer.showOutline({ duration: 250 });
       },
       onCorrectStroke: (strokeData) => {
+        if (canceled) return;
+        const stroke = getCharacterStroke(currentCharacter, strokeData.strokeNum, totalStrokesRef.current ?? computeTotalStrokesFallback(strokeData));
+        setStrokeLabel(stroke);
+        if (stroke && strokeData.strokesRemaining && audioEnabledRef.current) {
+          void speakChineseSequence([stroke.name], { rate: 0.85 });
+        }
         nextStrokeNumRef.current = strokeData.strokeNum + 1;
         setStrokeProgress({
           done: strokeData.strokeNum + 1,
@@ -495,6 +510,14 @@ export default function WriteApp({ onHome }: WriteAppProps) {
         });
       },
       onComplete: ({ totalMistakes }) => {
+        if (canceled) return;
+        const total = totalStrokesRef.current;
+        const lastStroke = total ? getCharacterStroke(currentCharacter, total - 1, total) : null;
+        // Keep the final stroke and character in one sequence so completion
+        // feedback cannot cancel the stroke name that was just accepted.
+        if (audioEnabledRef.current) void speakChineseSequence(
+          [...(lastStroke ? [lastStroke.name] : []), getChineseSpeechText(word)], { rate: 0.85 },
+        );
         const didHaveMistakeThisAttempt = totalMistakes > 0;
         hadMistakeThisWordRef.current = hadMistakeThisWordRef.current || didHaveMistakeThisAttempt;
 
@@ -542,7 +565,6 @@ export default function WriteApp({ onHome }: WriteAppProps) {
         lastCelebratedStreakRef.current = didHaveMistake ? 0 : lastCelebratedStreakRef.current;
 
         if (audioEnabledRef.current) playDing();
-        if (audioEnabledRef.current) void speakChineseSequence([getChineseSpeechText(word)], { rate: 0.95 });
 
         const celebrationExtraMs =
           celebrationBursts > 0
@@ -615,6 +637,7 @@ export default function WriteApp({ onHome }: WriteAppProps) {
 	            </div>
 
             <div className="flex flex-wrap items-center gap-3">
+              {onLearnStrokes && <button type="button" onClick={() => { stopSpeech(); onLearnStrokes(); }} className="rounded-full bg-cyan-900 px-4 py-2 text-sm font-semibold text-cyan-100">Learn strokes</button>}
               {onHome ? (
                 <button
                   type="button"
@@ -688,6 +711,7 @@ export default function WriteApp({ onHome }: WriteAppProps) {
                 </div>
 
                 <div className="mt-4 flex min-h-10 flex-col items-center justify-center gap-1">
+                  {strokeLabel && <div className="text-sm text-cyan-200" aria-live="polite"><span lang="zh-CN">{strokeLabel.name}</span> · <span lang="zh-Latn-pinyin">{strokeLabel.pinyin}</span> · {strokeLabel.english}</div>}
                   {progressLabel ? (
                     <div className="text-xs text-slate-400">{progressLabel}</div>
                   ) : (
@@ -739,7 +763,7 @@ export default function WriteApp({ onHome }: WriteAppProps) {
       <div className="fixed z-50 flex flex-col gap-2 [right:calc(theme(spacing.4)+env(safe-area-inset-right))] [bottom:calc(theme(spacing.4)+env(safe-area-inset-bottom))]">
         <button
           type="button"
-          onClick={() => setAudioEnabled((value) => !value)}
+          onClick={() => { stopSpeech(); audioEnabledRef.current = !audioEnabled; setAudioEnabled(!audioEnabled); }}
           className="inline-flex touch-manipulation items-center gap-2 rounded-full bg-slate-800/90 px-4 py-2 text-sm font-medium text-slate-100 shadow-lg ring-1 ring-slate-700/40 backdrop-blur hover:bg-slate-700"
           aria-pressed={audioEnabled}
           title="Toggle audio"
