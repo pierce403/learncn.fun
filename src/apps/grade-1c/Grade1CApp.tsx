@@ -224,7 +224,7 @@ export default function Grade1CApp() {
         <div className="ice-penguin-celebration" aria-hidden="true"><img src={POLAR_ART.penguin} alt="" width="1254" height="1254"/><span>★</span></div>
         <div className="one-c-eyebrow">Week {lesson.week} · {lesson.title}</div><h1 ref={heading} tabIndex={-1}>Practice complete!</h1><p>{lesson.words.length} characters practiced. Star earned.</p>
         <p className="one-c-small">{completed} of {available.length} available activities complete</p>
-        <div className="one-c-complete-actions"><button className="one-c-button primary" onClick={() => showMap(nextLessonId)}>Map →</button><button className="one-c-button secondary" onClick={() => startLesson(lesson)}>Again</button>{unlocked && <button className="one-c-button primary" onClick={startContinuous}>Continuous play →</button>}</div>
+        <div className="one-c-complete-actions"><button className="one-c-button secondary" onClick={() => startLesson(lesson)}>Again</button><button className="one-c-button primary" onClick={() => showMap(nextLessonId)}>Next →</button>{unlocked && <button className="one-c-button primary" onClick={startContinuous}>Continuous play →</button>}</div>
       </section>}
       <div className="one-c-notices" role="status">{audio.message && <p>{audio.message}</p>}{storageNotice && <p>{storageNotice}</p>}</div>
     </main><footer className="one-c-footer"><span>Grade 1C · Week {currentWeek} of {WEEKS.length}</span><a href="/">More Chinese games ↗</a></footer>

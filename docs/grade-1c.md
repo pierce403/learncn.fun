@@ -20,6 +20,8 @@ Reading choices include decorative emoji cues in both answer modes. Shared colum
 
 After a correct reading answer, the checkmark, Hanzi, pinyin, and English meaning form a centered horizontal row above a full-width Next button. Longer meanings wrap within the row on narrow screens.
 
+The completion screen places Again on the left and the primary Next → action on the right. Next returns to the ice path with the next activity selected.
+
 Reading audio matches the main Read game: each new question plays the short Mandarin cue 这是什么字？; Listen speaks the English meaning for CN/pinyin answers and the direct Hanzi for EN answers. Wrong choices play a pop, and correct choices play a ding and say the character in Mandarin. These cues apply to weekly reading, review, and continuous reading. Sound off silences prompts and feedback. Switching answer mode preserves the question without replaying the prompt. There is no teaching-card introduction.
 
 The map's round trophy button opens the Trophy case instead of the old Getting extra practice list. It includes each character from available weeks once, with separate reading and writing attempt counts. Doing best comes first, Still to try follows, and Needs the most practice is at the bottom with the trickiest characters first. Section links jump directly to each list. Ranking uses the same saved recent difficulty as adaptive practice; an untested skill stays labeled Not tried yet, and progress improves as successful attempts reduce difficulty. No new progress store or mastery credit is created by viewing the case.

@@ -140,7 +140,7 @@ describe("direct weekly practice", () => {
     for (let i = 0; i < 10; i++) { answerCurrent(); clickNext(); }
     expect(screen.getByRole("heading", { name: "Practice complete!" })).toBeTruthy();
     expect(JSON.parse(localStorage.getItem(PRACTICE_PROGRESS_KEY)!)["characters-w1-read"].completions).toBe(1);
-    fireEvent.click(screen.getByRole("button", { name: "Map →" }));
+    fireEvent.click(screen.getByRole("button", { name: "Next →" }));
     await act(async () => {});
     fireEvent.click(screen.getByRole("button", { name: "Start lesson: Write" }));
     expect(screen.getByRole("heading", { name: "Trace the character" })).toBeTruthy();
