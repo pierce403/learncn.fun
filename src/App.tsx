@@ -3,6 +3,7 @@ import ReadApp from "./apps/read/ReadApp";
 import ReadOutLoudApp from "./apps/read-out-loud/ReadOutLoudApp";
 import WriteApp from "./apps/write/WriteApp";
 import StrokesApp from "./apps/strokes/StrokesApp";
+import { PwaInstallPrompt } from "./components/PwaInstall";
 
 type AppId = "read" | "readOutLoud" | "write" | "strokes";
 
@@ -128,6 +129,7 @@ export default function App() {
             </p>
           </header>
 
+          <PwaInstallPrompt />
           <div className="mt-8">
             <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
               Popular apps

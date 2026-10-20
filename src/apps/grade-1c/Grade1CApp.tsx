@@ -8,6 +8,7 @@ import PenguinPath from "./PenguinPath";
 import { POLAR_ART, nextIceLesson } from "./ice-path";
 import TraceCharacter from "./TraceCharacter";
 import StrokesApp from "../strokes/StrokesApp";
+import { PwaInstallPrompt } from "../../components/PwaInstall";
 import { CompareScene, NumberSequence, SumScene } from "./NumberScenes";
 import { INSTRUCTION_LANGUAGE_KEY, parseInstructionLanguage, type InstructionLanguage, comparisonHintNarration, cardNarration, lessonNarration, questionNarration, spokenText } from "./narration";
 
@@ -257,6 +258,7 @@ export default function Grade1CApp() {
 
       <main>
         {screen === "home" && <>
+          <PwaInstallPrompt />
           <div className="one-c-audio-controls"><button className="one-c-button secondary" onClick={() => { audio.stop(); setScreen("strokes"); }}>✏️ Learn strokes · 笔画</button></div>
           <PenguinPath progress={progress} initialLessonId={mapPosition.from} destinationLessonId={mapPosition.to} onStart={startLesson} headingRef={heading} />
           <details className="one-c-family-note">
