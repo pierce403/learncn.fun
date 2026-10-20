@@ -56,8 +56,9 @@ For each new or corrected level:
 5. Run `npm test` to verify per-level counts, cumulative targets, unique characters, stable IDs, and
    direct character speech.
 
-Grade 1C also teaches syllables, counting sequences, measure phrases, and complete example
-sentences. Those spoken examples are lesson content and remain explicit in its curriculum.
+The previous Grade 1C newsletters include syllables, counting sequences, measure phrases,
+and complete example sentences. That data remains for progress migration; the current
+Grade 1C map follows the full character sheet described in `docs/grade-1c.md`.
 
 This project does not reproduce the series' stories, illustrations, exercises, audio, video, logos,
 or companion-app content.

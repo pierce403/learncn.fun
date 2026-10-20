@@ -48,7 +48,7 @@
 - Expected new-character counts for Levels 1–6: `60, 60, 60, 60, 70, 80`.
 - Speak character prompts directly and trust the selected Mandarin voice to choose the reading.
   Do not add words to steer pronunciation (for example, 了 must not become 好了).
-  Grade 1C syllable examples, number sequences, and complete lesson sentences are intentional content.
+  Archived Grade 1C syllable examples and complete sentences are lesson content, not pronunciation overrides.
 - Run `npm test` after any curriculum edit. See `docs/curriculum.md` for provenance and verification status.
 
 ## Write app
@@ -59,6 +59,16 @@
 - Any mistake during the word resets the “perfect streak” to `0`.
 - Multi-character prompts (e.g. 爸爸/妈妈) advance character-by-character.
 - Audio requires a user gesture (the tap that opens the app is usually enough).
+
+## Grade 1C
+
+- `weekly-curriculum.ts` and `character-lists.json` define the full 19-week PDF syllabus.
+- One chapter maps to one week, anchored to September 1, 2026, with later releases each Monday in Pacific time.
+- Future weeks stay locked in the UI, start handlers, navigation, and continuous practice pool.
+- Start directly in Read or Write; do not reintroduce teaching-card introductions.
+- Continuous play requires all currently available Read/Write activities to be complete.
+- Keep word difficulty per character and per skill, persist the first outcome immediately, and preserve legacy saves.
+- The old newsletter `curriculum.ts` remains for migration. See `docs/grade-1c.md`.
 
 ## Celebration (both apps)
 

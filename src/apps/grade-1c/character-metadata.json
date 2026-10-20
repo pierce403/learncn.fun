@@ -1,0 +1,1450 @@
+{
+  "衣": {
+    "pinyin": "yī",
+    "english": "Clothes"
+  },
+  "鱼": {
+    "pinyin": "yú",
+    "english": "Fish"
+  },
+  "雨": {
+    "pinyin": "yǔ",
+    "english": "Rain"
+  },
+  "一": {
+    "pinyin": "yī",
+    "english": "One"
+  },
+  "二": {
+    "pinyin": "èr",
+    "english": "Two"
+  },
+  "五": {
+    "pinyin": "wǔ",
+    "english": "Five"
+  },
+  "耳": {
+    "pinyin": "ěr",
+    "english": "Ear"
+  },
+  "牙": {
+    "pinyin": "yá",
+    "english": "Tooth"
+  },
+  "口": {
+    "pinyin": "kǒu",
+    "english": "Mouth"
+  },
+  "人": {
+    "pinyin": "rén",
+    "english": "Person"
+  },
+  "木": {
+    "pinyin": "mù",
+    "english": "Wood"
+  },
+  "土": {
+    "pinyin": "tǔ",
+    "english": "Earth / soil"
+  },
+  "马": {
+    "pinyin": "mǎ",
+    "english": "Horse"
+  },
+  "八": {
+    "pinyin": "bā",
+    "english": "Eight"
+  },
+  "巴": {
+    "pinyin": "bā",
+    "english": "Ba in bus and mouth"
+  },
+  "你": {
+    "pinyin": "nǐ",
+    "english": "You"
+  },
+  "我": {
+    "pinyin": "wǒ",
+    "english": "I / me"
+  },
+  "也": {
+    "pinyin": "yě",
+    "english": "Also"
+  },
+  "他": {
+    "pinyin": "tā",
+    "english": "He"
+  },
+  "弟": {
+    "pinyin": "dì",
+    "english": "Younger brother"
+  },
+  "不": {
+    "pinyin": "bù",
+    "english": "Not"
+  },
+  "爸": {
+    "pinyin": "bà",
+    "english": "Dad"
+  },
+  "她": {
+    "pinyin": "tā",
+    "english": "She"
+  },
+  "妈": {
+    "pinyin": "mā",
+    "english": "Mom"
+  },
+  "的": {
+    "pinyin": "de",
+    "english": "Belonging word"
+  },
+  "父": {
+    "pinyin": "fù",
+    "english": "Father"
+  },
+  "母": {
+    "pinyin": "mǔ",
+    "english": "Mother"
+  },
+  "女": {
+    "pinyin": "nǚ",
+    "english": "Female / daughter"
+  },
+  "儿": {
+    "pinyin": "ér",
+    "english": "Child / son"
+  },
+  "力": {
+    "pinyin": "lì",
+    "english": "strength"
+  },
+  "河": {
+    "pinyin": "hé",
+    "english": "river"
+  },
+  "禾": {
+    "pinyin": "hé",
+    "english": "grain plant"
+  },
+  "立": {
+    "pinyin": "lì",
+    "english": "stand upright"
+  },
+  "米": {
+    "pinyin": "mǐ",
+    "english": "rice"
+  },
+  "合": {
+    "pinyin": "hé",
+    "english": "join together"
+  },
+  "气": {
+    "pinyin": "qì",
+    "english": "air"
+  },
+  "和": {
+    "pinyin": "hé",
+    "english": "and"
+  },
+  "哥": {
+    "pinyin": "gē",
+    "english": "older brother"
+  },
+  "几": {
+    "pinyin": "jǐ",
+    "english": "how many"
+  },
+  "七": {
+    "pinyin": "qī",
+    "english": "seven"
+  },
+  "了": {
+    "pinyin": "le",
+    "english": "shows something is done"
+  },
+  "个": {
+    "pinyin": "gè",
+    "english": "general counting word"
+  },
+  "句": {
+    "pinyin": "jù",
+    "english": "sentence"
+  },
+  "可": {
+    "pinyin": "kě",
+    "english": "can"
+  },
+  "以": {
+    "pinyin": "yǐ",
+    "english": "use; by"
+  },
+  "吗": {
+    "pinyin": "ma",
+    "english": "makes a yes-or-no question"
+  },
+  "去": {
+    "pinyin": "qù",
+    "english": "go"
+  },
+  "日": {
+    "pinyin": "rì",
+    "english": "sun; day"
+  },
+  "石": {
+    "pinyin": "shí",
+    "english": "stone"
+  },
+  "子": {
+    "pinyin": "zǐ",
+    "english": "child; son"
+  },
+  "字": {
+    "pinyin": "zì",
+    "english": "character"
+  },
+  "车": {
+    "pinyin": "chē",
+    "english": "vehicle; car"
+  },
+  "四": {
+    "pinyin": "sì",
+    "english": "four"
+  },
+  "十": {
+    "pinyin": "shí",
+    "english": "ten"
+  },
+  "士": {
+    "pinyin": "shì",
+    "english": "scholar"
+  },
+  "只": {
+    "pinyin": "zhī",
+    "english": "counter for animals"
+  },
+  "把": {
+    "pinyin": "bǎ",
+    "english": "hold; puts the object first"
+  },
+  "尺": {
+    "pinyin": "chǐ",
+    "english": "ruler"
+  },
+  "是": {
+    "pinyin": "shì",
+    "english": "is; are"
+  },
+  "书": {
+    "pinyin": "shū",
+    "english": "book"
+  },
+  "出": {
+    "pinyin": "chū",
+    "english": "go out"
+  },
+  "自": {
+    "pinyin": "zì",
+    "english": "self"
+  },
+  "己": {
+    "pinyin": "jǐ",
+    "english": "self"
+  },
+  "它": {
+    "pinyin": "tā",
+    "english": "it"
+  },
+  "吃": {
+    "pinyin": "chī",
+    "english": "eat"
+  },
+  "山": {
+    "pinyin": "shān",
+    "english": "mountain"
+  },
+  "羊": {
+    "pinyin": "yáng",
+    "english": "sheep"
+  },
+  "毛": {
+    "pinyin": "máo",
+    "english": "fur; hair"
+  },
+  "草": {
+    "pinyin": "cǎo",
+    "english": "grass"
+  },
+  "太": {
+    "pinyin": "tài",
+    "english": "very"
+  },
+  "阳": {
+    "pinyin": "yáng",
+    "english": "sun; sunny"
+  },
+  "王": {
+    "pinyin": "wáng",
+    "english": "king"
+  },
+  "三": {
+    "pinyin": "sān",
+    "english": "three"
+  },
+  "伞": {
+    "pinyin": "sǎn",
+    "english": "umbrella"
+  },
+  "包": {
+    "pinyin": "bāo",
+    "english": "bag; wrap"
+  },
+  "老": {
+    "pinyin": "lǎo",
+    "english": "old"
+  },
+  "师": {
+    "pinyin": "shī",
+    "english": "teacher"
+  },
+  "早": {
+    "pinyin": "zǎo",
+    "english": "early; morning"
+  },
+  "安": {
+    "pinyin": "ān",
+    "english": "peaceful"
+  },
+  "半": {
+    "pinyin": "bàn",
+    "english": "half"
+  },
+  "午": {
+    "pinyin": "wǔ",
+    "english": "noon"
+  },
+  "奶": {
+    "pinyin": "nǎi",
+    "english": "milk; grandma"
+  },
+  "玩": {
+    "pinyin": "wán",
+    "english": "play"
+  },
+  "具": {
+    "pinyin": "jù",
+    "english": "tool; equipment"
+  },
+  "鸟": {
+    "pinyin": "niǎo",
+    "english": "bird"
+  },
+  "竹": {
+    "pinyin": "zhú",
+    "english": "bamboo"
+  },
+  "田": {
+    "pinyin": "tián",
+    "english": "field"
+  },
+  "苗": {
+    "pinyin": "miáo",
+    "english": "seedling"
+  },
+  "象": {
+    "pinyin": "xiàng",
+    "english": "elephant"
+  },
+  "家": {
+    "pinyin": "jiā",
+    "english": "home; family"
+  },
+  "刀": {
+    "pinyin": "dāo",
+    "english": "knife"
+  },
+  "网": {
+    "pinyin": "wǎng",
+    "english": "net"
+  },
+  "在": {
+    "pinyin": "zài",
+    "english": "at; in"
+  },
+  "里": {
+    "pinyin": "lǐ",
+    "english": "inside"
+  },
+  "上": {
+    "pinyin": "shàng",
+    "english": "up"
+  },
+  "下": {
+    "pinyin": "xià",
+    "english": "down"
+  },
+  "大": {
+    "pinyin": "dà",
+    "english": "big"
+  },
+  "小": {
+    "pinyin": "xiǎo",
+    "english": "small"
+  },
+  "来": {
+    "pinyin": "lái",
+    "english": "come"
+  },
+  "哭": {
+    "pinyin": "kū",
+    "english": "cry"
+  },
+  "笑": {
+    "pinyin": "xiào",
+    "english": "smile; laugh"
+  },
+  "男": {
+    "pinyin": "nán",
+    "english": "male"
+  },
+  "爷": {
+    "pinyin": "yé",
+    "english": "grandpa"
+  },
+  "姐": {
+    "pinyin": "jiě",
+    "english": "older sister"
+  },
+  "果": {
+    "pinyin": "guǒ",
+    "english": "fruit"
+  },
+  "开": {
+    "pinyin": "kāi",
+    "english": "open"
+  },
+  "瓜": {
+    "pinyin": "guā",
+    "english": "melon"
+  },
+  "火": {
+    "pinyin": "huǒ",
+    "english": "fire"
+  },
+  "花": {
+    "pinyin": "huā",
+    "english": "flower"
+  },
+  "叶": {
+    "pinyin": "yè",
+    "english": "leaf"
+  },
+  "面": {
+    "pinyin": "miàn",
+    "english": "face; noodles"
+  },
+  "关": {
+    "pinyin": "guān",
+    "english": "close"
+  },
+  "采": {
+    "pinyin": "cǎi",
+    "english": "pick; gather"
+  },
+  "两": {
+    "pinyin": "liǎng",
+    "english": "two of something"
+  },
+  "片": {
+    "pinyin": "piàn",
+    "english": "slice; piece"
+  },
+  "画": {
+    "pinyin": "huà",
+    "english": "draw; picture"
+  },
+  "笔": {
+    "pinyin": "bǐ",
+    "english": "pen"
+  },
+  "长": {
+    "pinyin": "cháng",
+    "english": "long"
+  },
+  "广": {
+    "pinyin": "guǎng",
+    "english": "wide"
+  },
+  "多": {
+    "pinyin": "duō",
+    "english": "many"
+  },
+  "少": {
+    "pinyin": "shǎo",
+    "english": "few"
+  },
+  "床": {
+    "pinyin": "chuáng",
+    "english": "bed"
+  },
+  "目": {
+    "pinyin": "mù",
+    "english": "eye"
+  },
+  "舌": {
+    "pinyin": "shé",
+    "english": "tongue"
+  },
+  "手": {
+    "pinyin": "shǒu",
+    "english": "hand"
+  },
+  "足": {
+    "pinyin": "zú",
+    "english": "foot; enough"
+  },
+  "本": {
+    "pinyin": "běn",
+    "english": "book"
+  },
+  "工": {
+    "pinyin": "gōng",
+    "english": "work"
+  },
+  "厂": {
+    "pinyin": "chǎng",
+    "english": "factory"
+  },
+  "走": {
+    "pinyin": "zǒu",
+    "english": "walk"
+  },
+  "跑": {
+    "pinyin": "pǎo",
+    "english": "run"
+  },
+  "飞": {
+    "pinyin": "fēi",
+    "english": "fly"
+  },
+  "妹": {
+    "pinyin": "mèi",
+    "english": "younger sister"
+  },
+  "门": {
+    "pinyin": "mén",
+    "english": "door"
+  },
+  "看": {
+    "pinyin": "kàn",
+    "english": "look; watch"
+  },
+  "见": {
+    "pinyin": "jiàn",
+    "english": "see"
+  },
+  "问": {
+    "pinyin": "wèn",
+    "english": "ask"
+  },
+  "又": {
+    "pinyin": "yòu",
+    "english": "again"
+  },
+  "头": {
+    "pinyin": "tóu",
+    "english": "head"
+  },
+  "们": {
+    "pinyin": "men",
+    "english": "makes a word plural"
+  },
+  "身": {
+    "pinyin": "shēn",
+    "english": "body"
+  },
+  "体": {
+    "pinyin": "tǐ",
+    "english": "body"
+  },
+  "牛": {
+    "pinyin": "niú",
+    "english": "cow"
+  },
+  "井": {
+    "pinyin": "jǐng",
+    "english": "well"
+  },
+  "虫": {
+    "pinyin": "chóng",
+    "english": "bug"
+  },
+  "弓": {
+    "pinyin": "gōng",
+    "english": "bow"
+  },
+  "贝": {
+    "pinyin": "bèi",
+    "english": "shell"
+  },
+  "心": {
+    "pinyin": "xīn",
+    "english": "heart"
+  },
+  "豆": {
+    "pinyin": "dòu",
+    "english": "bean"
+  },
+  "六": {
+    "pinyin": "liù",
+    "english": "six"
+  },
+  "支": {
+    "pinyin": "zhī",
+    "english": "counter for sticks"
+  },
+  "条": {
+    "pinyin": "tiáo",
+    "english": "counter for long things"
+  },
+  "九": {
+    "pinyin": "jiǔ",
+    "english": "nine"
+  },
+  "粒": {
+    "pinyin": "lì",
+    "english": "grain; small piece"
+  },
+  "今": {
+    "pinyin": "jīn",
+    "english": "today; now"
+  },
+  "什": {
+    "pinyin": "shén",
+    "english": "what (in 什么)"
+  },
+  "么": {
+    "pinyin": "me",
+    "english": "part of 什么 (what)"
+  },
+  "华": {
+    "pinyin": "huá",
+    "english": "Chinese; splendid"
+  },
+  "文": {
+    "pinyin": "wén",
+    "english": "writing"
+  },
+  "点": {
+    "pinyin": "diǎn",
+    "english": "dot; a little"
+  },
+  "说": {
+    "pinyin": "shuō",
+    "english": "speak; say"
+  },
+  "话": {
+    "pinyin": "huà",
+    "english": "words; speech"
+  },
+  "月": {
+    "pinyin": "yuè",
+    "english": "moon; month"
+  },
+  "天": {
+    "pinyin": "tiān",
+    "english": "sky; day"
+  },
+  "地": {
+    "pinyin": "dì",
+    "english": "ground"
+  },
+  "风": {
+    "pinyin": "fēng",
+    "english": "wind"
+  },
+  "雷": {
+    "pinyin": "léi",
+    "english": "thunder"
+  },
+  "电": {
+    "pinyin": "diàn",
+    "english": "electricity"
+  },
+  "水": {
+    "pinyin": "shuǐ",
+    "english": "water"
+  },
+  "寸": {
+    "pinyin": "cùn",
+    "english": "Chinese inch"
+  },
+  "方": {
+    "pinyin": "fāng",
+    "english": "direction; square"
+  },
+  "正": {
+    "pinyin": "zhèng",
+    "english": "correct; right"
+  },
+  "反": {
+    "pinyin": "fǎn",
+    "english": "opposite"
+  },
+  "白": {
+    "pinyin": "bái",
+    "english": "white"
+  },
+  "好": {
+    "pinyin": "hǎo",
+    "english": "good"
+  },
+  "坏": {
+    "pinyin": "huài",
+    "english": "bad; broken"
+  },
+  "对": {
+    "pinyin": "duì",
+    "english": "correct; toward"
+  },
+  "古": {
+    "pinyin": "gǔ",
+    "english": "ancient"
+  },
+  "旧": {
+    "pinyin": "jiù",
+    "english": "old; used"
+  },
+  "有": {
+    "pinyin": "yǒu",
+    "english": "have"
+  },
+  "没": {
+    "pinyin": "méi",
+    "english": "not have"
+  },
+  "云": {
+    "pinyin": "yún",
+    "english": "cloud"
+  },
+  "甲": {
+    "pinyin": "jiǎ",
+    "english": "shell; armor"
+  },
+  "丁": {
+    "pinyin": "dīng",
+    "english": "adult male; fourth"
+  },
+  "前": {
+    "pinyin": "qián",
+    "english": "front; before"
+  },
+  "后": {
+    "pinyin": "hòu",
+    "english": "back; after"
+  },
+  "左": {
+    "pinyin": "zuǒ",
+    "english": "left"
+  },
+  "右": {
+    "pinyin": "yòu",
+    "english": "right"
+  },
+  "中": {
+    "pinyin": "zhōng",
+    "english": "middle"
+  },
+  "间": {
+    "pinyin": "jiān",
+    "english": "space; between"
+  },
+  "边": {
+    "pinyin": "biān",
+    "english": "side"
+  },
+  "同": {
+    "pinyin": "tóng",
+    "english": "same"
+  },
+  "学": {
+    "pinyin": "xué",
+    "english": "learn"
+  },
+  "朋": {
+    "pinyin": "péng",
+    "english": "friend"
+  },
+  "友": {
+    "pinyin": "yǒu",
+    "english": "friend"
+  },
+  "坐": {
+    "pinyin": "zuò",
+    "english": "sit"
+  },
+  "高": {
+    "pinyin": "gāo",
+    "english": "high; tall"
+  },
+  "发": {
+    "pinyin": "fā",
+    "english": "send; start"
+  },
+  "直": {
+    "pinyin": "zhí",
+    "english": "straight"
+  },
+  "起": {
+    "pinyin": "qǐ",
+    "english": "rise; get up"
+  },
+  "回": {
+    "pinyin": "huí",
+    "english": "return"
+  },
+  "周": {
+    "pinyin": "zhōu",
+    "english": "week"
+  },
+  "末": {
+    "pinyin": "mò",
+    "english": "end"
+  },
+  "鸡": {
+    "pinyin": "jī",
+    "english": "chicken"
+  },
+  "饭": {
+    "pinyin": "fàn",
+    "english": "meal; rice"
+  },
+  "鸭": {
+    "pinyin": "yā",
+    "english": "duck"
+  },
+  "元": {
+    "pinyin": "yuán",
+    "english": "dollar; unit of money"
+  },
+  "饿": {
+    "pinyin": "è",
+    "english": "hungry"
+  },
+  "饱": {
+    "pinyin": "bǎo",
+    "english": "full"
+  },
+  "饼": {
+    "pinyin": "bǐng",
+    "english": "flat cake; biscuit"
+  },
+  "干": {
+    "pinyin": "gān",
+    "english": "dry"
+  },
+  "狗": {
+    "pinyin": "gǒu",
+    "english": "dog"
+  },
+  "喜": {
+    "pinyin": "xǐ",
+    "english": "joy; like"
+  },
+  "欢": {
+    "pinyin": "huān",
+    "english": "joy"
+  },
+  "肉": {
+    "pinyin": "ròu",
+    "english": "meat"
+  },
+  "猫": {
+    "pinyin": "māo",
+    "english": "cat"
+  },
+  "歌": {
+    "pinyin": "gē",
+    "english": "song"
+  },
+  "唱": {
+    "pinyin": "chàng",
+    "english": "sing"
+  },
+  "青": {
+    "pinyin": "qīng",
+    "english": "blue-green"
+  },
+  "菜": {
+    "pinyin": "cài",
+    "english": "vegetable; dish"
+  },
+  "汤": {
+    "pinyin": "tāng",
+    "english": "soup"
+  },
+  "蛋": {
+    "pinyin": "dàn",
+    "english": "egg"
+  },
+  "香": {
+    "pinyin": "xiāng",
+    "english": "fragrant"
+  },
+  "用": {
+    "pinyin": "yòng",
+    "english": "use"
+  },
+  "刷": {
+    "pinyin": "shuā",
+    "english": "brush"
+  },
+  "巾": {
+    "pinyin": "jīn",
+    "english": "cloth; towel"
+  },
+  "抹": {
+    "pinyin": "mǒ",
+    "english": "wipe"
+  },
+  "洗": {
+    "pinyin": "xǐ",
+    "english": "wash"
+  },
+  "要": {
+    "pinyin": "yào",
+    "english": "want; need"
+  },
+  "脸": {
+    "pinyin": "liǎn",
+    "english": "face"
+  },
+  "放": {
+    "pinyin": "fàng",
+    "english": "put; release"
+  },
+  "冲": {
+    "pinyin": "chōng",
+    "english": "rinse; rush"
+  },
+  "凉": {
+    "pinyin": "liáng",
+    "english": "cool"
+  },
+  "东": {
+    "pinyin": "dōng",
+    "english": "east"
+  },
+  "西": {
+    "pinyin": "xī",
+    "english": "west"
+  },
+  "到": {
+    "pinyin": "dào",
+    "english": "arrive"
+  },
+  "先": {
+    "pinyin": "xiān",
+    "english": "first; before"
+  },
+  "请": {
+    "pinyin": "qǐng",
+    "english": "please"
+  },
+  "很": {
+    "pinyin": "hěn",
+    "english": "very"
+  },
+  "泡": {
+    "pinyin": "pào",
+    "english": "soak; bubble"
+  },
+  "变": {
+    "pinyin": "biàn",
+    "english": "change"
+  },
+  "谢": {
+    "pinyin": "xiè",
+    "english": "thank"
+  },
+  "这": {
+    "pinyin": "zhè",
+    "english": "this"
+  },
+  "双": {
+    "pinyin": "shuāng",
+    "english": "pair"
+  },
+  "袜": {
+    "pinyin": "wà",
+    "english": "sock"
+  },
+  "那": {
+    "pinyin": "nà",
+    "english": "that"
+  },
+  "皮": {
+    "pinyin": "pí",
+    "english": "skin"
+  },
+  "鞋": {
+    "pinyin": "xié",
+    "english": "shoe"
+  },
+  "件": {
+    "pinyin": "jiàn",
+    "english": "counter for clothes"
+  },
+  "服": {
+    "pinyin": "fú",
+    "english": "clothing"
+  },
+  "被": {
+    "pinyin": "bèi",
+    "english": "quilt; by"
+  },
+  "还": {
+    "pinyin": "hái",
+    "english": "still; also"
+  },
+  "色": {
+    "pinyin": "sè",
+    "english": "color"
+  },
+  "红": {
+    "pinyin": "hóng",
+    "english": "red"
+  },
+  "都": {
+    "pinyin": "dōu",
+    "english": "all"
+  },
+  "动": {
+    "pinyin": "dòng",
+    "english": "move"
+  },
+  "作": {
+    "pinyin": "zuò",
+    "english": "do; make"
+  },
+  "快": {
+    "pinyin": "kuài",
+    "english": "fast"
+  },
+  "收": {
+    "pinyin": "shōu",
+    "english": "collect; put away"
+  },
+  "拾": {
+    "pinyin": "shí",
+    "english": "pick up"
+  },
+  "穿": {
+    "pinyin": "chuān",
+    "english": "wear"
+  },
+  "事": {
+    "pinyin": "shì",
+    "english": "matter; thing to do"
+  },
+  "做": {
+    "pinyin": "zuò",
+    "english": "do; make"
+  },
+  "甜": {
+    "pinyin": "tián",
+    "english": "sweet"
+  },
+  "苦": {
+    "pinyin": "kǔ",
+    "english": "bitter"
+  },
+  "臭": {
+    "pinyin": "chòu",
+    "english": "smelly"
+  },
+  "生": {
+    "pinyin": "shēng",
+    "english": "grow; be born"
+  },
+  "重": {
+    "pinyin": "zhòng",
+    "english": "heavy"
+  },
+  "喝": {
+    "pinyin": "hē",
+    "english": "drink"
+  },
+  "甘": {
+    "pinyin": "gān",
+    "english": "sweet; willing"
+  },
+  "汁": {
+    "pinyin": "zhī",
+    "english": "juice"
+  },
+  "买": {
+    "pinyin": "mǎi",
+    "english": "buy"
+  },
+  "斤": {
+    "pinyin": "jīn",
+    "english": "half a kilogram"
+  },
+  "串": {
+    "pinyin": "chuàn",
+    "english": "string of things"
+  },
+  "弯": {
+    "pinyin": "wān",
+    "english": "curved; bend"
+  },
+  "选": {
+    "pinyin": "xuǎn",
+    "english": "choose"
+  },
+  "最": {
+    "pinyin": "zuì",
+    "english": "most"
+  },
+  "抱": {
+    "pinyin": "bào",
+    "english": "hug; hold"
+  },
+  "拿": {
+    "pinyin": "ná",
+    "english": "take; hold"
+  },
+  "办": {
+    "pinyin": "bàn",
+    "english": "handle; do"
+  },
+  "法": {
+    "pinyin": "fǎ",
+    "english": "method"
+  },
+  "圆": {
+    "pinyin": "yuán",
+    "english": "round"
+  },
+  "切": {
+    "pinyin": "qiē",
+    "english": "cut"
+  },
+  "怎": {
+    "pinyin": "zěn",
+    "english": "how (in 怎么)"
+  },
+  "扫": {
+    "pinyin": "sǎo",
+    "english": "sweep"
+  },
+  "户": {
+    "pinyin": "hù",
+    "english": "household; door"
+  },
+  "桌": {
+    "pinyin": "zhuō",
+    "english": "table"
+  },
+  "椅": {
+    "pinyin": "yǐ",
+    "english": "chair"
+  },
+  "兄": {
+    "pinyin": "xiōng",
+    "english": "elder brother"
+  },
+  "房": {
+    "pinyin": "fáng",
+    "english": "room; house"
+  },
+  "阿": {
+    "pinyin": "ā",
+    "english": "name prefix"
+  },
+  "叔": {
+    "pinyin": "shū",
+    "english": "uncle"
+  },
+  "会": {
+    "pinyin": "huì",
+    "english": "can; meeting"
+  },
+  "写": {
+    "pinyin": "xiě",
+    "english": "write"
+  },
+  "啊": {
+    "pinyin": "a",
+    "english": "ah!"
+  },
+  "完": {
+    "pinyin": "wán",
+    "english": "finish"
+  },
+  "业": {
+    "pinyin": "yè",
+    "english": "work; study"
+  },
+  "躲": {
+    "pinyin": "duǒ",
+    "english": "hide"
+  },
+  "进": {
+    "pinyin": "jìn",
+    "english": "enter"
+  },
+  "净": {
+    "pinyin": "jìng",
+    "english": "clean"
+  },
+  "谁": {
+    "pinyin": "shuí",
+    "english": "who"
+  },
+  "打": {
+    "pinyin": "dǎ",
+    "english": "hit; do"
+  },
+  "听": {
+    "pinyin": "tīng",
+    "english": "listen"
+  },
+  "声": {
+    "pinyin": "shēng",
+    "english": "sound"
+  },
+  "昨": {
+    "pinyin": "zuó",
+    "english": "yesterday"
+  },
+  "晚": {
+    "pinyin": "wǎn",
+    "english": "evening; late"
+  },
+  "星": {
+    "pinyin": "xīng",
+    "english": "star"
+  },
+  "明": {
+    "pinyin": "míng",
+    "english": "bright"
+  },
+  "庆": {
+    "pinyin": "qìng",
+    "english": "celebrate"
+  },
+  "祝": {
+    "pinyin": "zhù",
+    "english": "wish; offer blessings"
+  },
+  "节": {
+    "pinyin": "jié",
+    "english": "festival; section"
+  },
+  "爱": {
+    "pinyin": "ài",
+    "english": "love"
+  },
+  "给": {
+    "pinyin": "gěi",
+    "english": "give"
+  },
+  "国": {
+    "pinyin": "guó",
+    "english": "country"
+  },
+  "乐": {
+    "pinyin": "lè",
+    "english": "happy"
+  },
+  "课": {
+    "pinyin": "kè",
+    "english": "lesson"
+  },
+  "台": {
+    "pinyin": "tái",
+    "english": "platform; machine counter"
+  },
+  "讲": {
+    "pinyin": "jiǎng",
+    "english": "speak; explain"
+  },
+  "故": {
+    "pinyin": "gù",
+    "english": "story (in 故事)"
+  },
+  "每": {
+    "pinyin": "měi",
+    "english": "every"
+  },
+  "童": {
+    "pinyin": "tóng",
+    "english": "child"
+  },
+  "因": {
+    "pinyin": "yīn",
+    "english": "because; cause"
+  },
+  "为": {
+    "pinyin": "wèi",
+    "english": "for; because"
+  },
+  "兔": {
+    "pinyin": "tù",
+    "english": "rabbit"
+  },
+  "尾": {
+    "pinyin": "wěi",
+    "english": "tail"
+  },
+  "短": {
+    "pinyin": "duǎn",
+    "english": "short"
+  },
+  "眼": {
+    "pinyin": "yǎn",
+    "english": "eye"
+  },
+  "睛": {
+    "pinyin": "jīng",
+    "english": "part of 眼睛 (eye)"
+  },
+  "爪": {
+    "pinyin": "zhuǎ",
+    "english": "claw"
+  },
+  "尖": {
+    "pinyin": "jiān",
+    "english": "pointed; tip"
+  },
+  "物": {
+    "pinyin": "wù",
+    "english": "thing"
+  },
+  "虎": {
+    "pinyin": "hǔ",
+    "english": "tiger"
+  },
+  "狮": {
+    "pinyin": "shī",
+    "english": "lion"
+  },
+  "园": {
+    "pinyin": "yuán",
+    "english": "garden"
+  },
+  "期": {
+    "pinyin": "qī",
+    "english": "period of time"
+  },
+  "带": {
+    "pinyin": "dài",
+    "english": "bring; belt"
+  },
+  "黑": {
+    "pinyin": "hēi",
+    "english": "black"
+  },
+  "站": {
+    "pinyin": "zhàn",
+    "english": "stand"
+  },
+  "叫": {
+    "pinyin": "jiào",
+    "english": "call; be named"
+  },
+  "认": {
+    "pinyin": "rèn",
+    "english": "recognize"
+  },
+  "再": {
+    "pinyin": "zài",
+    "english": "again"
+  },
+  "孩": {
+    "pinyin": "hái",
+    "english": "child"
+  },
+  "组": {
+    "pinyin": "zǔ",
+    "english": "group"
+  },
+  "屋": {
+    "pinyin": "wū",
+    "english": "house"
+  },
+  "公": {
+    "pinyin": "gōng",
+    "english": "public; grandpa"
+  },
+  "校": {
+    "pinyin": "xiào",
+    "english": "school"
+  },
+  "场": {
+    "pinyin": "chǎng",
+    "english": "field; place"
+  },
+  "商": {
+    "pinyin": "shāng",
+    "english": "business"
+  },
+  "店": {
+    "pinyin": "diàn",
+    "english": "shop"
+  },
+  "梯": {
+    "pinyin": "tī",
+    "english": "ladder; stairs"
+  },
+  "扶": {
+    "pinyin": "fú",
+    "english": "support with a hand"
+  },
+  "常": {
+    "pinyin": "cháng",
+    "english": "often"
+  },
+  "球": {
+    "pinyin": "qiú",
+    "english": "ball"
+  },
+  "步": {
+    "pinyin": "bù",
+    "english": "step"
+  },
+  "图": {
+    "pinyin": "tú",
+    "english": "picture; diagram"
+  },
+  "习": {
+    "pinyin": "xí",
+    "english": "practice"
+  },
+  "伙": {
+    "pinyin": "huǒ",
+    "english": "partner; group"
+  },
+  "伴": {
+    "pinyin": "bàn",
+    "english": "companion"
+  },
+  "游": {
+    "pinyin": "yóu",
+    "english": "swim; travel"
+  },
+  "拍": {
+    "pinyin": "pāi",
+    "english": "pat; clap"
+  },
+  "兴": {
+    "pinyin": "xìng",
+    "english": "happy (in 高兴)"
+  },
+  "戏": {
+    "pinyin": "xì",
+    "english": "play; drama"
+  }
+}

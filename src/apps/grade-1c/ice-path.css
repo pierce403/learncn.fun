@@ -136,3 +136,10 @@
 .ice-stop.week-4.selected .ice-stop-label { border-color: #fde68a; }
 
 .ice-week-banner.week-4 { box-shadow: 0 -1.5rem 0 .4rem #194360, 0 1.5rem 0 .4rem #194360; }
+
+.ice-week-nav { display: flex; overflow-x: auto; padding: 4px 4px 12px; }
+.ice-week-link { min-width: 150px; flex: 0 0 150px; }
+.one-c .ice-week-link:disabled { cursor: not-allowed; }
+.ice-stop.locked { opacity: .6; }
+.one-c .ice-stop.locked button:disabled { cursor: not-allowed; }
+.ice-stop.locked .ice-platform { animation: none; }

@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { LESSONS, WEEK_4_INITIALS, WEEK_4_READING, WEEK_4_WRITING, WEEK_4_LESSONS, WEEK_4_PREVIOUS_LESSONS, WEEK_4_NUMBER_LINE, WEEK_4_DICE, WEEK_4_STORIES, practiceSpeech } from "./curriculum";
 import { makeRound, makeReview, parseProgress, saveCompletion, questionSpeech } from "./game";
 import { cardNarration, lessonDirections, questionNarration } from "./narration";
-import { nextIceLesson } from "./ice-path";
 
 describe("Week 4 newsletter and games", () => {
   it("covers the exact published initials and recognition/writing characters once", () => {
@@ -93,12 +92,10 @@ describe("Week 4 newsletter and games", () => {
     expect(line.some(q => q.word.value === 10)).toBe(true);
   });
 
-  it("preserves all earlier stars, resumes at Week 4, and saves new completions", () => {
+  it("preserves legacy newsletter stars for migration and saves completions", () => {
     const earlier = LESSONS.filter(l => l.week < 4);
     const previous = Object.fromEntries(earlier.map(l => [l.id, { completions: 2, best: .75 }]));
     let progress = parseProgress(JSON.stringify(previous), LESSONS);
-    expect(nextIceLesson(progress)).toBe(WEEK_4_LESSONS[0].id);
-    expect(nextIceLesson(progress, earlier.at(-1)!.id)).toBe(WEEK_4_LESSONS[0].id);
     for (const lesson of WEEK_4_LESSONS) progress = saveCompletion(progress, lesson.id, .5);
     for (const lesson of earlier) expect(progress[lesson.id]).toEqual(previous[lesson.id]);
     expect(Object.keys(progress)).toHaveLength(23);

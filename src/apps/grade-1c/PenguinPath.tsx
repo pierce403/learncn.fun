@@ -1,34 +1,38 @@
 import { useEffect, useRef, useState, type CSSProperties, type Ref } from "react";
-import { LESSONS, WEEKS, type Lesson } from "./curriculum";
+import type { Lesson } from "./curriculum";
+import { WEEKS, availableLessons } from "./weekly-curriculum";
 import type { Progress } from "./game";
 import { HOP_DURATION_MS, ICE_MAP_HEIGHT, ICE_STOPS, ICE_WEEKS, POLAR_ART, iceRoutePath, lessonIndex, nextHop } from "./ice-path";
 
 type Props = {
   progress: Progress;
+  currentWeek: number;
   initialLessonId: string;
   destinationLessonId: string;
   onStart: (lesson: Lesson) => void;
   headingRef: Ref<HTMLHeadingElement>;
 };
 
-export default function PenguinPath({ progress, initialLessonId, destinationLessonId, onStart, headingRef }: Props) {
+export default function PenguinPath({ currentWeek, progress, initialLessonId, destinationLessonId, onStart, headingRef }: Props) {
   const [current, setCurrent] = useState(() => lessonIndex(initialLessonId));
   const [destination, setDestination] = useState(() => lessonIndex(destinationLessonId));
   const [hop, setHop] = useState<{ from: number; to: number } | null>(null);
   const [reduceMotion, setReduceMotion] = useState(() => typeof window !== "undefined" && (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false));
   const selected = ICE_STOPS[destination].lesson;
   const moving = current !== destination;
-  const completed = LESSONS.filter((lesson) => progress[lesson.id]).length;
+  const available = availableLessons(currentWeek);
+  const completed = available.filter(lesson => progress[lesson.id]).length;
   const startButton = useRef<HTMLButtonElement>(null);
   const hasExplored = useRef(false);
   const wasMoving = useRef(false);
 
   useEffect(() => {
     // Reveal the nearby action without pulling an already visible island away.
-    if (destination >= 2 || hasExplored.current) startButton.current?.scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
-  }, [destination, reduceMotion]);
+    if ((destination >= 2 && completed < available.length) || hasExplored.current) startButton.current?.scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
+  }, [destination, reduceMotion, completed, available.length]);
 
   function exploreLesson(index: number) {
+    if (ICE_STOPS[index].lesson.week > currentWeek) return;
     hasExplored.current = true;
     if (index === destination) startButton.current?.scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
     else setDestination(index);
@@ -75,37 +79,37 @@ export default function PenguinPath({ progress, initialLessonId, destinationLess
 
   return <section className="ice-journey" aria-labelledby="ice-journey-title">
     <div className="ice-journey-heading">
-      <div><div className="one-c-eyebrow"><span className="one-c-class-badge">1C</span> Your Chinese adventure</div><h1 id="ice-journey-title" ref={headingRef} tabIndex={-1}>Hop into Chinese!</h1><p>Pick a week. Let’s explore!</p></div>
-      <div className="ice-star-total" aria-label={`${completed} of ${LESSONS.length} lesson stars earned`}><span aria-hidden="true">★</span><strong>{completed}<span> / {LESSONS.length}</span></strong></div>
+      <div><div className="one-c-eyebrow"><span className="one-c-class-badge">1C</span> Your Chinese adventure</div><h1 id="ice-journey-title" ref={headingRef} tabIndex={-1}>Hop into Chinese!</h1><p>Week {currentWeek} is open. Pick Read or Write.</p></div>
+      <div className="ice-star-total" aria-label={`${completed} of ${available.length} lesson stars earned`}><span aria-hidden="true">★</span><strong>{completed}<span> / {available.length}</span></strong></div>
     </div>
 
-    <nav className="ice-week-nav" aria-label="Choose a week">{WEEKS.map((week) => <button key={week.number} className={`ice-week-link week-${week.number}`} aria-pressed={selected.week === week.number} disabled={moving} onClick={() => {
+    <nav className="ice-week-nav" aria-label="Choose a week">{WEEKS.map((week) => <button key={week.number} className={`ice-week-link week-${week.number}`} aria-pressed={selected.week === week.number} disabled={moving || week.number > currentWeek} onClick={() => {
       const next = week.lessons.find((lesson) => !progress[lesson.id]) ?? week.lessons[0];
       exploreLesson(lessonIndex(next.id));
-    }}><strong>Week {week.number}</strong><span>{week.title}</span><small>★ {week.lessons.filter((lesson) => progress[lesson.id]).length} / {week.lessons.length}</small></button>)}</nav>
+    }}><strong>Week {week.number}</strong><span>{week.number > currentWeek ? `🔒 Opens ${week.dates.split("–")[0]}` : week.title}</span><small>★ {week.lessons.filter((lesson) => progress[lesson.id]).length} / {week.lessons.length}</small></button>)}</nav>
 
     <div className="ice-journey-layout">
-      <div className="ice-ocean" aria-label={`${LESSONS.length} floating lesson islands in ${WEEKS.length} weeks`} style={{ backgroundImage: `url(${POLAR_ART.water})`, height: `${ICE_MAP_HEIGHT}rem` }}>
+      <div className="ice-ocean" aria-label={`Reading and writing islands for ${WEEKS.length} weeks`} style={{ backgroundImage: `url(${POLAR_ART.water})`, height: `${ICE_MAP_HEIGHT}rem` }}>
         {ICE_WEEKS.map((week) => <div key={week.number} className={`ice-week-banner week-${week.number}`} style={{ top: `${week.y}%` }}>
           <div><h2>Week {week.number}</h2><span>{week.dates} · {week.title}</span></div>
           <strong aria-label={`${week.lessons.filter((lesson) => progress[lesson.id]).length} of ${week.lessons.length} stars`}>★ {week.lessons.filter((lesson) => progress[lesson.id]).length}/{week.lessons.length}</strong>
         </div>)}
         <svg className="ice-route-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">{ICE_WEEKS.map((week) => <path key={week.number} d={iceRoutePath(week.stops)} />)}</svg>
         <ol className="ice-stops" aria-label="Lesson path">
-          {ICE_STOPS.map(({ lesson, lessonNumber, x, y }, index) => <li key={lesson.id} className={`ice-stop ${x < 50 ? "left" : "right"} week-${lesson.week} ${progress[lesson.id] ? "completed" : ""} ${index === destination ? "selected" : ""}`} style={{ left: `${x}%`, top: `${y}%`, "--float-delay": `${index * -.4}s` } as CSSProperties}>
-            <button className="ice-stop-button" disabled={moving} aria-current={index === destination ? "step" : undefined} aria-label={`Week ${lesson.week}, lesson ${lessonNumber}: ${lesson.title}. ${progress[lesson.id] ? "Star earned. Play again." : "Ready to play."}`} onClick={() => exploreLesson(index)}>
-              <span className="ice-platform" aria-hidden="true"><img src={POLAR_ART.ice} alt="" width="1254" height="1254" draggable={false} /><span className={`ice-stop-number ${current === index ? "occupied" : ""}`}>{progress[lesson.id] ? "★" : lessonNumber}</span></span>
+          {ICE_STOPS.map(({ lesson, lessonNumber, x, y }, index) => <li key={lesson.id} className={`ice-stop ${x < 50 ? "left" : "right"} week-${lesson.week} ${lesson.week > currentWeek ? "locked" : ""} ${progress[lesson.id] ? "completed" : ""} ${index === destination ? "selected" : ""}`} style={{ left: `${x}%`, top: `${y}%`, "--float-delay": `${index * -.4}s` } as CSSProperties}>
+            <button className="ice-stop-button" disabled={moving || lesson.week > currentWeek} aria-current={index === destination ? "step" : undefined} aria-label={`Week ${lesson.week}, lesson ${lessonNumber}: ${lesson.title}. ${lesson.week > currentWeek ? "Locked until this school week." : progress[lesson.id] ? "Star earned. Play again." : "Ready to play."}`} onClick={() => exploreLesson(index)}>
+              <span className="ice-platform" aria-hidden="true"><img src={POLAR_ART.ice} alt="" width="1254" height="1254" draggable={false} /><span className={`ice-stop-number ${current === index ? "occupied" : ""}`}>{lesson.week > currentWeek ? "🔒" : progress[lesson.id] ? "★" : lessonNumber}</span></span>
             </button>
             <div className="ice-stop-label">
-              <button className="ice-lesson-select" disabled={moving} aria-current={index === destination ? "step" : undefined} onClick={() => exploreLesson(index)}>
-                <span className="ice-stop-caption">{progress[lesson.id] ? "★ Star earned" : `Week ${lesson.week} · ${lessonNumber}`}</span><strong>{lesson.title}</strong><span lang={lesson.kind === "sounds" ? "zh-Latn-pinyin" : "zh-CN"}>{lesson.chinese}</span>
+              <button className="ice-lesson-select" disabled={moving || lesson.week > currentWeek} aria-current={index === destination ? "step" : undefined} onClick={() => exploreLesson(index)}>
+                <span className="ice-stop-caption">{lesson.week > currentWeek ? "🔒 Coming later" : progress[lesson.id] ? "★ Star earned" : `Week ${lesson.week} · ${lessonNumber}`}</span><strong>{lesson.title}</strong><span lang={lesson.kind === "sounds" ? "zh-Latn-pinyin" : "zh-CN"}>{lesson.chinese}</span>
               </button>
-              {index === destination && <button className="one-c-button primary ice-start-lesson" ref={startButton} aria-label={`${progress[lesson.id] ? "Practice again" : "Start lesson"}: ${lesson.title}`} onClick={() => onStart(lesson)}>{progress[lesson.id] ? "Again" : "Start"}</button>}
+              {index === destination && lesson.week <= currentWeek && <button className="one-c-button primary ice-start-lesson" ref={startButton} aria-label={`${progress[lesson.id] ? "Practice again" : "Start lesson"}: ${lesson.title}`} onClick={() => onStart(lesson)}>{progress[lesson.id] ? "Again" : "Start"}</button>}
             </div>
           </li>)}
         </ol>
         <div key={hop ? `${hop.from}-${hop.to}` : `rest-${current}`} className={`ice-penguin-position ${hop ? "hopping" : ""}`} style={penguinStyle} aria-hidden="true"><div className="ice-penguin-float"><img src={POLAR_ART.penguin} alt="" width="1254" height="1254" draggable={false} /></div></div>
-        <span className="ice-finish-note">{completed === LESSONS.length ? "You explored every island!" : "A star on every island"}</span>
+        <span className="ice-finish-note">{completed === available.length ? "All available weeks complete!" : "A star on every island"}</span>
       </div>
 
     </div>

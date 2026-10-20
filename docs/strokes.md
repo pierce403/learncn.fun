@@ -27,8 +27,9 @@ reduced-motion preferences. The game needs no external images or character data.
 [cnchar-order 3.2.6](https://github.com/theajack/cnchar) dictionary. Its license is
 retained in `docs/cnchar-order-LICENSE.txt`. Stroke counts were checked against
 [hanzi-writer-data 2.0.1](https://github.com/chanind/hanzi-writer-data), the pinned
-version used by Hanzi Writer 3.7.3. These checks cover 414 distinct characters
-(the 390 book characters plus Grade 1C vocabulary). The runtime refuses to map
+version used by Hanzi Writer 3.7.3. These checks cover 429 distinct characters
+(the 390 book characters plus Grade 1C vocabulary, including all 167 characters
+in the full 19-week writing syllabus). The runtime refuses to map
 names if a drawing's stroke count differs. No stroke labels are guessed from
 mouse movements.
 

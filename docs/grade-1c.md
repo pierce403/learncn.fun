@@ -1,121 +1,39 @@
-# Grade 1C · Weeks 1–4
+# Grade 1C character practice
 
-The standalone page at `/1c/` uses the user-supplied Grade 1C newsletters for
-2026–27. The original newsletters remain private and are not included in this
-repository. The map has 23 islands grouped into four weeks.
+`/1c/` follows the owner-supplied **Grade 1 List of Characters for Recognition and Writing.pdf** (欢乐伙伴 一年级 生字表), received October 19, 2026. The PDF stays private. The character lists are transcribed in `src/apps/grade-1c/character-lists.json` with their original order and chapter boundaries.
 
-## Week 1A · September 1–4
+## Full curriculum
 
-Source: **1C-Week 1 Newsletter 26-27.pdf**, especially “Chinese Learning Point,” p. 2.
+The 19 chapters contain 364 recognition entries (362 unique characters) and 167 writing characters (all unique). 采 and 话 recur in recognition lists and remain in both assigned chapters. Writing entries 自己 and 老师 are split into their two characters. Every writing character occurs somewhere in the recognition syllabus; some are revisited for writing in a later chapter.
 
-- Meet your class: 上学, 老师, 学生.
-- Say hello: 早安, 午安, 晚安.
-- Move & play: 起立, 坐下, 举手, 放下, 洗手, 喝水.
-- Make a friend: 你好，我叫__。 / 请问你叫什么名字？ / 我今年__岁了。
-- Count with me: numbers 0–10, linked to numerals, a ten-frame, and Chinese and
-  English number words. This supports the number recognition within 10 described
-  on page 1; the newsletter does not supply a specific number-word list.
+`character-metadata.json` contains the app's pinyin and short English meanings, not content claimed to be in the PDF. It reuses existing catalog/newsletter metadata where suitable and supplies the remaining character glosses. Character meanings are context dependent. The readings for 抹 and 爪 were checked against the Ministry of Education dictionaries ([抹](https://dict.mini.moe.edu.tw/SearchIndex/word_detail?breadcrumbs=Search_%E6%8A%B9_one&dictSearchField=%E6%8A%B9&wordID=D0003384), [爪](https://dict.revised.moe.edu.tw/dictView.jsp?ID=8042&la=0&powerMode=0)). All speech sends the original Hanzi to the selected Mandarin voice; no pronunciation phrases are substituted.
 
-The vocabulary translations and tone-marked pinyin follow the sheet. Spacing and
-punctuation are normalized, including `wǎn ān` for the sheet's `wǎn 'ān`.
-The action tips, sentence puzzles, and number activities are original examples.
-Sentence puzzles use the fictional name 小明 (Xiaoming) and age six, then encourage
-children to substitute their own details out loud. No name or age is collected.
-The newsletter's administrative dates and English classroom recap are not lessons.
+## Schedule and locks
 
-## Week 2B · September 8–11
+The owner requested one textbook chapter per week. Week 1 starts September 1, 2026, using the school start from the original newsletters. Subsequent weeks unlock each Monday in `America/Los_Angeles`; the school-local date is calculated independently of the device's configured time zone and daylight-saving changes. October 19–23 is Week 8. The schedule advances weekly and does not infer holiday pauses absent a supplied school calendar. `weekly-curriculum.ts` is the source for release dates.
 
-Source: **1C-Week 2 Newsletter 26-27.pdf**, pp. 1–2. Six islands cover pinyin
-finals a, o, e, i, u, ü, er; initials y and w; recognition of 衣、鱼、雨、耳、牙;
-writing 一、二、五、口、人; comparing quantities; and number sequences within 10.
-Character cards include the newsletter's word combinations and example sentences.
-Comparison and sequence puzzles are original practice for the math goals.
+The map displays all 19 weeks, with Read and Write islands for each. Future week navigation, island selection, lesson start, next-lesson routing, and the continuous practice pool all respect the release cap. Completion of earlier activities does not unlock future weeks. The cap refreshes on focus, tab visibility changes, and once per minute. These are curriculum pacing controls, not a security boundary against a user changing their device clock or source.
 
-## Week 3A · September 14–18
+## Direct practice
 
-Source: **1C-Week 3 Newsletter 26-27..pdf**, pp. 1–2, supplied September 18, 2026.
-Seven new islands cover:
+There are no introductory teaching cards or automatic narrated instructions. Reading shows a Hanzi character with three meaning choices; related synonyms such as 爸/父 are excluded as distractors. Writing opens the existing finger/pen tracing pad, including spoken stroke names and optional stroke help. Each activity covers its entire assigned list once, then reviews missed or hinted characters. All activities use direct Mandarin character audio through Listen and Slow buttons. A tap fallback remains available if drawing cannot load; it never counts as a clean handwriting success in the word history.
 
-- Meet the family: 爷爷、奶奶、爸爸、妈妈.
-- Brothers & sisters: 哥哥、姐姐、弟弟、妹妹.
-- Family words: 家人、父母、儿子、女儿.
-- Who is he?: 他是谁？ / 他是我的爷爷。 / 你家有几个人？ / 我家有六个人。
-- Counting words: fill a single measure-word gap in 一个人、一条鱼、一件雨衣、两只耳朵.
-- Make a number: identify a missing part of a whole within 10.
-- Add with me: add two groups, including zero, with totals no greater than 10.
+A completed activity earns a star even when help was needed. Read and Write for every currently available week must be completed to unlock Continuous play. When a new week opens, those new activities must be completed before continuous play can resume; a running continuous session checks again before its next question.
 
-All 12 family terms and four sentence patterns come from p. 2. Displayed pinyin
-keeps the newsletter's syllable tones, with normalized spacing and punctuation;
-browser speech may use natural neutral tones in repeated family words. The tips
-clarify that 爷爷 and 奶奶 refer to paternal grandparents. Six people is a practice
-example, not an assumption about the child's family, and no family details are collected.
+## Adaptive continuous play
 
-Page 1 mentions measure words without giving a list. The four gap exercises are
-original practice using people and the fish, raincoat, and ears already encountered
-in Week 2. Contextual 一 changes tone in the displayed phrase pinyin; 只 is read zhī.
-The composition and addition puzzles are also original, based on p. 1's math goals.
-Existing Week 2 sequences remain available for ordering review. The Lesson 2 initials
-and character-writing lists arrive in Week 4.
+Continuous play mixes reading and handwriting without a fixed round length. Next draws a new question; End practice returns to the map. Only unlocked characters are candidates. Each character/skill pair appears once in the pool even if it appears in multiple weeks. The previous three pairs are excluded when other candidates are available.
 
-## Week 4B · September 21–25
+Word history is keyed by `read:<hanzi>` or `write:<hanzi>` and saves after the first result on each question. A wrong answer or hint is recorded immediately, so leaving the question doesn't erase the difficulty. Retrying that same question successfully does not overwrite the miss or create a clean result. A later review is a new attempt. Repeated wrong taps/stroke hints within one question do not inflate the attempt count.
 
-Source: **1C-Week 4 Newsletter 26-27.pdf**, pp. 1–2, from the supplied newsletter
-Drive folder. Five islands cover:
+Selection weight is 2 for an unseen pair, otherwise `1 + 12 * difficulty`, plus 2 when the most recent attempt needed help. Each miss/hint adds 0.5 to difficulty up to 1. Each clean success multiplies it by 0.65. Every pair retains positive weight; sustained clean practice gradually removes extra focus. The interface shows the currently trickiest pairs.
 
-- Sound explorers: b, p, m, f, d, t, n, l, spoken in Mandarin syllables.
-- Read with me: 马、巴、你、我、他、弟、爸、她、妈、的、父、母.
-- Trace with me: 木、土、八、也、不、女、儿, with guided tracing
-  and the existing tap-answer fallback.
-- I have…: three original completed sentences using 我有 and familiar vocabulary.
-- Add & explore: number-line hops (including zero), counting dots on two dice,
-  and four addition stories with tappable counters. All totals stay within 10.
-  Stories can be read and narrated in either instruction language.
+## Local progress and migration
 
-All recognition and writing characters, word combinations, and Chinese example
-sentences come from page 2. The sentence translations and pinyin are supplied by
-the game; pinyin uses natural neutral tones and contextual 一/不 tone changes.
-巴 is taught as a character in 巴士 and 嘴巴, not as “bus” on its own. 的 is spoken
-in 我的 to disambiguate its pronunciation. 他/她 always receive written practice
-rather than audio-only identification. Equivalent parent words (爸/父 and 妈/母) are excluded
-from each other’s answer choices in the combined reading lesson. The math problems and “I have…” examples
-are original practice for page 1's goals. Subtraction belongs to the following
-week's preview and is not added as Week 4 material.
+New completion records use `learncn.1c.characters.v1`. Word history uses `learncn.1c.word-history.v1`. Both are local to this browser, with no account, microphone, analytics, or server-side player data. Corrupt records are rejected, and unavailable storage leaves the current visit usable.
 
-## Game behavior
+The prior `learncn.1c.week1.v1` save remains untouched. On first use of the new curriculum, completed old character activities contribute coverage: writing also contributes recognition. A new activity receives a carried-over star only if every assigned character is covered by those completed old activities. The combined old Week 4 IDs are still migrated by the existing parser. Full completion of the old four-week map credits the new Week 1 and Week 2 reading and writing activities. Unrelated number/phrase lessons cannot award later chapter stars. The earlier newsletter data stays in `curriculum.ts` for this migration and its regression tests.
 
-Each activity starts with teaching cards. Vocabulary games practice every word in
-reading and listening (or written recognition with sound off). Sentence games use
-two meaning choices with optional spoken answers. Counting games use an interactive
-ten-frame and Chinese choices. Week 3 uses two choices throughout; measure-word
-and arithmetic answers show Hanzi and pinyin. Number parts use both different
-colors and circle/diamond shapes, so color alone is not required to solve them.
-Wrong answers allow retries; incorrect or hinted words get one review at the end.
-Completing an activity earns a star regardless of mistakes.
+## Validation
 
-Only aggregate completion counts and best first-try results are stored locally,
-under `learncn.1c.week1.v1`. This is separate from the main apps' book-level state.
-Week 1–3 IDs remain unchanged, so existing stars survive the new week.
-Week 4 now groups the same material into five islands. A valid completion from any
-old Week 4 island credits its combined island, using the highest completion count
-and best score. Existing combined-island records take precedence, and the
-unchanged “I have…” lesson retains its star directly.
-Unavailable or corrupt browser storage does not block play. Audio uses browser
-speech synthesis and never requires a microphone or speech recognition model.
-Every listening prompt has a written hint if playback is unavailable. The device
-may use an online speech service, depending on its installed voices.
-The lesson uses the same speech helper as Read and Write. An incomplete browser
-voice list does not disable listening: when no matching voice is listed, playback
-requests `zh-CN` (or `en-US`) and lets the browser select a voice. The lesson only
-shows a playback error after speech actually fails, or if speech is unsupported.
-
-## Routing and validation
-
-Vite builds two actual HTML entrypoints: `/index.html` and `/1c/index.html`.
-GitHub Pages redirects `/1c` to `/1c/`; the relative asset URLs emitted for each
-entrypoint also support loading `/1c/index.html` directly. No SPA fallback is needed.
-The existing home screen includes a link to the new activity.
-
-Run `npm test` and `npm run build`. Tests cover exact curriculum coverage, number
-mappings, question generation, sentence solvability, review selection, and progress
-validation. Check the generated `dist/1c/index.html` and its asset references when
-changing the build setup.
+Tests cover PDF counts and chapter boundaries, direct prompts, distinct answer choices, Pacific week release and DST boundaries, lock enforcement, completion migration, immediate mistake persistence, independent reading/writing history, weighted practice, continuous eligibility and re-locking, and storage corruption. The existing trace, speech, hosting, and production build checks remain required.

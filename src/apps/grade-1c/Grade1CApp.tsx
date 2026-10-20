@@ -1,373 +1,187 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { burstConfetti } from "../../lib/confetti";
 import { playDing, playTada } from "../../lib/sfx";
-import { COMPARISONS, LESSONS, NUMBERS, WEEKS, practiceSpeech, type Lesson, type Word } from "./curriculum";
-import { makeReview, makeRound, parseProgress, PROGRESS_KEY, questionSpeech, saveCompletion, type Progress, type Question } from "./game";
+import type { Lesson, Word } from "./curriculum";
+import { LESSONS, WEEKS, availableLessons, currentSchoolWeek } from "./weekly-curriculum";
+import { makeReview, PROGRESS_KEY, saveCompletion, type Progress, type Question } from "./game";
+import { choosePractice, continuousUnlocked, parseWordHistory, PRACTICE_PROGRESS_KEY, practiceRound, practiceQuestion, priority, readPracticeProgress, recordResult, skillFor, wordKey, WORD_HISTORY_KEY, type WordHistory } from "./practice";
 import { useLessonAudio } from "./useLessonAudio";
 import PenguinPath from "./PenguinPath";
 import { POLAR_ART, nextIceLesson } from "./ice-path";
 import TraceCharacter from "./TraceCharacter";
 import StrokesApp from "../strokes/StrokesApp";
 import { PwaInstallPrompt } from "../../components/PwaInstall";
-import { CompareScene, NumberSequence, SumScene } from "./NumberScenes";
-import { INSTRUCTION_LANGUAGE_KEY, parseInstructionLanguage, type InstructionLanguage, comparisonHintNarration, cardNarration, lessonNarration, questionNarration, spokenText } from "./narration";
 
-type Screen = "home" | "learn" | "play" | "complete" | "strokes";
-type Run = { original: Question[]; questions: Question[]; index: number; reviewing: boolean; missed: string[]; firstTry: number };
-const COLORS: Record<string, string> = { cyan: "#67e8f9", amber: "#fcd34d", green: "#6ee7b7", violet: "#c4b5fd", rose: "#fda4af" };
-
-function SoundIcon() {
-  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M11 4 5 9H2v6h3l6 5V4Z" strokeLinejoin="round" /><path d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14" strokeLinecap="round" /></svg>;
-}
-
-function TenFrame({ value, onCount }: { value: number; onCount?: (value: number) => void }) {
-  const [counted, setCounted] = useState<number[]>([]);
-  return <div className="one-c-counting">
-    <div className="one-c-ten-frame" role="group" aria-label="Counting frame with ten spaces">
-      {Array.from({ length: 10 }, (_, index) => index < value
-        ? <button key={index} className={`one-c-counter ${counted.includes(index) ? "counted" : ""}`} aria-label={`Count dot ${index + 1}`} aria-pressed={counted.includes(index)} onClick={() => {
-            setCounted((previous) => previous.includes(index) ? previous.filter((item) => item !== index) : [...previous, index]);
-            onCount?.(index + 1);
-          }}><span aria-hidden="true">{counted.includes(index) ? "✓" : ""}</span></button>
-        : <span key={index} className="one-c-empty-counter" aria-hidden="true" />)}
-    </div>
-    <p className="one-c-small">{value === 0 ? "No dots. How many is that?" : "Tap each dot as you count."}</p>
-  </div>;
-}
-
-const speechText = practiceSpeech;
-
-function readProgress(): Progress {
-  try { return parseProgress(localStorage.getItem(PROGRESS_KEY), LESSONS); } catch { return {}; }
-}
+type Screen = "home" | "play" | "complete" | "strokes";
+type Run = { original: Question[]; questions: Question[]; index: number; reviewing: boolean; missed: string[]; firstTry: number; continuous: boolean; practiced: number };
+function stored(key: string): string | null { try { return localStorage.getItem(key); } catch { return null; } }
+function SoundIcon() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M11 4 5 9H2v6h3l6 5V4Z" strokeLinejoin="round"/><path d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14" strokeLinecap="round"/></svg>; }
 
 export default function Grade1CApp() {
-  const [instructionLanguage, setInstructionLanguage] = useState<InstructionLanguage>(() => {
-    try { return parseInstructionLanguage(localStorage.getItem(INSTRUCTION_LANGUAGE_KEY)); }
-    catch { return "en"; }
-  });
+  const [currentWeek, setCurrentWeek] = useState(currentSchoolWeek);
   const [screen, setScreen] = useState<Screen>("home");
   const [lesson, setLesson] = useState<Lesson>(LESSONS[0]);
-  const [learnIndex, setLearnIndex] = useState(0);
-  const [progress, setProgress] = useState<Progress>(readProgress);
-  const [mapPosition, setMapPosition] = useState(() => {
-    const id = nextIceLesson(progress);
-    return { from: id, to: id };
-  });
-  const [storageNotice, setStorageNotice] = useState("");
+  const [progress, setProgress] = useState<Progress>(() => readPracticeProgress(stored(PRACTICE_PROGRESS_KEY), stored(PROGRESS_KEY)));
+  const [history, setHistory] = useState<WordHistory>(() => parseWordHistory(stored(WORD_HISTORY_KEY)));
+  const historyRef = useRef(history);
+  const [mapPosition, setMapPosition] = useState(() => { const id = nextIceLesson(progress, undefined, currentWeek); return { from: id, to: id }; });
   const [run, setRun] = useState<Run | null>(null);
   const [wrong, setWrong] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<"" | "wrong" | "correct">("");
   const [hint, setHint] = useState(false);
   const [traceFallback, setTraceFallback] = useState(false);
+  const [storageNotice, setStorageNotice] = useState("");
+  const [notice, setNotice] = useState("");
+  const recorded = useRef(false);
+  const solvedOnce = useRef(false);
+  const recent = useRef<string[]>([]);
+  const sequence = useRef(0);
   const heading = useRef<HTMLHeadingElement>(null);
   const nextButton = useRef<HTMLButtonElement>(null);
   const audio = useLessonAudio();
-  const learned = LESSONS.filter((item) => progress[item.id]).length;
-  const nextLesson = LESSONS.find((item) => item.id === nextIceLesson(progress, lesson.id))!;
-  const week = WEEKS.find((item) => item.number === lesson.week)!;
-  const word = lesson.words[learnIndex];
-  const studyWord = word.example ?? word;
   const question = run?.questions[run.index];
-  const isSentence = lesson.kind === "sentences";
-  const isSound = lesson.kind === "sounds";
-  const isListening = question?.mode === "listen" || question?.mode === "sound";
-  const showSentenceText = isSentence && (question?.mode === "meaning" || !audio.canListen || Boolean(audio.message));
-  const accent = COLORS[lesson.color];
+  const available = availableLessons(currentWeek);
+  const completed = available.filter(item => progress[item.id]).length;
+  const unlocked = continuousUnlocked(progress, currentWeek);
+  const nextLessonId = nextIceLesson(progress, lesson.id, currentWeek);
+  const tricky = Object.entries(history).filter(([, result]) => result.difficulty >= .25).sort((a, b) => priority(b[1]) - priority(a[1])).slice(0, 8);
 
   useEffect(() => {
-    heading.current?.focus({ preventScroll: true });
-  }, [screen, learnIndex, run?.index, run?.reviewing]);
+    const refresh = () => setCurrentWeek(currentSchoolWeek());
+    const timer = window.setInterval(refresh, 60_000);
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => { clearInterval(timer); window.removeEventListener("focus", refresh); document.removeEventListener("visibilitychange", refresh); };
+  }, []);
+  useEffect(() => { heading.current?.focus({ preventScroll: true }); }, [screen, question?.id]);
+  useEffect(() => { if (screen !== "home") window.scrollTo(0, 0); }, [screen]);
+  useEffect(() => { if (feedback === "correct") nextButton.current?.focus({ preventScroll: true }); }, [feedback]);
 
-  useEffect(() => {
-    if (screen !== "home") window.scrollTo(0, 0);
-  }, [screen]);
-
-  useEffect(() => {
-    if (feedback === "correct") nextButton.current?.focus({ preventScroll: true });
-  }, [feedback]);
-
-  useEffect(() => {
-    try { localStorage.setItem(INSTRUCTION_LANGUAGE_KEY, instructionLanguage); }
-    catch { /* The current choice still works when storage is unavailable. */ }
-  }, [instructionLanguage]);
-
-  function chooseInstructionLanguage(language: InstructionLanguage) {
-    if (language === instructionLanguage) return;
-    audio.stop();
-    setInstructionLanguage(language);
-    if (screen === "learn") audio.narrate(lessonNarration(lesson, word, language));
-    else if (screen === "play" && question) audio.narrate(questionNarration(lesson, question, traceFallback, true, language));
-    else audio.play(language === "zh" ? "中文说明。" : "English directions.", language);
+  function save(key: string, value: unknown) {
+    try { localStorage.setItem(key, JSON.stringify(value)); }
+    catch { setStorageNotice("Progress lasts for this visit. This browser isn't allowing it to be saved."); }
   }
-
-  function resetAnswer() {
-    setWrong([]);
-    setFeedback("");
-    setHint(false);
-    setTraceFallback(false);
-  }
-
+  function resetAnswer() { setWrong([]); setFeedback(""); setHint(false); setTraceFallback(false); recorded.current = false; solvedOnce.current = false; }
   function showMap(destination = lesson.id) {
-    audio.stop();
-    setMapPosition({ from: lesson.id, to: destination });
-    setScreen("home");
-    setRun(null);
-    resetAnswer();
+    audio.stop(); setMapPosition({ from: lesson.id, to: destination }); setScreen("home"); setRun(null); resetAnswer();
   }
-
-  function home() { showMap(); }
-
+  function readQuestion(item: Question) {
+    // No teaching cards or narrated instructions: speak only the practice target.
+    if (item.mode === "trace") audio.play(item.word.hanzi);
+  }
   function startLesson(item: Lesson) {
-    audio.stop();
-    setLesson(item);
-    setLearnIndex(0);
-    setScreen("learn");
-    setRun(null);
-    resetAnswer();
-    audio.narrate(lessonNarration(item, item.words[0], instructionLanguage));
+    if (item.week > currentSchoolWeek()) return;
+    audio.stop(); setNotice(""); setLesson(item); resetAnswer();
+    const questions = practiceRound(item);
+    setRun({ original: questions, questions, index: 0, reviewing: false, missed: [], firstTry: 0, continuous: false, practiced: 0 });
+    setScreen("play"); readQuestion(questions[0]);
   }
-
-  function startGame() {
-    const questions = makeRound(lesson, audio.canListen);
-    setRun({ original: questions, questions, index: 0, reviewing: false, missed: [], firstTry: 0 });
-    resetAnswer();
-    setScreen("play");
-    audio.stop();
-    readQuestion(questions[0], true);
+  function startContinuous() {
+    if (!continuousUnlocked(progress, currentSchoolWeek())) return;
+    recent.current = []; sequence.current = 0; setNotice("");
+    nextContinuous(0);
   }
-
-  function readQuestion(item: Question, fullDirections = false) {
-    audio.narrate(questionNarration(lesson, item, false, fullDirections, instructionLanguage));
+  function nextContinuous(practiced: number) {
+    if (!continuousUnlocked(progress, currentSchoolWeek())) {
+      showMap(nextIceLesson(progress)); setNotice("A new week is open. Complete its reading and writing to continue."); return;
+    }
+    const item = choosePractice(historyRef.current, currentSchoolWeek(), recent.current);
+    if (!item) return;
+    recent.current = [...recent.current.slice(-2), item.key];
+    const q = practiceQuestion(item.lesson, item.word, `continuous-${++sequence.current}`);
+    audio.stop(); resetAnswer(); setLesson(item.lesson);
+    setRun({ original: [q], questions: [q], index: 0, reviewing: false, missed: [], firstTry: 0, continuous: true, practiced });
+    setScreen("play"); readQuestion(q);
   }
-
-  function markMissed() {
-    if (!question) return;
-    setRun((current) => current && !current.reviewing && !current.missed.includes(question.word.id)
-      ? { ...current, missed: [...current.missed, question.word.id] } : current);
+  function record(outcome: "correct" | "miss" | "hint") {
+    if (!question || recorded.current) return;
+    recorded.current = true;
+    const updated = recordResult(historyRef.current, wordKey(lesson, question.word), outcome);
+    historyRef.current = updated; setHistory(updated); save(WORD_HISTORY_KEY, updated);
   }
-
+  function markMissed(outcome: "miss" | "hint") {
+    if (!question || solvedOnce.current) return;
+    record(outcome);
+    setRun(current => current && !current.reviewing && !current.missed.includes(question.word.id) ? { ...current, missed: [...current.missed, question.word.id] } : current);
+  }
   function solved(lastStrokeName?: string) {
-    if (!question || feedback === "correct") return;
-    if (!wrong.length && !hint) setRun((current) => current && !current.reviewing ? { ...current, firstTry: current.firstTry + 1 } : current);
-    setFeedback("correct");
-    if (audio.enabled) playDing();
-    audio.narrate([
-      ...(lastStrokeName ? [{ text: lastStrokeName, language: "zh" as const }] : []),
-      { text: questionSpeech(question), language: "zh" },
-    ]);
+    if (!question || solvedOnce.current) return;
+    solvedOnce.current = true;
+    // A tap fallback isn't evidence of successful handwriting.
+    if (!traceFallback) record("correct");
+    if (!wrong.length && !hint && !traceFallback) setRun(current => current && !current.reviewing ? { ...current, firstTry: current.firstTry + 1 } : current);
+    setFeedback("correct"); if (audio.enabled) playDing();
+    audio.narrate([...(lastStrokeName ? [{ text: lastStrokeName, language: "zh" as const }] : []), { text: question.word.hanzi, language: "zh" }]);
   }
-
   function answer(id: string) {
-    if (!question || feedback === "correct") return;
+    if (!question || solvedOnce.current) return;
     if (id === question.word.id) { solved(); return; }
-    setWrong((previous) => previous.includes(id) ? previous : [...previous, id]);
-    setFeedback("wrong");
-    markMissed();
-    audio.play(instructionLanguage === "zh" ? "再试试！选另一个答案。" : "Good try! Tap another answer.", instructionLanguage);
+    setWrong(previous => [...new Set([...previous, id])]); setFeedback("wrong");
+    if (!traceFallback) markMissed("miss");
   }
-
-  function revealHint() {
-    setHint(true);
-    markMissed();
-    if (question?.mode === "compare") audio.narrate(comparisonHintNarration());
-  }
-
   function finish() {
     if (!run) return;
     const updated = saveCompletion(progress, lesson.id, run.firstTry / run.original.length);
-    setProgress(updated);
-    try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(updated)); }
-    catch { setStorageNotice("Progress will last for this visit. This browser isn't allowing it to be saved."); }
-    setScreen("complete");
-    audio.stop();
+    setProgress(updated); save(PRACTICE_PROGRESS_KEY, updated); setScreen("complete"); audio.stop();
     if (audio.enabled) playTada();
     if (!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) burstConfetti();
   }
-
   function advance() {
     if (!run || feedback !== "correct") return;
-    audio.stop();
-    resetAnswer();
-    if (run.index + 1 < run.questions.length) {
-      setRun({ ...run, index: run.index + 1 });
-      readQuestion(run.questions[run.index + 1]);
-      return;
-    }
+    if (run.continuous) { nextContinuous(run.practiced + 1); return; }
+    audio.stop(); resetAnswer();
+    if (run.index + 1 < run.questions.length) { setRun({ ...run, index: run.index + 1 }); readQuestion(run.questions[run.index + 1]); return; }
     if (!run.reviewing && run.missed.length) {
-      const review = makeReview(run.original, run.missed);
-      setRun({ ...run, questions: review, index: 0, reviewing: true });
-      readQuestion(review[0]);
-      return;
+      const review = makeReview(run.original, run.missed).map(q => ({ ...q, id: `${q.id}-review` }));
+      setRun({ ...run, questions: review, index: 0, reviewing: true }); readQuestion(review[0]); return;
     }
     finish();
   }
-
-  function listenButtons(text: string) {
-    return <div className="one-c-audio-controls">
-      <button className="one-c-button secondary" disabled={!audio.enabled} onClick={() => audio.play(text)}><SoundIcon /> Listen</button>
-      <button className="one-c-button quiet" disabled={!audio.enabled} aria-label="Listen slowly" onClick={() => audio.play(text, "zh", true)}>Slow</button>
-    </div>;
-  }
-
-  function pronunciation(item: Word, useExample = false) {
-    const content = useExample ? item.example ?? item : item;
-    return <div className="one-c-word-answer">
-      <div lang={item.soundCue ? "zh-Latn-pinyin" : "zh-CN"} className="one-c-answer-hanzi">{content.hanzi}</div>
-      <div className="one-c-pinyin">{item.soundCue && "Hear: "}<span lang="zh-Latn-pinyin">{content.pinyin}</span></div>
-      <div>{content.english}</div>
-    </div>;
-  }
-
-  function questionDetails(item: Question) {
-    return <>{item.pair && <div className="one-c-answer-hanzi">{item.pair[0]} {item.word.hanzi} {item.pair[1]}</div>}
-      {item.parts && <div className="one-c-answer-hanzi">{item.parts[0]} + {item.parts[1]} = {item.parts[0] + item.parts[1]}</div>}
-      {item.sequence && <NumberSequence values={item.sequence} answer={item.word.value} />}
-      {pronunciation(item.word, isSentence || item.mode === "measure")}</>;
-  }
-
-  const prompt = isSentence ? showSentenceText ? "What does this mean?" : "Listen and tap"
-    : isSound ? question?.mode === "sound-read" || !audio.canListen || audio.message ? "Find the sound" : "Listen and tap the sound"
-    : question?.mode === "trace" ? traceFallback ? "Find the character" : "Trace with me"
-    : question?.mode === "compare" ? "More, less, or the same?"
-    : question?.mode === "order" ? "What number is missing?"
-    : question?.mode === "measure" ? "Which word fits?"
-    : question?.mode === "bonds" ? "What part is missing?"
-    : question?.mode === "addition" ? "How many altogether?"
-    : question?.mode === "count" ? "How many dots?" : question?.mode === "recognize" ? "Find the Chinese words" : question?.mode === "listen" ? "Listen. What does it mean?" : "What does this mean?";
-  const hintLabel = isSentence ? "Show the sentence" : isSound ? "Show the sound" : "Show the word";
-
+  function detail(word: Word) { return <div className="one-c-word-answer"><div className="one-c-answer-hanzi" lang="zh-CN">{word.hanzi}</div><div className="one-c-pinyin" lang="zh-Latn-pinyin">{word.pinyin}</div><div>{word.english}</div></div>; }
+  function listen(word: Word, slow = false) { audio.play(word.hanzi, "zh", slow); }
   if (screen === "strokes") return <StrokesApp homeLabel="Map" initialAudio={audio.enabled} onHome={() => setScreen("home")} />;
 
-  return <div className="one-c" style={{ "--lesson-accent": accent } as CSSProperties}>
-    <div className="one-c-shell">
-      <header className="one-c-header">
-        <a className="one-c-brand" href="/">learncn<span>.fun</span></a>
-        <div className="one-c-header-actions">
-          <div className="one-c-language-setting">
-            <span lang={instructionLanguage === "zh" ? "zh-CN" : "en"}>{instructionLanguage === "zh" ? "说明" : "Directions"}</span>
-            <div className="one-c-language-toggle" role="group" aria-label="Spoken instruction language">
-              <button lang="en-US" aria-label="English instructions" aria-pressed={instructionLanguage === "en"} onClick={() => chooseInstructionLanguage("en")}>English</button>
-              <button lang="zh-CN" aria-label="Mandarin instructions" aria-pressed={instructionLanguage === "zh"} onClick={() => chooseInstructionLanguage("zh")}>中文</button>
-            </div>
-          </div>
-          {screen !== "home" && <button className="one-c-button quiet" aria-label="Back to the ice path" onClick={home}>Map</button>}
-          <button className="one-c-sound-toggle" aria-label={audio.enabled ? "Turn sound off" : "Turn sound on"} aria-pressed={audio.enabled} onClick={audio.toggle}><SoundIcon /><span>Sound</span></button>
+  return <div className="one-c" style={{ "--lesson-accent": lesson.kind === "writing" ? "#6ee7b7" : "#67e8f9" } as CSSProperties}><div className="one-c-shell">
+    <header className="one-c-header"><a className="one-c-brand" href="/">learncn<span>.fun</span></a><div className="one-c-header-actions">
+      {screen !== "home" && <button className="one-c-button quiet" aria-label={run?.continuous ? "End continuous practice" : "Back to the ice path"} onClick={() => { if (run?.continuous) setNotice(`${run.practiced + Number(feedback === "correct")} characters practiced.`); showMap(); }}>{run?.continuous ? "End practice" : "Map"}</button>}
+      <button className="one-c-sound-toggle" aria-label={audio.enabled ? "Turn sound off" : "Turn sound on"} aria-pressed={audio.enabled} onClick={audio.toggle}><SoundIcon/><span>Sound</span></button>
+    </div></header>
+    <main>
+      {screen === "home" && <><PwaInstallPrompt/>
+        <section className="one-c-continuous" aria-label="Continuous practice">
+          <div><h2>Continuous play</h2><p>{unlocked ? "Read and write, with extra practice for tricky characters." : `Complete Read and Write in weeks 1–${currentWeek || 1} to unlock.`}</p><span className="one-c-small">{completed} / {available.length} activities complete</span></div>
+          <button className="one-c-button primary" disabled={!unlocked} onClick={startContinuous}>{unlocked ? "Continuous play →" : "🔒 Continuous play"}</button>
+        </section>
+        {notice && <p role="status" className="one-c-review-note">{notice}</p>}
+        {tricky.length > 0 && <section className="one-c-tricky"><h2>Getting extra practice</h2><div>{tricky.map(([key, result]) => <span key={key}><strong lang="zh-CN">{key.split(":")[1]}</strong> {key.startsWith("write:") ? "Writing" : "Reading"}<small>{result.misses} {result.misses === 1 ? "tricky attempt" : "tricky attempts"}</small></span>)}</div></section>}
+        <PenguinPath currentWeek={currentWeek} progress={progress} initialLessonId={mapPosition.from} destinationLessonId={mapPosition.to} onStart={startLesson} headingRef={heading}/>
+        <div className="one-c-audio-controls"><button className="one-c-button secondary" onClick={() => { audio.stop(); setScreen("strokes"); }}>✏️ Learn strokes · 笔画</button></div>
+
+        <details className="one-c-family-note"><summary>For grown-ups</summary><p>19 weeks, with separate reading and writing lists from the full Grade 1 character sheet. Each chapter maps to the same numbered week. Weeks open on Mondays, using the September 1, 2026 school start and Pacific time.</p><p>Practice starts immediately. Mistakes and hints give characters more weight in continuous play; successful practice gradually reduces that extra weight. Reading and handwriting are tracked separately. Only available weeks enter the practice pool.</p><p>Progress and word history stay in this browser. Earlier character-practice stars are carried over where they cover a whole new activity; the old save is retained. No microphone or account is needed.</p></details>
+      </>}
+      {screen === "play" && run && question && <section className="one-c-activity">
+        <div className="one-c-activity-heading"><div><div className="one-c-eyebrow">{run.continuous ? "Continuous play" : `Week ${lesson.week}`} · {skillFor(lesson) === "write" ? "Write" : "Read"}{run.reviewing ? " · Review" : ""}</div><h1 ref={heading} tabIndex={-1}>{question.mode === "trace" ? traceFallback ? "Find the character" : "Write the character" : "What does this mean?"}</h1></div><span className="one-c-step-count">{run.continuous ? `${run.practiced} practiced` : `${run.index + 1} / ${run.questions.length}`}</span></div>
+        {!run.continuous && <progress className="one-c-progress" value={run.index + Number(feedback === "correct")} max={run.questions.length} aria-label={run.reviewing ? "Review progress" : "Practice progress"}/>}
+        <div className="one-c-play-card">
+          {question.mode === "meaning" ? <div className="one-c-prompt-hanzi" lang="zh-CN">{question.word.hanzi}</div> : <><div className="one-c-prompt-english">{question.word.english}</div><div className="one-c-pinyin" lang="zh-Latn-pinyin">{question.word.pinyin}</div></>}
+          <div className="one-c-audio-controls"><button className="one-c-button secondary" disabled={!audio.enabled} onClick={() => listen(question.word)}><SoundIcon/> Listen</button><button className="one-c-button quiet" disabled={!audio.enabled} onClick={() => listen(question.word, true)}>Slow</button></div>
+          {question.mode === "trace" && !traceFallback && <TraceCharacter key={question.id} hanzi={question.word.hanzi} onStrokeName={name => audio.play(name)} onComplete={solved} onHelp={() => { markMissed("hint"); setHint(true); }} onFallback={() => setTraceFallback(true)}/>}
+          {traceFallback && <p className="one-c-small">Drawing unavailable? You can finish with a tap. <button className="one-c-text-button" onClick={() => setTraceFallback(false)}>Try drawing again</button></p>}
+          {(question.mode !== "trace" || traceFallback) && <div className="one-c-options sentence-choices" role="group" aria-label="Answer choices">{question.options.map(option => <button key={option.id} className={`one-c-option ${traceFallback ? "chinese" : ""} ${wrong.includes(option.id) ? "wrong" : ""}`} disabled={wrong.includes(option.id) || feedback === "correct"} onClick={() => answer(option.id)}><span className="one-c-option-label" lang={traceFallback ? "zh-CN" : "en"}>{traceFallback ? option.hanzi : option.english}</span></button>)}</div>}
+          {feedback !== "correct" && question.mode !== "trace" && <div className="one-c-hint">{hint ? detail(question.word) : <button className="one-c-text-button" onClick={() => { setHint(true); markMissed("hint"); }}>Hint</button>}</div>}
         </div>
-      </header>
-
-      <main>
-        {screen === "home" && <>
-          <PwaInstallPrompt />
-          <div className="one-c-audio-controls"><button className="one-c-button secondary" onClick={() => { audio.stop(); setScreen("strokes"); }}>✏️ Learn strokes · 笔画</button></div>
-          <PenguinPath progress={progress} initialLessonId={mapPosition.from} destinationLessonId={mapPosition.to} onStart={startLesson} headingRef={heading} />
-          <details className="one-c-family-note">
-            <summary>For grown-ups · What we’re practicing</summary>
-            <p>Based on the Grade 1C newsletters (2026–27). Week 1: school words, greetings, introductions, and numbers 0–10. Week 2: pinyin finals a, o, e, i, u, ü, er; initials y and w; recognizing 衣、鱼、雨、耳、牙; writing 一、二、五、口、人; and comparing and ordering numbers within 10.</p>
-            <p>Week 3: twelve family words, asking who someone is and how many people are in a family, measure words, number parts, and addition within 10. The counting-word and math puzzles are practice examples for the newsletter’s learning goals.</p>
-            <p>Week 4: initials b, p, m, f, d, t, n, l; twelve reading characters and seven writing characters; “I have…” sentences; and addition within 10 using number lines, dice, and little stories.</p>
-            <p>Learn the cards together, then play. Incorrect answers get a gentle retry and a short review. The numbers use a counting frame, numerals, and Chinese and English number words. Listening uses your device’s Mandarin voice; every audio question has a written hint.</p>
-            <p>Stars are saved in this browser. Introductions use the example name Xiaoming and age six; the family sentence uses six people as an example. Children can practice their own details out loud; the game does not collect them.</p>
-            <p>Pinyin audio uses example syllables in a Mandarin voice. The ü sound keeps its dots in nǚ; after y, its dots disappear, as in yú (鱼) and yǔ (雨). Open “Words” on a character card for the newsletter’s word combinations and example sentence.</p>
-          </details>
-        </>}
-
-        {screen === "learn" && <section className="one-c-activity" aria-label={lesson.title}>
-          <div className="one-c-activity-heading"><div><div className="one-c-eyebrow">Week {lesson.week} · {lesson.title} · Learn</div><h1 ref={heading} tabIndex={-1}>{isSentence ? "Let’s say it together." : isSound ? "Meet your new sounds." : lesson.kind === "compare" || lesson.kind === "order" || word.parts ? "Let’s try it together." : "Meet your new words."}</h1></div><span className="one-c-step-count">{learnIndex + 1} / {lesson.words.length}</span></div>
-          <button className="one-c-text-button one-c-help-button" aria-label="Hear directions" title="Hear directions" disabled={!audio.enabled} onClick={() => audio.narrate(lessonNarration(lesson, word, instructionLanguage))}><span aria-hidden="true">?</span></button>
-          <progress className="one-c-progress" value={learnIndex + 1} max={lesson.words.length} aria-label="Teaching card progress" />
-          <div className={`one-c-study-card ${isSentence || word.measure ? "sentence" : ""}`}>
-            {word.value === undefined && <span className="one-c-study-icon" aria-hidden="true">{word.icon}</span>}
-            {word.parts ? <SumScene key={word.id} parts={word.parts} mathModel={word.mathModel} story={word.story} language={instructionLanguage} missing={lesson.kind === "bonds" ? "part" : "total"} reveal onCount={(value) => audio.play(NUMBERS[value].hanzi)} /> : word.pair ? <CompareScene pair={word.pair} sign={word.hanzi} /> : word.sequence ? <NumberSequence values={word.sequence} /> : <div className="one-c-study-hanzi" lang={isSound ? "zh-Latn-pinyin" : "zh-CN"}>{word.value !== undefined && <span className="one-c-numeral">{word.value}</span>}{studyWord.hanzi}</div>}
-            {word.parts && <div className="one-c-pinyin" lang="zh-CN">{word.hanzi}</div>}
-            <div className="one-c-pinyin">{isSound && "Hear: "}<span lang="zh-Latn-pinyin">{studyWord.pinyin}</span></div>
-            <div className="one-c-study-english">{studyWord.english}</div>
-            {word.value !== undefined && <TenFrame key={word.id} value={word.value} onCount={(value) => audio.play(NUMBERS[value].hanzi)} />}
-            {listenButtons(speechText(word))}
-            <p className="one-c-tip">{word.tip}</p>
-            <button className="one-c-text-button" disabled={!audio.enabled} aria-label="Read this to me" onClick={() => audio.narrate(cardNarration(word, true, instructionLanguage))}><SoundIcon /> Read</button>
-            {word.related && <details className="one-c-related" key={word.id}><summary>Words</summary>
-              {word.related.map((item) => <button key={item.hanzi} className="one-c-review-word" disabled={!audio.enabled} onClick={() => audio.play(item.hanzi)}><span><span lang="zh-CN">{item.hanzi}</span> · <span lang="zh-Latn-pinyin">{item.pinyin}</span><br />{item.english}</span><SoundIcon /></button>)}
-              {word.sentence && <button className="one-c-review-word" disabled={!audio.enabled} onClick={() => audio.play(word.sentence!.hanzi)}><span><span lang="zh-CN">{word.sentence.hanzi}</span><br /><span lang="zh-Latn-pinyin">{word.sentence.pinyin}</span><br />{word.sentence.english}</span><SoundIcon /></button>}
-            </details>}
-          </div>
-          <div className="one-c-study-nav">
-            <button className="one-c-button secondary" disabled={learnIndex === 0} onClick={() => { setLearnIndex(learnIndex - 1); audio.narrate(cardNarration(lesson.words[learnIndex - 1], false, instructionLanguage)); }}>Back</button>
-            <button className="one-c-button primary" onClick={() => { if (learnIndex + 1 === lesson.words.length) startGame(); else { setLearnIndex(learnIndex + 1); audio.narrate(cardNarration(lesson.words[learnIndex + 1], false, instructionLanguage)); } }}>{learnIndex + 1 === lesson.words.length ? "Play" : "Next"}<span aria-hidden="true">→</span></button>
-          </div>
-          <button className="one-c-text-button one-c-skip" aria-label="Skip learning cards and play" onClick={startGame}>Skip</button>
-        </section>}
-
-        {screen === "play" && run && question && <section className="one-c-activity">
-          <div className="one-c-activity-heading"><div><div className="one-c-eyebrow">Week {lesson.week} · {lesson.title} · {run.reviewing ? "One more practice" : "Play"}</div><h1 ref={heading} tabIndex={-1}>{prompt}</h1></div><span className="one-c-step-count">{run.index + 1} / {run.questions.length}</span></div>
-          <button className="one-c-text-button one-c-help-button" aria-label="Hear directions" title="Hear directions" disabled={!audio.enabled} onClick={() => audio.narrate(questionNarration(lesson, question, traceFallback, true, instructionLanguage))}><span aria-hidden="true">?</span></button>
-          <progress className="one-c-progress" value={run.index + (feedback === "correct" ? 1 : 0)} max={run.questions.length} aria-label={run.reviewing ? "Review progress" : "Game progress"} />
-          {run.reviewing && <p className="one-c-review-note">{isSentence ? "Let’s try again!" : "Let’s try the words you needed a little help with."}</p>}
-          <div className={`one-c-play-card ${isSentence ? "sentence" : ""}`}>
-            {(question.mode === "meaning" || showSentenceText) && <><div className="one-c-prompt-hanzi" lang="zh-CN">{question.word.example?.hanzi ?? question.word.hanzi}</div>{isSentence && <div className="one-c-pinyin" lang="zh-Latn-pinyin">{question.word.example?.pinyin ?? question.word.pinyin}</div>}</>}
-            {(question.mode === "recognize" || question.mode === "trace") && <div className="one-c-prompt-english">{question.word.icon} {question.word.english}</div>}
-            {isListening && <div className="one-c-listen-prompt"><button className="one-c-big-listen" disabled={!audio.enabled} aria-label={isSentence ? "Hear the sentence again" : "Listen to the Chinese sounds"} onClick={() => audio.play(speechText(question.word))}><SoundIcon /></button><p>{isSentence || isSound ? "Hear it again" : "Tap to hear the Chinese words."}</p><button className="one-c-text-button" disabled={!audio.enabled} aria-label="Listen slowly" onClick={() => audio.play(speechText(question.word), "zh", true)}>Slow</button></div>}
-            {isSound && (question.mode === "sound-read" || !audio.canListen || audio.message) && <p className="one-c-prompt-english">{question.word.soundCue}</p>}
-            {question.mode === "trace" && !traceFallback && <TraceCharacter key={question.id} hanzi={question.word.hanzi} onStrokeName={(name) => audio.play(name)} onComplete={solved} onHelp={() => { markMissed(); setWrong(["trace"]); }} onFallback={() => { setTraceFallback(true); audio.narrate(questionNarration(lesson, question, true, true, instructionLanguage)); }} />}
-            {question.pair && <CompareScene pair={question.pair} sign={feedback === "correct" ? question.word.hanzi : "?"} />}
-            {question.sequence && <NumberSequence values={question.sequence} answer={feedback === "correct" ? question.word.value : undefined} />}
-            {question.parts && <SumScene key={question.id} parts={question.parts} mathModel={question.mathModel} story={question.story} language={instructionLanguage} missing={question.mode === "bonds" ? "part" : "total"} reveal={feedback === "correct"} onCount={(value) => audio.play(NUMBERS[value].hanzi)} />}
-            {question.mode === "measure" && question.word.measure && <>
-              <div className="one-c-measure-prompt" lang="zh-CN" aria-label={feedback === "correct" ? speechText(question.word) : `${question.word.measure.before}，空格，${question.word.measure.after}`}>
-                {question.word.measure.before}<span className="one-c-measure-gap">{feedback === "correct" ? question.word.hanzi : "?"}</span>{question.word.measure.after}
-              </div>
-              <div className="one-c-prompt-english">{question.word.icon} {question.word.english}</div>
-            </>}
-            {question.mode === "count" && <TenFrame key={question.id} value={question.word.value!} />}
-            {!isListening && <button className="one-c-text-button one-c-read-prompt" disabled={!audio.enabled} aria-label="Listen to the question" onClick={() => audio.narrate(questionNarration(lesson, question, traceFallback, false, instructionLanguage))}><SoundIcon /> Listen</button>}
-
-            {(question.mode !== "trace" || traceFallback) && <div className={`one-c-options ${isSentence || lesson.week >= 2 ? "sentence-choices" : ""}`} role="group" aria-label="Answer choices">{question.options.map((option) => {
-              const chinese = question.mode === "recognize" || question.mode === "count" || question.mode === "trace" || question.mode === "compare" || question.mode === "measure" || Boolean(question.parts);
-              const showPinyin = question.mode === "compare" || question.mode === "measure" || lesson.week >= 3 && chinese;
-              const symbol = isSound || question.mode === "order";
-              const label = option.choiceLabel ?? option.english;
-              const isWrong = wrong.includes(option.id);
-              const isCorrect = feedback === "correct" && option.id === question.word.id;
-              return <div key={option.id} className={`one-c-option-row ${isWrong ? "wrong" : ""} ${isCorrect ? "correct" : ""}`}>
-                <button className={`one-c-option ${chinese || symbol ? "chinese" : ""}`} disabled={isWrong || feedback === "correct"} onClick={() => answer(option.id)}>
-                  {!chinese && !symbol && <span className="one-c-option-icon" aria-hidden="true">{option.icon}</span>}
-                  <span className="one-c-option-label" lang={isSound ? "zh-Latn-pinyin" : chinese ? "zh-CN" : "en"}>{question.mode === "order" ? option.value : chinese || symbol ? option.hanzi : label}{showPinyin && <span className="one-c-choice-pinyin" lang="zh-Latn-pinyin">{option.pinyin}</span>}</span>
-                  {isWrong && <span className="one-c-choice-state">Again</span>}{isCorrect && <span className="one-c-choice-state">✓ Correct</span>}
-                </button>
-                {question.mode === "compare" && <button className="one-c-option-audio" aria-label={`Hear ${option.hanzi}`} disabled={!audio.enabled} onClick={() => audio.play(speechText(option))}><SoundIcon /></button>}
-                {question.mode === "measure" && <button className="one-c-option-audio" aria-label={`Hear ${option.hanzi}`} disabled={!audio.enabled} onClick={() => audio.play(option.hanzi === "只" ? "一只" : option.hanzi)}><SoundIcon /></button>}
-                {!chinese && !isSound && question.mode !== "order" && <button className="one-c-option-audio" aria-label={`Hear option: ${label}`} disabled={!audio.enabled} onClick={() => audio.narrate(spokenText(label))}><SoundIcon /></button>}
-              </div>;
-            })}</div>}
-
-            {feedback !== "correct" && (question.mode !== "trace" || traceFallback) && <div className="one-c-hint">
-              {!hint ? <button className="one-c-text-button" aria-label={isListening && !showSentenceText ? `Hint: ${hintLabel.toLowerCase()}` : "Hint"} onClick={revealHint}>Hint</button> : question.mode === "compare" ? <div>{COMPARISONS.map((item) => <button key={item.id} className="one-c-review-word" disabled={!audio.enabled} onClick={() => audio.narrate(comparisonHintNarration([item]))}><span><span lang="zh-CN">{item.hanzi}</span> · <span lang="zh-Latn-pinyin">{item.pinyin}</span><br />{item.english}</span><SoundIcon /></button>)}</div> : <div>{questionDetails(question)}{listenButtons(questionSpeech(question))}</div>}
-              {question.mode === "listen" && !isSentence && (!audio.canListen || audio.message) && !hint && <p className="one-c-small">No audio? Tap “Hint” to keep playing.</p>}
-            </div>}
-          </div>
-          <div className={`one-c-feedback ${feedback}`} aria-live="polite" aria-atomic="true">
-            {feedback === "wrong" && <p>{isSentence ? "Good try! Tap the other one." : "Good try! Choose another answer, or take a hint."}</p>}
-            {feedback === "correct" && <>
-              <div><strong>太棒了！ Great work!</strong>{questionDetails(question)}</div>
-              <button className="one-c-button primary" ref={nextButton} aria-label={run.index + 1 === run.questions.length ? !run.reviewing && run.missed.length ? "Again: practice tricky words" : "Done: collect your star" : "Next question"} onClick={advance}>{run.index + 1 === run.questions.length ? !run.reviewing && run.missed.length ? "Again" : "Done" : "Next"}<span aria-hidden="true">→</span></button>
-            </>}
-          </div>
-        </section>}
-
-        {screen === "complete" && run && <section className="one-c-complete">
-          <div className="ice-penguin-celebration" aria-hidden="true"><img src={POLAR_ART.penguin} alt="" width="1254" height="1254" /><span>★</span></div>
-          <div className="one-c-eyebrow">Week {lesson.week} · {lesson.title} · Star earned</div>
-          <h1 ref={heading} tabIndex={-1}>You did it!</h1>
-          <p>You practiced {isSentence ? `${lesson.words.length} whole sentences` : isSound ? `${lesson.words.length} pinyin sounds` : lesson.kind === "compare" ? "comparing numbers" : lesson.kind === "order" ? "putting numbers in order" : lesson.kind === "measures" ? "Chinese counting words" : lesson.kind === "bonds" ? "parts of a number" : lesson.kind === "addition" ? "adding within 10" : `${lesson.words.length} ${lesson.kind === "numbers" ? "numbers" : "Chinese words"}`}.</p>
-          {run.missed.length > 0 && <p className="one-c-small">And you gave the tricky ones another go. That’s how we learn!</p>}
-          {WEEKS.map((week) => <div className="one-c-week-stars" key={week.number}><strong>Week {week.number}</strong><div className="one-c-stars">{week.lessons.map((item) => <span key={item.id} className={progress[item.id] ? "earned" : ""} aria-label={`${item.title}: ${progress[item.id] ? "star earned" : "not yet completed"}`}>★</span>)}</div></div>)}
-          <p className="one-c-small">{learned === LESSONS.length ? "All stars earned! You explored every island!" : `${learned} of ${LESSONS.length} island stars`}</p>
-          <div className="one-c-complete-actions"><button className="one-c-button primary" aria-label={learned === LESSONS.length ? "Map: back to the ice path" : "Next lesson"} onClick={() => showMap(learned === LESSONS.length ? lesson.id : nextLesson.id)}>{learned === LESSONS.length ? "Map" : "Next"}<span aria-hidden="true">→</span></button><button className="one-c-button secondary" aria-label="Play this lesson again" onClick={startGame}>Again</button></div>
-          <details className="one-c-practiced"><summary>Practice</summary>{lesson.words.map((item) => <button className="one-c-review-word" key={item.id} disabled={!audio.enabled} onClick={() => audio.play(speechText(item))}>{pronunciation(item, isSentence || lesson.kind === "measures")}<SoundIcon /></button>)}</details>
-        </section>}
-        <div className="one-c-notices" role="status">{audio.message && <p>{audio.message}</p>}{storageNotice && <p>{storageNotice}</p>}</div>
-      </main>
-      <footer className="one-c-footer"><span>Grade 1C · {screen === "home" ? `Weeks ${WEEKS.map((item) => item.number).join(", ")}` : `Week ${week.number} · ${week.title}`}</span><a href="/">More Chinese games ↗</a></footer>
-    </div>
-  </div>;
+        <div className={`one-c-feedback ${feedback}`} aria-live="polite" aria-atomic="true">
+          {feedback === "wrong" && <p>Try again.</p>}
+          {feedback === "correct" && <><div><strong>✓</strong>{detail(question.word)}</div><button className="one-c-button primary" ref={nextButton} aria-label={run.continuous ? "Next practice question" : "Next question"} onClick={advance}>{run.continuous || run.index + 1 < run.questions.length ? "Next" : !run.reviewing && run.missed.length ? "Review" : "Done"} →</button></>}
+        </div>
+      </section>}
+      {screen === "complete" && run && <section className="one-c-complete">
+        <div className="ice-penguin-celebration" aria-hidden="true"><img src={POLAR_ART.penguin} alt="" width="1254" height="1254"/><span>★</span></div>
+        <div className="one-c-eyebrow">Week {lesson.week} · {lesson.title}</div><h1 ref={heading} tabIndex={-1}>Practice complete!</h1><p>{lesson.words.length} characters practiced. Star earned.</p>
+        <p className="one-c-small">{completed} of {available.length} available activities complete</p>
+        <div className="one-c-complete-actions"><button className="one-c-button primary" onClick={() => showMap(nextLessonId)}>Map →</button><button className="one-c-button secondary" onClick={() => startLesson(lesson)}>Again</button>{unlocked && <button className="one-c-button primary" onClick={startContinuous}>Continuous play →</button>}</div>
+      </section>}
+      <div className="one-c-notices" role="status">{audio.message && <p>{audio.message}</p>}{storageNotice && <p>{storageNotice}</p>}</div>
+    </main><footer className="one-c-footer"><span>Grade 1C · Week {currentWeek} of {WEEKS.length}</span><a href="/">More Chinese games ↗</a></footer>
+  </div></div>;
 }

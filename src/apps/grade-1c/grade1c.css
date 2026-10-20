@@ -247,3 +247,17 @@
 .one-c-die button { border: 0; border-radius: 50%; background: transparent; color: #a5f3fc; font-size: 2.3rem; line-height: 1; min-width: 44px; min-height: 44px; cursor: pointer; }
 .one-c-die.die-1 button { color: #fde68a; }
 .one-c-die button[aria-pressed="true"] { background: #ffffff20; font-size: 1.6rem; }
+
+.one-c-continuous { display: flex; gap: 1.5rem; align-items: center; justify-content: space-between; border: 1px solid #5aa692; background: #123b38; padding: 1.25rem; border-radius: 20px; margin: 1.5rem 0 .5rem; }
+.one-c-continuous h2, .one-c-tricky h2 { font-size: 1.15rem; margin: 0 0 .35rem; font-weight: 750; }
+.one-c-continuous p { color: #b7d5d1; margin: .3rem 0; font-size: .9rem; }
+.one-c-continuous button { flex-shrink: 0; }
+.one-c-tricky { margin: 2rem 0; }
+.one-c-tricky > div { display: flex; flex-wrap: wrap; gap: .65rem; }
+.one-c-tricky > div > span { padding: .7rem 1rem; background: #1d3046; border-radius: 12px; font-size: .85rem; }
+.one-c-tricky strong { font-size: 1.5rem; margin-right: .4rem; }
+.one-c-tricky small { display: block; color: #aabed2; margin-top: .3rem; }
+@media(max-width:600px) { .one-c-continuous { flex-direction: column; align-items: stretch; gap: .8rem; } }
+.one-c-options > .one-c-option { width: 100%; background: #1b2c43; border: 2px solid #3d536f; border-radius: 15px; }
+.one-c-options > .one-c-option:not(:disabled):hover { border-color: #b9d3e9; background: #263e5b; }
+.one-c-options > .one-c-option.wrong { border-color: #d8887e; background: #462932; }

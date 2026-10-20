@@ -5,6 +5,9 @@ const path = require('node:path');
 const { dict } = require(path.resolve(process.argv[2], 'cnchar.order.min.js'));
 const sources = ['src/data/level-character-seeds.ts', 'src/apps/grade-1c/curriculum.ts'];
 const characters = new Set(sources.flatMap(file => [...fs.readFileSync(file, 'utf8').matchAll(/hanzi: "([^"]+)"/g)].flatMap(match => [...match[1]].filter(char => /\p{Script=Han}/u.test(char)))));
+for (const chapter of JSON.parse(fs.readFileSync('src/apps/grade-1c/character-lists.json', 'utf8'))) {
+  for (const char of chapter.writing) characters.add(char);
+}
 const codes = {a:'hzzp',b:'sz',c:'hz',d:'d',o:'hxg',j:'h',l:'n',r:'hzg',f:'s',g:'sg',k:'d',s:'p',n:'pz',x:'szz',w:'hzzzg',z:'szzg',i:'t',t:'wg',y:'xg',v:'hzw',e:'hp',p:'hzt',q:'hzzz',h:'st',m:'pd',u:'swg'};
 // cnchar groups several shapes under one code. Resolve the variants for our
 // characters explicitly, rather than teaching the alternative name randomly.

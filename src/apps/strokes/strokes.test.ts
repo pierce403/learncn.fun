@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { LEVEL_CHARACTER_SEEDS } from '../../data/level-character-seeds';
 import { LESSONS } from '../grade-1c/curriculum';
+import { LESSONS as WEEKLY_LESSONS } from '../grade-1c/weekly-curriculum';
 import characterStrokes from '../../data/character-strokes.json';
 import { getCharacterStroke, STROKES_BY_ID, STROKE_SETS } from '../../data/strokes';
 import { makeStrokeRound } from './game';
@@ -8,7 +9,7 @@ import { makeStrokeRound } from './game';
 const names = (hanzi: string) => (characterStrokes as Record<string, string[]>)[hanzi].map(id => STROKES_BY_ID[id].name);
 describe('stroke learning content', () => {
   it('names every stroke for all book characters and penguin tracing lessons', () => {
-    const characters = [...Object.values(LEVEL_CHARACTER_SEEDS).flat().map(word => word.hanzi), ...LESSONS.filter(lesson => lesson.kind === 'writing').flatMap(lesson => lesson.words.map(word => word.hanzi))];
+    const characters = [...Object.values(LEVEL_CHARACTER_SEEDS).flat().map(word => word.hanzi), ...[...LESSONS, ...WEEKLY_LESSONS].filter(lesson => lesson.kind === 'writing').flatMap(lesson => lesson.words.map(word => word.hanzi))];
     for (const character of characters) {
       const ids = (characterStrokes as Record<string, string[]>)[character];
       expect(ids, character).toBeDefined();

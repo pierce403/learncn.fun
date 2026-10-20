@@ -1,4 +1,4 @@
-import { LESSONS, WEEKS } from "./curriculum";
+import { LESSONS, WEEKS, availableLessons, currentSchoolWeek } from "./weekly-curriculum";
 import type { Progress } from "./game";
 
 export const POLAR_ART = {
@@ -29,10 +29,11 @@ export function nextHop(current: number, destination: number): number {
   return current + Math.sign(destination - current);
 }
 
-export function nextIceLesson(progress: Progress, afterId?: string): string {
-  const start = afterId ? lessonIndex(afterId) + 1 : 0;
-  const candidates = [...LESSONS.slice(start), ...LESSONS.slice(0, start)];
-  return (candidates.find((lesson) => !progress[lesson.id]) ?? LESSONS[LESSONS.length - 1]).id;
+export function nextIceLesson(progress: Progress, afterId?: string, currentWeek = currentSchoolWeek()): string {
+  const available = availableLessons(currentWeek);
+  const start = afterId ? Math.max(0, available.findIndex(lesson => lesson.id === afterId) + 1) : 0;
+  const candidates = [...available.slice(start), ...available.slice(0, start)];
+  return (candidates.find(lesson => !progress[lesson.id]) ?? available.at(-1) ?? LESSONS[0]).id;
 }
 
 export function iceRoutePath(stops = ICE_STOPS): string {
