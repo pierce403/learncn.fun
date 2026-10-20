@@ -1,6 +1,7 @@
 import lists from "./character-lists.json";
 import metadata from "./character-metadata.json";
 import type { Lesson, Word } from "./curriculum";
+import { characterIcon } from "./character-icons";
 
 // One textbook chapter per school week, as requested by the owner. School week 1
 // began September 1, 2026; later weeks open on Monday in the school's time zone.
@@ -12,7 +13,7 @@ const characters: Record<string, { pinyin: string; english: string }> = metadata
 function makeWords(text: string): Word[] {
   return Array.from(text, hanzi => ({
     id: `char-${hanzi.codePointAt(0)!.toString(16)}`, hanzi, ...characters[hanzi],
-    icon: "", tip: "",
+    icon: characterIcon(hanzi), tip: "",
     meaningGroup: ["爸父", "妈母", "哥兄", "子儿孩童", "房屋", "图画"].find(group => group.includes(hanzi)),
   }));
 }

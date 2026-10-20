@@ -51,7 +51,7 @@ describe("direct weekly practice", () => {
     const word = LESSONS[0].words.find(w => w.hanzi === character)!;
     let choices = within(screen.getByRole("group", { name: "Answer choices" }));
     expect(choices.getByRole("button", { name: word.pinyin })).toBeTruthy();
-    fireEvent.click(choices.getAllByRole("button").find(b => b.textContent !== word.pinyin)!);
+    fireEvent.click(choices.getAllByRole("button").find(b => b !== choices.getByRole("button", { name: word.pinyin }))!);
     fireEvent.click(screen.getByRole("button", { name: "Answers CN" }));
     expect(screen.getByRole("heading", { name: "What does this mean?" })).toBeTruthy();
     expect(document.querySelector('.one-c-prompt-hanzi')!.textContent).toBe(character);
@@ -69,7 +69,7 @@ describe("direct weekly practice", () => {
     const character = document.querySelector('.one-c-prompt-hanzi')!.textContent!;
     const word = LESSONS[0].words.find(w => w.hanzi === character)!;
     const buttons = within(screen.getByRole("group", { name: "Answer choices" })).getAllByRole("button");
-    fireEvent.click(buttons.find(b => b.textContent !== word.english)!);
+    fireEvent.click(buttons.find(b => b !== within(screen.getByRole("group", { name: "Answer choices" })).getByRole("button", { name: word.english }))!);
     expect(JSON.parse(localStorage.getItem(WORD_HISTORY_KEY)!)[`read:${character}`].misses).toBe(1);
     answerCurrent();
     expect(JSON.parse(localStorage.getItem(WORD_HISTORY_KEY)!)[`read:${character}`]).toMatchObject({ attempts: 1, misses: 1, successes: 0 });

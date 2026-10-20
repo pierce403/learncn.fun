@@ -257,6 +257,12 @@
 .one-c-options > .one-c-option:not(:disabled):hover { border-color: #b9d3e9; background: #263e5b; }
 .one-c-options > .one-c-option.wrong { border-color: #d8887e; background: #462932; }
 
+/* Shared columns center the whole group and align the labels across buttons. */
+.one-c-options.reading-choices { grid-template-columns: minmax(.75rem, 1fr) 2.5rem minmax(0, max-content) minmax(.75rem, 1fr); column-gap: .8rem; }
+.one-c-options.reading-choices > .one-c-option { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; padding: .8rem 0; min-height: 88px; font-size: 1.1rem; }
+.one-c-options.reading-choices .one-c-option-icon { grid-column: 2; font-size: 2rem; line-height: 1.2; text-align: center; }
+.one-c-options.reading-choices .one-c-option-label { grid-column: 3; min-width: 0; overflow-wrap: anywhere; text-align: left; }
+
 /* Completion stays within thumb reach even when the drawing pad fills the screen. */
 .one-c-writing-complete .one-c-shell { padding-bottom: calc(8rem + env(safe-area-inset-bottom)); }
 .one-c-feedback.correct.one-c-writing-feedback { position: fixed; z-index: 30; bottom: max(.75rem, env(safe-area-inset-bottom)); left: max(1rem, env(safe-area-inset-left)); right: max(1rem, env(safe-area-inset-right)); max-width: 760px; margin: 0 auto; padding: .85rem; flex-direction: row; align-items: center; gap: .75rem; background: #0f342e; border: 2px solid #6ee7b7; box-shadow: 0 -8px 32px #0008; }
