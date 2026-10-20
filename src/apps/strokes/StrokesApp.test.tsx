@@ -35,9 +35,9 @@ function draw(points: Point[], pointerType = 'touch') {
 describe('stroke drawing playground', () => {
   it('draws a full round, retries, awards once, and resets on replay', () => {
     render(<StrokesApp onHome={vi.fn()} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Play now' }));
     expect(screen.getByRole('heading').textContent).toBe('Draw the stroke');
-    expect(screen.queryByRole('group', { name: 'Stroke shapes' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Play now' })).toBeNull();
+    expect(screen.queryByRole('heading', { name: 'Meet the strokes' })).toBeNull();
     for (let question = 0; question < 6; question++) {
       const name = screen.getByRole('button', { name: /^Hear / }).getAttribute('aria-label')!.slice(5);
       const stroke = STROKES.find(item => item.name === name)!;
@@ -65,7 +65,6 @@ describe('stroke drawing playground', () => {
 
   it('ignores another finger, cancels interrupted input, and clears a retry', () => {
     render(<StrokesApp onHome={vi.fn()} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Play now' }));
     fireEvent.pointerDown(pad(), event({ x: 18, y: 50 }));
     fireEvent.pointerDown(pad(), { ...event({ x: 90, y: 90 }, 2), isPrimary: false });
     fireEvent.pointerMove(pad(), event({ x: 90, y: 90 }, 2));
@@ -85,14 +84,19 @@ describe('stroke drawing playground', () => {
     const onHome = vi.fn();
     render(<StrokesApp onHome={onHome} homeLabel="Map" initialAudio={false} />);
     fireEvent.click(screen.getByRole('button', { name: 'Turns & hooks' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Play now' }));
     expect((screen.getByRole('button', { name: /^Hear / }) as HTMLButtonElement).disabled).toBe(true);
     draw([{ x: 58, y: 16 }, { x: 58, y: 76 }]);
     expect(screen.queryByRole('button', { name: 'Next →' })).toBeNull();
     draw(strokePoints(STROKES.find(stroke => stroke.id === 'sg')!.path), 'pen');
     expect(screen.getByRole('button', { name: 'Next →' })).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'First strokes' }));
-    expect(screen.getByRole('heading').textContent).toBe('Meet the strokes');
+    expect(screen.getByRole('heading').textContent).toBe('Draw the stroke');
+    draw(strokePoints(STROKES.find(stroke => stroke.id === 'h')!.path));
+    expect(screen.getByRole('progressbar').getAttribute('value')).toBe('1');
+    fireEvent.click(screen.getByRole('button', { name: 'First strokes' }));
+    expect(screen.getByRole('progressbar').getAttribute('value')).toBe('0');
+    draw(strokePoints(STROKES.find(stroke => stroke.id === 'h')!.path));
+    expect(screen.getByRole('progressbar').getAttribute('value')).toBe('1');
     fireEvent.click(screen.getByRole('button', { name: '← Map' }));
     expect(onHome).toHaveBeenCalledOnce();
   });

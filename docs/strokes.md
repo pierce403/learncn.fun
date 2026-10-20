@@ -6,8 +6,10 @@ English direction work with sound off. The final stroke and character share one
 speech sequence so completion feedback does not interrupt the final stroke name.
 
 Learn strokes is available from the main app picker, Write, and the Grade 1C map.
-It has six basic strokes and a second set of six turns/hooks. Children can watch
-and hear each stroke, then draw all six on a touch, pen, or mouse drawing pad.
+It has six basic strokes and a second set of six turns/hooks. Opening the game
+or switching sets starts drawing immediately, with no introductory cards. Each
+stroke’s name is spoken as its touch, pen, or mouse drawing pad appears. The
+Watch again button provides an optional animation and audio hint.
 Each stroke is one continuous gesture from the gold dot to the end ring. A faint
 guide and replayable animation show direction. Attempts are checked for the start,
 end, length, and ordered shape (discrete Fréchet distance with a generous 10-unit
