@@ -178,9 +178,9 @@ export default function Grade1CApp() {
     finish();
   }
   function detail(word: Word) { return <div className="one-c-word-answer"><div className="one-c-answer-hanzi" lang="zh-CN">{word.hanzi}</div><div className="one-c-pinyin" lang="zh-Latn-pinyin">{word.pinyin}</div><div>{word.english}</div></div>; }
-  function listen(word: Word, slow = false) {
+  function listen(word: Word) {
     const english = readingActive && answerMode === "cn";
-    audio.play(english ? word.english : word.hanzi, english ? "en" : "zh", slow);
+    audio.play(english ? word.english : word.hanzi, english ? "en" : "zh");
   }
   if (screen === "strokes") return <StrokesApp homeLabel="Map" initialAudio={audio.enabled} onHome={() => setScreen("home")} />;
 
@@ -209,7 +209,7 @@ export default function Grade1CApp() {
         {!run.continuous && <progress className="one-c-progress" value={run.index + Number(feedback === "correct")} max={run.questions.length} aria-label={run.reviewing ? "Review progress" : "Practice progress"}/>}
         <div className="one-c-play-card">
           {question.mode === "meaning" ? <div className="one-c-prompt-hanzi" lang="zh-CN">{question.word.hanzi}</div> : <><div className="one-c-prompt-english">{question.word.english}</div><div className="one-c-pinyin" lang="zh-Latn-pinyin">{question.word.pinyin}</div></>}
-          <div className="one-c-audio-controls"><button className="one-c-button secondary" disabled={!audio.enabled} onClick={() => listen(question.word)}><SoundIcon/> Listen</button><button className="one-c-button quiet" disabled={!audio.enabled} onClick={() => listen(question.word, true)}>Slow</button></div>
+          <div className="one-c-audio-controls"><button className="one-c-button secondary" disabled={!audio.enabled} onClick={() => listen(question.word)}><SoundIcon/> Listen</button></div>
           {question.mode === "trace" && <TraceCharacter key={`${question.id}-${writingAttempt}`} hanzi={question.word.hanzi} mode={writingMode} onStrokeName={name => audio.play(name)} onComplete={completeWriting} onHelp={kind => { markMissed(kind); setHint(true); }}/>}
           {(question.mode !== "trace") && <div className="one-c-options reading-choices" role="group" aria-label="Answer choices">{question.options.map(option => <button key={option.id} className={`one-c-option ${wrong.includes(option.id) ? "wrong" : ""}`} disabled={wrong.includes(option.id) || feedback === "correct"} onClick={() => answer(option.id)}><span className="one-c-option-icon" aria-hidden="true">{option.icon}</span><span className="one-c-option-label" lang={answerMode === "cn" ? "zh-Latn-pinyin" : "en"}>{answerMode === "cn" ? option.pinyin : option.english}</span></button>)}</div>}
           {feedback !== "correct" && question.mode !== "trace" && <div className="one-c-hint">{hint ? detail(question.word) : <button className="one-c-text-button" onClick={() => { setHint(true); markMissed("hint"); }}>Hint</button>}</div>}

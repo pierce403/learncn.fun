@@ -51,7 +51,7 @@ describe("direct weekly practice", () => {
     fireEvent.click(screen.getByRole("button", { name: "Back to the ice path" }));
     expect(audio.play).toHaveBeenCalledTimes(2);
   });
-  it("matches Listen and Slow to the answer language without restarting the cue or changing questions", () => {
+  it("matches Listen to the answer language without restarting the cue or changing questions", () => {
     localStorage.setItem("learncn.read.answerMode", "cn");
     render(<Grade1CApp/>);
     fireEvent.click(screen.getByRole("button", { name: "Start lesson: Read" }));
@@ -59,17 +59,13 @@ describe("direct weekly practice", () => {
     const word = LESSONS[0].words.find(w => w.hanzi === character)!;
     audio.play.mockClear();
     fireEvent.click(screen.getByRole("button", { name: "Listen" }));
-    expect(audio.play).toHaveBeenLastCalledWith(word.english, "en", false);
-    fireEvent.click(screen.getByRole("button", { name: "Slow" }));
-    expect(audio.play).toHaveBeenLastCalledWith(word.english, "en", true);
+    expect(audio.play).toHaveBeenLastCalledWith(word.english, "en");
     audio.play.mockClear();
     fireEvent.click(screen.getByRole("button", { name: "Answers CN" }));
     expect(audio.play).not.toHaveBeenCalled();
     expect(document.querySelector('.one-c-prompt-hanzi')!.textContent).toBe(character);
     fireEvent.click(screen.getByRole("button", { name: "Listen" }));
-    expect(audio.play).toHaveBeenLastCalledWith(character, "zh", false);
-    fireEvent.click(screen.getByRole("button", { name: "Slow" }));
-    expect(audio.play).toHaveBeenLastCalledWith(character, "zh", true);
+    expect(audio.play).toHaveBeenLastCalledWith(character, "zh");
   });
   it("keeps automatic prompts and feedback sounds silent when sound is off", () => {
     audio.enabled = false;
