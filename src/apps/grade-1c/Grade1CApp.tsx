@@ -48,6 +48,7 @@ export default function Grade1CApp() {
   const nextButton = useRef<HTMLButtonElement>(null);
   const audio = useLessonAudio();
   const question = run?.questions[run.index];
+  const readingActive = screen === "play" && question?.mode === "meaning";
   const writingComplete = screen === "play" && question?.mode === "trace" && (feedback === "correct" || writingAction !== null);
   const available = availableLessons(currentWeek);
   const completed = available.filter(item => activityComplete(item, progress)).length;
@@ -175,7 +176,7 @@ export default function Grade1CApp() {
   function listen(word: Word, slow = false) { audio.play(word.hanzi, "zh", slow); }
   if (screen === "strokes") return <StrokesApp homeLabel="Map" initialAudio={audio.enabled} onHome={() => setScreen("home")} />;
 
-  return <div className={`one-c ${writingComplete ? "one-c-writing-complete" : ""}`} style={{ "--lesson-accent": lesson.kind === "writing" ? "#6ee7b7" : "#67e8f9" } as CSSProperties}><div className="one-c-shell">
+  return <div className={`one-c ${writingComplete ? "one-c-writing-complete" : ""} ${readingActive ? "one-c-reading" : ""}`} style={{ "--lesson-accent": lesson.kind === "writing" ? "#6ee7b7" : "#67e8f9" } as CSSProperties}><div className="one-c-shell">
     <header className="one-c-header"><a className="one-c-brand" href="/">learncn<span>.fun</span></a><div className="one-c-header-actions">
       {screen === "home" && <button className="one-c-trophy-button" aria-label="Open trophy case" title="Trophy case" onClick={() => { audio.stop(); setScreen("trophies"); }}><TrophyIcon/></button>}
       {screen !== "home" && <button className="one-c-button quiet" aria-label={run?.continuous ? "End continuous practice" : "Back to the ice path"} onClick={() => { if (run?.continuous) setNotice(`${run.practiced + Number(feedback === "correct")} characters practiced.`); showMap(); }}>{run?.continuous ? "End practice" : "Map"}</button>}
@@ -200,7 +201,7 @@ export default function Grade1CApp() {
         {!run.continuous && <progress className="one-c-progress" value={run.index + Number(feedback === "correct")} max={run.questions.length} aria-label={run.reviewing ? "Review progress" : "Practice progress"}/>}
         <div className="one-c-play-card">
           {question.mode === "meaning" ? <div className="one-c-prompt-hanzi" lang="zh-CN">{question.word.hanzi}</div> : <><div className="one-c-prompt-english">{question.word.english}</div><div className="one-c-pinyin" lang="zh-Latn-pinyin">{question.word.pinyin}</div></>}
-          <div className="one-c-audio-controls"><button className="one-c-button secondary" disabled={!audio.enabled} onClick={() => listen(question.word)}><SoundIcon/> Listen</button><button className="one-c-button quiet" disabled={!audio.enabled} onClick={() => listen(question.word, true)}>Slow</button>{question.mode !== "trace" && <button className="one-c-button secondary one-c-answer-mode" aria-pressed={answerMode === "cn"} title="CN: pinyin · EN: English" onClick={toggleAnswers}>Answers {answerMode === "cn" ? "CN" : "EN"}</button>}</div>
+          <div className="one-c-audio-controls"><button className="one-c-button secondary" disabled={!audio.enabled} onClick={() => listen(question.word)}><SoundIcon/> Listen</button><button className="one-c-button quiet" disabled={!audio.enabled} onClick={() => listen(question.word, true)}>Slow</button></div>
           {question.mode === "trace" && <TraceCharacter key={`${question.id}-${writingAttempt}`} hanzi={question.word.hanzi} mode={writingMode} onStrokeName={name => audio.play(name)} onComplete={completeWriting} onHelp={kind => { markMissed(kind); setHint(true); }}/>}
           {(question.mode !== "trace") && <div className="one-c-options sentence-choices" role="group" aria-label="Answer choices">{question.options.map(option => <button key={option.id} className={`one-c-option ${wrong.includes(option.id) ? "wrong" : ""}`} disabled={wrong.includes(option.id) || feedback === "correct"} onClick={() => answer(option.id)}><span className="one-c-option-label" lang={answerMode === "cn" ? "zh-Latn-pinyin" : "en"}>{answerMode === "cn" ? option.pinyin : option.english}</span></button>)}</div>}
           {feedback !== "correct" && question.mode !== "trace" && <div className="one-c-hint">{hint ? detail(question.word) : <button className="one-c-text-button" onClick={() => { setHint(true); markMissed("hint"); }}>Hint</button>}</div>}
@@ -219,5 +220,6 @@ export default function Grade1CApp() {
       </section>}
       <div className="one-c-notices" role="status">{audio.message && <p>{audio.message}</p>}{storageNotice && <p>{storageNotice}</p>}</div>
     </main><footer className="one-c-footer"><span>Grade 1C · Week {currentWeek} of {WEEKS.length}</span><a href="/">More Chinese games ↗</a></footer>
+    {readingActive && <button className="one-c-answer-mode" aria-pressed={answerMode === "cn"} title="CN: pinyin · EN: English" onClick={toggleAnswers}><span aria-hidden="true"/>Answers {answerMode === "cn" ? "CN" : "EN"}</button>}
   </div></div>;
 }

@@ -266,8 +266,11 @@
 .one-c-writing-feedback .one-c-button.primary:hover { background: #fef3c7; }
 .one-c-writing-feedback .one-c-button.primary:active { box-shadow: 0 2px 0 #b7791f; }
 
-.one-c-button.one-c-answer-mode { border-color: #fbbf24; color: #fde68a; }
-.one-c-button.one-c-answer-mode[aria-pressed="true"] { border-color: #67e8f9; color: #a5f3fc; }
+.one-c-reading .one-c-shell { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
+.one-c-answer-mode { position: fixed; z-index: 50; right: calc(1rem + env(safe-area-inset-right)); bottom: calc(1rem + env(safe-area-inset-bottom)); display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; padding: .5rem 1rem; border: 1px solid #33415566; border-radius: 999px; background: #1e293be6; color: #f1f5f9; font-size: .875rem !important; font-weight: 500 !important; box-shadow: 0 10px 15px -3px #0003; backdrop-filter: blur(12px); }
+.one-c-answer-mode:hover { background: #334155; }
+.one-c-answer-mode > span { width: 10px; height: 10px; border-radius: 50%; background: #fcd34d; }
+.one-c-answer-mode[aria-pressed="true"] > span { background: #38bdf8; }
 
 .one-c-trophy-button, .one-c-trophy-emblem { display: inline-grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; border: 1px solid #b99b4d; background: #332d1b; color: #fde68a; flex-shrink: 0; }
 .one-c-trophy-button:hover { background: #514322; }
