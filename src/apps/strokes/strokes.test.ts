@@ -35,14 +35,10 @@ describe('stroke learning content', () => {
     expect(getCharacterStroke('口', 3, 3)).toBeNull();
     expect(getCharacterStroke('口', 1, 3)?.name).toBe('横折');
   });
-  it('covers every stroke exactly once with three distinct solvable choices', () => {
+  it('draws every stroke in the chosen set exactly once', () => {
     for (let set = 0; set < STROKE_SETS.length; set++) for (let run = 0; run < 20; run++) {
       const round = makeStrokeRound(set);
-      expect(round.map(item => item.stroke.id).sort()).toEqual([...STROKE_SETS[set].ids].sort());
-      for (const item of round) {
-        expect(new Set(item.options.map(option => option.id)).size).toBe(3);
-        expect(item.options.filter(option => option.id === item.stroke.id)).toHaveLength(1);
-      }
+      expect(round.map(item => item.id).sort()).toEqual([...STROKE_SETS[set].ids].sort());
     }
   });
 });

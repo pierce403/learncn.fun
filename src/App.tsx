@@ -71,8 +71,8 @@ export default function App() {
       {
         id: "strokes",
         title: "Learn strokes",
-        subtitle: "Listen & match",
-        description: "Meet the strokes, hear their names, and find the matching shapes.",
+        subtitle: "Listen & draw",
+        description: "Hear each stroke’s name, then draw it from the starting dot.",
         accent: "from-cyan-400/20 via-slate-900/40 to-slate-900/20 ring-cyan-400/30",
       },
     ],

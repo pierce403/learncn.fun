@@ -7,8 +7,15 @@ speech sequence so completion feedback does not interrupt the final stroke name.
 
 Learn strokes is available from the main app picker, Write, and the Grade 1C map.
 It has six basic strokes and a second set of six turns/hooks. Children can watch
-and hear each stroke, then play six shape-matching questions. Wrong answers allow
-a retry; the score counts first tries. Progress in weekly lessons is unchanged.
+and hear each stroke, then draw all six on a touch, pen, or mouse drawing pad.
+Each stroke is one continuous gesture from the gold dot to the end ring. A faint
+guide and replayable animation show direction. Attempts are checked for the start,
+end, length, and ordered shape (discrete Fréchet distance with a generous 10-unit
+tolerance on a 100-unit pad). This rejects taps, reverse strokes, shortcuts and
+large backtracking without requiring calligraphic precision. Turns and hooks stay
+in one gesture. A retry replaces the previous attempt; interrupted gestures are
+cancelled, and extra fingers are ignored. The score counts first tries, with one
+fish for every completed stroke. Progress in weekly lessons is unchanged.
 SVG teaching diagrams show writing direction from a gold start dot and honor
 reduced-motion preferences. The game needs no external images or character data.
 
