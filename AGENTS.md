@@ -71,6 +71,7 @@
 - Writing starts with tracing, then requires a clean whole-character attempt without hints. Mistakes or hints require a fresh unassisted retry; no tap/skip fallback may earn a writing star.
 - Only writing completions with `handwritingVerified: true` count as stars or unlock continuous play. Keep earlier tracing records.
 - Keep word difficulty per character and per skill, persist the first outcome immediately, and preserve legacy saves.
+- The round trophy button opens all available characters: strengths first, untried in the middle, and practice needs at the bottom. Keep reading/writing results separate and use saved recent difficulty for ranking.
 - Keep the writing completion action fixed and visible on phones. Use only the ice path for week selection; do not restore the horizontal week slider.
 - The old newsletter `curriculum.ts` remains for migration. See `docs/grade-1c.md`.
 

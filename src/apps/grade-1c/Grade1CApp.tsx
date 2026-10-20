@@ -4,15 +4,16 @@ import { playDing, playTada } from "../../lib/sfx";
 import type { Lesson, Word } from "./curriculum";
 import { LESSONS, WEEKS, availableLessons, currentSchoolWeek } from "./weekly-curriculum";
 import { makeReview, PROGRESS_KEY, saveCompletion, type Progress, type Question } from "./game";
-import { activityComplete, choosePractice, continuousUnlocked, parseWordHistory, PRACTICE_PROGRESS_KEY, practiceRound, practiceQuestion, priority, readPracticeProgress, recordResult, skillFor, wordKey, WORD_HISTORY_KEY, type WordHistory } from "./practice";
+import { activityComplete, choosePractice, continuousUnlocked, parseWordHistory, PRACTICE_PROGRESS_KEY, practiceRound, practiceQuestion, readPracticeProgress, recordResult, skillFor, wordKey, WORD_HISTORY_KEY, type WordHistory } from "./practice";
 import { useLessonAudio } from "./useLessonAudio";
 import PenguinPath from "./PenguinPath";
 import { POLAR_ART, nextIceLesson } from "./ice-path";
 import TraceCharacter, { type WritingAttempt, type WritingMode } from "./TraceCharacter";
 import StrokesApp from "../strokes/StrokesApp";
 import { PwaInstallPrompt } from "../../components/PwaInstall";
+import TrophyCase, { TrophyIcon } from "./TrophyCase";
 
-type Screen = "home" | "play" | "complete" | "strokes";
+type Screen = "home" | "play" | "complete" | "strokes" | "trophies";
 // Share the main Read game's preference, including its default of CN/pinyin.
 const ANSWER_MODE_KEY = "learncn.read.answerMode";
 type Run = { original: Question[]; questions: Question[]; index: number; reviewing: boolean; missed: string[]; firstTry: number; continuous: boolean; practiced: number; written: string[] };
@@ -53,7 +54,6 @@ export default function Grade1CApp() {
   const unlocked = continuousUnlocked(progress, currentWeek);
   const needsWritingCheck = available.some(item => item.kind === "writing" && progress[item.id] && !activityComplete(item, progress));
   const nextLessonId = nextIceLesson(progress, lesson.id, currentWeek);
-  const tricky = Object.entries(history).filter(([, result]) => result.difficulty >= .25).sort((a, b) => priority(b[1]) - priority(a[1])).slice(0, 8);
 
   useEffect(() => {
     const refresh = () => setCurrentWeek(currentSchoolWeek());
@@ -177,6 +177,7 @@ export default function Grade1CApp() {
 
   return <div className={`one-c ${writingComplete ? "one-c-writing-complete" : ""}`} style={{ "--lesson-accent": lesson.kind === "writing" ? "#6ee7b7" : "#67e8f9" } as CSSProperties}><div className="one-c-shell">
     <header className="one-c-header"><a className="one-c-brand" href="/">learncn<span>.fun</span></a><div className="one-c-header-actions">
+      {screen === "home" && <button className="one-c-trophy-button" aria-label="Open trophy case" title="Trophy case" onClick={() => { audio.stop(); setScreen("trophies"); }}><TrophyIcon/></button>}
       {screen !== "home" && <button className="one-c-button quiet" aria-label={run?.continuous ? "End continuous practice" : "Back to the ice path"} onClick={() => { if (run?.continuous) setNotice(`${run.practiced + Number(feedback === "correct")} characters practiced.`); showMap(); }}>{run?.continuous ? "End practice" : "Map"}</button>}
       <button className="one-c-sound-toggle" aria-label={audio.enabled ? "Turn sound off" : "Turn sound on"} aria-pressed={audio.enabled} onClick={audio.toggle}><SoundIcon/><span>Sound</span></button>
     </div></header>
@@ -188,12 +189,12 @@ export default function Grade1CApp() {
         </section>
         {notice && <p role="status" className="one-c-review-note">{notice}</p>}
         {needsWritingCheck && <p className="one-c-review-note">Writing stars now need a full attempt without hints. Your earlier practice is saved.</p>}
-        {tricky.length > 0 && <section className="one-c-tricky"><h2>Getting extra practice</h2><div>{tricky.map(([key, result]) => <span key={key}><strong lang="zh-CN">{key.split(":")[1]}</strong> {key.startsWith("write:") ? "Writing" : "Reading"}<small>{result.misses} {result.misses === 1 ? "tricky attempt" : "tricky attempts"}</small></span>)}</div></section>}
         <PenguinPath currentWeek={currentWeek} progress={progress} initialLessonId={mapPosition.from} destinationLessonId={mapPosition.to} onStart={startLesson} headingRef={heading}/>
         <div className="one-c-audio-controls"><button className="one-c-button secondary" onClick={() => { audio.stop(); setScreen("strokes"); }}>✏️ Learn strokes · 笔画</button></div>
 
         <details className="one-c-family-note"><summary>For grown-ups</summary><p>19 weeks, with separate reading and writing lists from the full Grade 1 character sheet. Each chapter maps to the same numbered week. Weeks open on Mondays, using the September 1, 2026 school start and Pacific time.</p><p>Practice starts immediately. Mistakes and hints give characters more weight in continuous play; successful practice gradually reduces that extra weight. Reading and handwriting are tracked separately. Only available weeks enter the practice pool.</p><p>Progress and word history stay in this browser. Earlier reading stars are carried over where they cover a whole new activity. Writing stars require every character to be written without hints; earlier tracing records are retained. No microphone or account is needed.</p></details>
       </>}
+      {screen === "trophies" && <TrophyCase history={history} currentWeek={currentWeek} headingRef={heading}/>}
       {screen === "play" && run && question && <section className="one-c-activity">
         <div className="one-c-activity-heading"><div><div className="one-c-eyebrow">{run.continuous ? "Continuous play" : `Week ${lesson.week}`} · {skillFor(lesson) === "write" ? "Write" : "Read"}{run.reviewing ? " · Review" : ""}</div><h1 ref={heading} tabIndex={-1}>{question.mode === "trace" ? writingMode === "guided" ? "Trace the character" : "Write it on your own" : answerMode === "cn" ? "How do you read this?" : "What does this mean?"}</h1></div><span className="one-c-step-count">{run.continuous ? `${run.practiced} practiced` : `${run.index + 1} / ${run.questions.length}`}</span></div>
         {!run.continuous && <progress className="one-c-progress" value={run.index + Number(feedback === "correct")} max={run.questions.length} aria-label={run.reviewing ? "Review progress" : "Practice progress"}/>}

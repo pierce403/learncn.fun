@@ -249,14 +249,9 @@
 .one-c-die button[aria-pressed="true"] { background: #ffffff20; font-size: 1.6rem; }
 
 .one-c-continuous { display: flex; gap: 1.5rem; align-items: center; justify-content: space-between; border: 1px solid #5aa692; background: #123b38; padding: 1.25rem; border-radius: 20px; margin: 1.5rem 0 .5rem; }
-.one-c-continuous h2, .one-c-tricky h2 { font-size: 1.15rem; margin: 0 0 .35rem; font-weight: 750; }
+.one-c-continuous h2 { font-size: 1.15rem; margin: 0 0 .35rem; font-weight: 750; }
 .one-c-continuous p { color: #b7d5d1; margin: .3rem 0; font-size: .9rem; }
 .one-c-continuous button { flex-shrink: 0; }
-.one-c-tricky { margin: 2rem 0; }
-.one-c-tricky > div { display: flex; flex-wrap: wrap; gap: .65rem; }
-.one-c-tricky > div > span { padding: .7rem 1rem; background: #1d3046; border-radius: 12px; font-size: .85rem; }
-.one-c-tricky strong { font-size: 1.5rem; margin-right: .4rem; }
-.one-c-tricky small { display: block; color: #aabed2; margin-top: .3rem; }
 @media(max-width:600px) { .one-c-continuous { flex-direction: column; align-items: stretch; gap: .8rem; } }
 .one-c-options > .one-c-option { width: 100%; background: #1b2c43; border: 2px solid #3d536f; border-radius: 15px; }
 .one-c-options > .one-c-option:not(:disabled):hover { border-color: #b9d3e9; background: #263e5b; }
@@ -273,3 +268,38 @@
 
 .one-c-button.one-c-answer-mode { border-color: #fbbf24; color: #fde68a; }
 .one-c-button.one-c-answer-mode[aria-pressed="true"] { border-color: #67e8f9; color: #a5f3fc; }
+
+.one-c-trophy-button, .one-c-trophy-emblem { display: inline-grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; border: 1px solid #b99b4d; background: #332d1b; color: #fde68a; flex-shrink: 0; }
+.one-c-trophy-button:hover { background: #514322; }
+.one-c-trophy-button svg { width: 25px; height: 25px; }
+.one-c-trophy-case { margin: 2rem auto; max-width: 900px; }
+.one-c-trophy-intro { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+.one-c-trophy-intro h1 { font-size: clamp(1.8rem, 5vw, 2.5rem); font-weight: 800; letter-spacing: -.035em; }
+.one-c-trophy-intro p { color: #b7c7db; }
+.one-c-trophy-emblem { width: 68px; height: 68px; box-shadow: 0 0 30px #fbbf2415; }
+.one-c-trophy-emblem svg { width: 36px; height: 36px; }
+.one-c-trophy-links { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1.4rem 0 2.3rem; }
+.one-c-trophy-links a { display: inline-flex; align-items: center; gap: .65rem; min-height: 44px; padding: .55rem .85rem; border: 1px solid #3d516e; border-radius: 999px; background: #15263b; color: #d9e7f4; font-size: .9rem; }
+.one-c-trophy-links a:hover { background: #243951; }
+.one-c-trophy-links span { color: #fde68a; font-weight: 750; }
+.one-c-trophy-shelf { margin-top: 2rem; scroll-margin-top: 1.5rem; }
+.one-c-trophy-shelf h2 { font-size: 1.25rem; font-weight: 750; margin-bottom: .3rem; color: #fde68a; }
+.one-c-trophy-shelf h2 span { font-size: .9rem; margin-left: .35rem; color: #aebed3; font-weight: 400; }
+.one-c-trophy-shelf.untried h2 { color: #cbd5e1; }
+.one-c-trophy-shelf.practice h2 { color: #a5f3fc; }
+.one-c-trophy-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 235px), 1fr)); gap: .85rem; padding: 0; margin: 1rem 0 0; list-style: none; }
+.one-c-trophy-card { min-width: 0; border: 1px solid #645631; border-radius: 16px; padding: 1.1rem; background: linear-gradient(135deg, #2d2a20, #142034); }
+.untried .one-c-trophy-card { border-color: #35445e; background: #111e32; }
+.practice .one-c-trophy-card { border-color: #3b7083; background: #112b3b; }
+.one-c-trophy-word { display: flex; align-items: center; gap: .9rem; min-height: 70px; }
+.one-c-trophy-word > strong { font-size: 2.5rem; line-height: 1.3; font-weight: 600; }
+.one-c-trophy-word > div { min-width: 0; overflow-wrap: anywhere; }
+.one-c-trophy-word span { color: #a5f3fc; }
+.one-c-trophy-word p { font-size: .9rem; color: #d5dfec; }
+.one-c-trophy-card dl { display: grid; gap: .6rem; margin: .85rem 0 0; padding-top: .8rem; border-top: 1px solid #ffffff18; font-size: .8rem; }
+.one-c-trophy-card dl > div { display: flex; justify-content: space-between; gap: .5rem; }
+.one-c-trophy-card dt { color: #b7c7db; }
+.one-c-trophy-card dd { margin: 0; text-align: right; color: #cbd5e1; }
+.one-c-trophy-card dd strong { color: #f8fafc; }
+.one-c-trophy-card small { display: block; color: #6ee7b7; margin-top: .15rem; }
+.one-c-trophy-empty { padding: 1.25rem; border: 1px dashed #3d516e; border-radius: 16px; margin-top: 1rem !important; color: #b7c7db; }

@@ -74,7 +74,15 @@ describe("direct weekly practice", () => {
     answerCurrent();
     expect(JSON.parse(localStorage.getItem(WORD_HISTORY_KEY)!)[`read:${character}`]).toMatchObject({ attempts: 1, misses: 1, successes: 0 });
     fireEvent.click(screen.getByRole("button", { name: "Back to the ice path" }));
-    expect(screen.getByText("Getting extra practice")).toBeTruthy();
+    expect(screen.queryByText("Getting extra practice")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Open trophy case" }));
+    expect(screen.getByRole("heading", { name: "Trophy case" })).toBeTruthy();
+    const practice = screen.getByRole("region", { name: /Needs the most practice/ });
+    expect(within(practice).getByText(character)).toBeTruthy();
+    expect(within(practice).getByText("0 / 1")).toBeTruthy();
+    expect(screen.getByRole("region", { name: /Still to try/ })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Back to the ice path" }));
+    expect(screen.getByRole("button", { name: "Open trophy case" })).toBeTruthy();
   });
   it("saves a completed reading activity and opens writing directly", async () => {
     render(<Grade1CApp/>); fireEvent.click(screen.getByRole("button", { name: "Start lesson: Read" }));
