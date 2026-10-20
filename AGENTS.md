@@ -67,6 +67,7 @@
 - Future weeks stay locked in the UI, start handlers, navigation, and continuous practice pool.
 - Start directly in Read or Write; do not reintroduce teaching-card introductions.
 - Penguin Read supports Answers CN (pinyin) and EN, sharing the main Read preference. Keep choices unique in both languages and preserve mistakes when toggling.
+- Match main Read audio: a short 这是什么字？ cue for each reading question, English Listen/Slow with CN answers and Mandarin with EN answers, a pop on mistakes, and a ding plus direct Hanzi speech on success. Respect Sound off.
 - Continuous play requires all currently available Read/Write activities to be complete.
 - Writing starts with tracing, then requires a clean whole-character attempt without hints. Mistakes or hints require a fresh unassisted retry; no tap/skip fallback may earn a writing star.
 - Only writing completions with `handwritingVerified: true` count as stars or unlock continuous play. Keep earlier tracing records.

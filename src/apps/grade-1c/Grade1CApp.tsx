@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { burstConfetti } from "../../lib/confetti";
-import { playDing, playTada } from "../../lib/sfx";
+import { playDing, playPop, playTada } from "../../lib/sfx";
 import type { Lesson, Word } from "./curriculum";
 import { LESSONS, WEEKS, availableLessons, currentSchoolWeek } from "./weekly-curriculum";
 import { makeReview, PROGRESS_KEY, saveCompletion, type Progress, type Question } from "./game";
@@ -16,6 +16,7 @@ import TrophyCase, { TrophyIcon } from "./TrophyCase";
 type Screen = "home" | "play" | "complete" | "strokes" | "trophies";
 // Share the main Read game's preference, including its default of CN/pinyin.
 const ANSWER_MODE_KEY = "learncn.read.answerMode";
+const READING_PROMPT = "这是什么字？";
 type Run = { original: Question[]; questions: Question[]; index: number; reviewing: boolean; missed: string[]; firstTry: number; continuous: boolean; practiced: number; written: string[] };
 function stored(key: string): string | null { try { return localStorage.getItem(key); } catch { return null; } }
 function SoundIcon() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M11 4 5 9H2v6h3l6 5V4Z" strokeLinejoin="round"/><path d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14" strokeLinecap="round"/></svg>; }
@@ -66,6 +67,9 @@ export default function Grade1CApp() {
   useEffect(() => { heading.current?.focus({ preventScroll: true }); }, [screen, question?.id]);
   useEffect(() => { if (screen !== "home") window.scrollTo(0, 0); }, [screen]);
   useEffect(() => { if (feedback === "correct" || writingAction) nextButton.current?.focus({ preventScroll: true }); }, [feedback, writingAction]);
+  useEffect(() => {
+    if (readingActive && audio.enabled) audio.play(READING_PROMPT, "zh");
+  }, [readingActive, question?.id, audio.enabled, audio.play]);
 
   function save(key: string, value: unknown) {
     try { localStorage.setItem(key, JSON.stringify(value)); }
@@ -96,7 +100,7 @@ export default function Grade1CApp() {
     audio.stop(); setMapPosition({ from: lesson.id, to: destination }); setScreen("home"); setRun(null); resetAnswer();
   }
   function readQuestion(item: Question) {
-    // No teaching cards or narrated instructions: speak only the practice target.
+    // Reading uses the short question cue above; writing says its target.
     if (item.mode === "trace") audio.play(item.word.hanzi);
   }
   function startLesson(item: Lesson) {
@@ -151,6 +155,7 @@ export default function Grade1CApp() {
     if (!question || solvedOnce.current) return;
     if (id === question.word.id) { solved(); return; }
     setWrong(previous => [...new Set([...previous, id])]); setFeedback("wrong");
+    if (audio.enabled) playPop();
     markMissed("miss");
   }
   function finish() {
@@ -173,7 +178,10 @@ export default function Grade1CApp() {
     finish();
   }
   function detail(word: Word) { return <div className="one-c-word-answer"><div className="one-c-answer-hanzi" lang="zh-CN">{word.hanzi}</div><div className="one-c-pinyin" lang="zh-Latn-pinyin">{word.pinyin}</div><div>{word.english}</div></div>; }
-  function listen(word: Word, slow = false) { audio.play(word.hanzi, "zh", slow); }
+  function listen(word: Word, slow = false) {
+    const english = readingActive && answerMode === "cn";
+    audio.play(english ? word.english : word.hanzi, english ? "en" : "zh", slow);
+  }
   if (screen === "strokes") return <StrokesApp homeLabel="Map" initialAudio={audio.enabled} onHome={() => setScreen("home")} />;
 
   return <div className={`one-c ${writingComplete ? "one-c-writing-complete" : ""} ${readingActive ? "one-c-reading" : ""}`} style={{ "--lesson-accent": lesson.kind === "writing" ? "#6ee7b7" : "#67e8f9" } as CSSProperties}><div className="one-c-shell">

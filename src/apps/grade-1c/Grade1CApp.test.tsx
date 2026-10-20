@@ -5,13 +5,15 @@ import Grade1CApp from "./Grade1CApp";
 import type { WritingAttempt, WritingMode } from "./TraceCharacter";
 import { availableLessons, LESSONS } from "./weekly-curriculum";
 import { PRACTICE_PROGRESS_KEY, WORD_HISTORY_KEY } from "./practice";
+import { playDing, playPop } from "../../lib/sfx";
 const audio = vi.hoisted(() => ({ enabled: true, canListen: true, message: "", play: vi.fn(), narrate: vi.fn(), stop: vi.fn(), toggle: vi.fn() }));
 vi.mock("./useLessonAudio", () => ({ useLessonAudio: () => audio }));
 vi.mock("../../lib/confetti", () => ({ burstConfetti: vi.fn() }));
-vi.mock("../../lib/sfx", () => ({ playDing: vi.fn(), playTada: vi.fn() }));
+vi.mock("../../lib/sfx", () => ({ playDing: vi.fn(), playPop: vi.fn(), playTada: vi.fn() }));
 vi.mock("../../components/PwaInstall", () => ({ PwaInstallPrompt: () => null }));
 vi.mock("./TraceCharacter", () => ({ default: ({ hanzi, mode, onComplete, onHelp }: { hanzi: string; mode: WritingMode; onComplete: (result: WritingAttempt) => void; onHelp: (kind: "miss" | "hint") => void }) => <div aria-label={`Draw ${hanzi}`}><span>{mode} pad</span><button onClick={() => onHelp("miss")}>Stroke mistake</button><button onClick={() => onComplete({ assisted: mode === "guided" })}>Finish drawing</button><button onClick={() => onComplete({ assisted: true })}>Finish with help</button></div> }));
 beforeEach(() => {
+  audio.enabled = true;
   localStorage.clear(); localStorage.setItem("learncn.read.answerMode", "en"); vi.useFakeTimers(); vi.setSystemTime(new Date("2026-10-20T02:47:00Z"));
   vi.spyOn(window, "scrollTo").mockImplementation(() => {});
   HTMLElement.prototype.scrollIntoView = vi.fn();
@@ -29,6 +31,59 @@ function answerCurrent() {
 }
 
 describe("direct weekly practice", () => {
+  it("plays the short reading cue per new card, pops on mistakes, and dings and says the correct character", () => {
+    render(<Grade1CApp/>);
+    expect(audio.play).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Start lesson: Read" }));
+    expect(audio.play).toHaveBeenCalledExactlyOnceWith("这是什么字？", "zh");
+    const character = document.querySelector('.one-c-prompt-hanzi')!.textContent!;
+    const word = LESSONS[0].words.find(w => w.hanzi === character)!;
+    const choices = within(screen.getByRole("group", { name: "Answer choices" }));
+    fireEvent.click(choices.getAllByRole("button").find(button => button !== choices.getByRole("button", { name: word.english }))!);
+    expect(playPop).toHaveBeenCalledTimes(1);
+    expect(audio.play).toHaveBeenCalledTimes(1);
+    answerCurrent();
+    expect(playDing).toHaveBeenCalledTimes(1);
+    expect(audio.narrate).toHaveBeenLastCalledWith([{ text: character, language: "zh" }]);
+    clickNext();
+    expect(audio.play).toHaveBeenCalledTimes(2);
+    expect(audio.play).toHaveBeenLastCalledWith("这是什么字？", "zh");
+    fireEvent.click(screen.getByRole("button", { name: "Back to the ice path" }));
+    expect(audio.play).toHaveBeenCalledTimes(2);
+  });
+  it("matches Listen and Slow to the answer language without restarting the cue or changing questions", () => {
+    localStorage.setItem("learncn.read.answerMode", "cn");
+    render(<Grade1CApp/>);
+    fireEvent.click(screen.getByRole("button", { name: "Start lesson: Read" }));
+    const character = document.querySelector('.one-c-prompt-hanzi')!.textContent!;
+    const word = LESSONS[0].words.find(w => w.hanzi === character)!;
+    audio.play.mockClear();
+    fireEvent.click(screen.getByRole("button", { name: "Listen" }));
+    expect(audio.play).toHaveBeenLastCalledWith(word.english, "en", false);
+    fireEvent.click(screen.getByRole("button", { name: "Slow" }));
+    expect(audio.play).toHaveBeenLastCalledWith(word.english, "en", true);
+    audio.play.mockClear();
+    fireEvent.click(screen.getByRole("button", { name: "Answers CN" }));
+    expect(audio.play).not.toHaveBeenCalled();
+    expect(document.querySelector('.one-c-prompt-hanzi')!.textContent).toBe(character);
+    fireEvent.click(screen.getByRole("button", { name: "Listen" }));
+    expect(audio.play).toHaveBeenLastCalledWith(character, "zh", false);
+    fireEvent.click(screen.getByRole("button", { name: "Slow" }));
+    expect(audio.play).toHaveBeenLastCalledWith(character, "zh", true);
+  });
+  it("keeps automatic prompts and feedback sounds silent when sound is off", () => {
+    audio.enabled = false;
+    render(<Grade1CApp/>);
+    fireEvent.click(screen.getByRole("button", { name: "Start lesson: Read" }));
+    const word = LESSONS[0].words.find(w => w.hanzi === document.querySelector('.one-c-prompt-hanzi')!.textContent)!;
+    const choices = within(screen.getByRole("group", { name: "Answer choices" }));
+    fireEvent.click(choices.getAllByRole("button").find(button => button !== choices.getByRole("button", { name: word.english }))!);
+    answerCurrent(); clickNext();
+    expect(audio.play).not.toHaveBeenCalled();
+    expect(playPop).not.toHaveBeenCalled();
+    expect(playDing).not.toHaveBeenCalled();
+    expect((screen.getByRole("button", { name: "Listen" }) as HTMLButtonElement).disabled).toBe(true);
+  });
   it("locks future weeks and continuous play, then opens reading without teaching cards", () => {
     render(<Grade1CApp/>);
     expect((screen.getByRole("button", { name: "Week 9, lesson 1: Read. Locked until this school week." }) as HTMLButtonElement).disabled).toBe(true);
