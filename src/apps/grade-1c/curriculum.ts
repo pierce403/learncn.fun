@@ -257,7 +257,7 @@ export const WEEK_4_READING: Word[] = [
   { id: "w4-mom", meaningGroup: "mother", hanzi: "妈", pinyin: "mā", english: "Mom", icon: "👩", tip: "This is the character in 妈妈, mom.",
     related: [{ hanzi: "妈妈", pinyin: "māma", english: "mom" }, { hanzi: "爸妈", pinyin: "bàmā", english: "dad and mom" }],
     sentence: { hanzi: "妈妈在做饭。", pinyin: "Māma zài zuò fàn.", english: "Mom is cooking." } },
-  { id: "w4-de", hanzi: "的", pinyin: "de", english: "Belonging word", icon: "🎒", tip: "Put 的 after 我 to make 我的: my or mine.", audioText: "我的",
+  { id: "w4-de", hanzi: "的", pinyin: "de", english: "Belonging word", icon: "🎒", tip: "Put 的 after 我 to make 我的: my or mine.",
     related: [{ hanzi: "我的", pinyin: "wǒ de", english: "my / mine" }, { hanzi: "你的", pinyin: "nǐ de", english: "your / yours" }],
     sentence: { hanzi: "这是我的书包。", pinyin: "Zhè shì wǒ de shūbāo.", english: "This is my schoolbag." } },
   { id: "w4-father", meaningGroup: "father", hanzi: "父", pinyin: "fù", english: "Father", icon: "👨", tip: "Find this character at the start of 父母, parents.",

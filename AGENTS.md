@@ -46,8 +46,9 @@
   - `hanzi`, `pinyin`, `english`
 - Each source row is one newly introduced core Han character. Cumulative practice sets are computed.
 - Expected new-character counts for Levels 1–6: `60, 60, 60, 60, 70, 80`.
-- Polyphonic characters may need a contextual speech override in `src/data/words.ts` so browser audio
-  matches the catalog pinyin.
+- Speak character prompts directly and trust the selected Mandarin voice to choose the reading.
+  Do not add words to steer pronunciation (for example, 了 must not become 好了).
+  Grade 1C syllable examples, number sequences, and complete lesson sentences are intentional content.
 - Run `npm test` after any curriculum edit. See `docs/curriculum.md` for provenance and verification status.
 
 ## Write app

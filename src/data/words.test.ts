@@ -104,24 +104,12 @@ describe("character catalog integrity", () => {
     expect(getWordsForLevel(14 as LevelId, "through")).toEqual([]);
   });
 
-  it("gives polyphonic characters enough speech context for the catalog reading", () => {
-    const expectedSpeech = {
-      只: "一只",
-      长: "长大",
-      觉: "觉得",
-      为: "成为",
-      干: "干草",
-      数: "数字",
-      种: "一种",
-      还: "还有",
-      得: "得到",
-      乐: "快乐",
-    } as const;
-
-    for (const [hanzi, speechText] of Object.entries(expectedSpeech)) {
+  it("speaks formerly overridden characters without adding context words", () => {
+    const characters = "只了少地兴乐好的子几中可长没觉把和得着啊吧吗发为会行过给干还呢分当作转数空片那更都藏种参落处呀";
+    for (const hanzi of characters) {
       const word = WORDS.find((candidate) => candidate.hanzi === hanzi);
       expect(word, `speech entry for ${hanzi}`).toBeDefined();
-      expect(getChineseSpeechText(word!), `speech context for ${hanzi}`).toBe(speechText);
+      expect(getChineseSpeechText(word!), `plain speech for ${hanzi}`).toBe(hanzi);
     }
   });
 });

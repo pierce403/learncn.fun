@@ -34,6 +34,12 @@ describe("Week 4 newsletter and games", () => {
     }
   });
 
+  it("reads 的 directly in character cards and listening questions", () => {
+    const word = WEEK_4_READING.find(w => w.hanzi === "的")!;
+    expect(cardNarration(word).at(-1)).toEqual({ text: "的", language: "zh" });
+    expect(questionSpeech({ id: "w4-de-listen", word, mode: "listen", options: [word] })).toBe("的");
+  });
+
   it("keeps he/she written and offers two distinct, solvable choices with or without audio", () => {
     for (const lesson of WEEK_4_LESSONS) {
       for (const listening of [true, false]) {

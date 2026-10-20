@@ -6,7 +6,6 @@ export type Word = {
   pinyin: string;
   english: string;
   introducedAt: LevelId;
-  speechText?: string;
 };
 
 export type LevelId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14;
@@ -45,58 +44,6 @@ export const ALL_LEVELS: readonly LevelId[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
 
 export const AVAILABLE_LEVELS: readonly AvailableLevelId[] = [1, 2, 3, 4, 5, 6];
 
-// Browser speech engines choose a reading from context. These short phrases keep
-// polyphonic characters and neutral-tone particles aligned with the catalog pinyin.
-const CHINESE_SPEECH_TEXT_BY_CHARACTER: Readonly<Partial<Record<string, string>>> = {
-  只: "一只",
-  了: "好了",
-  少: "多少",
-  地: "大地",
-  兴: "高兴",
-  乐: "快乐",
-  好: "美好",
-  的: "好的",
-  子: "儿子",
-  几: "几个",
-  中: "中间",
-  可: "可以",
-  长: "长大",
-  没: "没有",
-  觉: "觉得",
-  把: "一把",
-  和: "我和你",
-  得: "得到",
-  着: "看着",
-  啊: "好啊",
-  吧: "好吧",
-  吗: "好吗",
-  发: "出发",
-  为: "成为",
-  会: "开会",
-  行: "行走",
-  过: "走过",
-  给: "给我",
-  干: "干草",
-  还: "还有",
-  呢: "你呢",
-  分: "分开",
-  当: "当时",
-  作: "作业",
-  转: "转身",
-  数: "数字",
-  空: "天空",
-  片: "一片",
-  那: "那里",
-  更: "更多",
-  都: "都是",
-  藏: "藏起来",
-  种: "一种",
-  参: "参加",
-  落: "落下",
-  处: "到处",
-  呀: "好呀",
-};
-
 export const LEVELS: readonly LevelDefinition[] = ALL_LEVELS.map((id, index) => {
   const cumulativeTarget = CUMULATIVE_TARGETS[index];
   const previousTarget = index === 0 ? 0 : CUMULATIVE_TARGETS[index - 1];
@@ -119,7 +66,6 @@ function makeWord(level: LevelId, seed: { hanzi: string; pinyin: string; english
     id: `hanzi-${codePoints}`,
     ...seed,
     introducedAt: level,
-    speechText: CHINESE_SPEECH_TEXT_BY_CHARACTER[seed.hanzi],
   };
 }
 
@@ -158,5 +104,6 @@ export function getWriteWordsForLevel(level: LevelId, scope: PracticeScope): Wor
 }
 
 export function getChineseSpeechText(word: Word): string {
-  return word.speechText ?? word.hanzi;
+  // Speak the displayed character; let the selected Mandarin voice choose its reading.
+  return word.hanzi;
 }

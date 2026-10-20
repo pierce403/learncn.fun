@@ -31,8 +31,12 @@ describe("spoken directions for beginning readers", () => {
           const parts = questionNarration(lesson, question, false, full, "zh");
           expect(parts[0].language).toBe("zh");
           if (question.mode === "recognize") {
-            expect(parts.at(-1)).toEqual({ text: question.word.english, language: "en" });
-            expect(parts.map((part) => part.text).join("")).not.toContain(practiceSpeech(question.word));
+            // Common particles such as 的 can occur in the fixed directions.
+            // Only the English target follows them; no Mandarin answer is added.
+            expect(parts).toEqual([
+              { text: full ? "听听这个英文词，选出对应的汉字。" : "找一找。", language: "zh" },
+              { text: question.word.english, language: "en" },
+            ]);
           } else expect(parts.every((part) => part.language === "zh")).toBe(true);
           if (!full && ["meaning", "listen", "sound", "trace"].includes(question.mode)) {
             expect(parts).toEqual([{ text: practiceSpeech(question.word), language: "zh" }]);

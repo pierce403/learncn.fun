@@ -50,10 +50,14 @@ For each new or corrected level:
 1. Compare the core/total character chart against the owned book set.
 2. Enter only newly introduced core characters in `src/data/level-character-seeds.ts`.
 3. Check the intended reading and child-friendly English gloss in the context used by the books.
-4. Add or verify a contextual speech override in `src/data/words.ts` when an isolated character can
-   be pronounced differently by browser text-to-speech.
+4. Speak the displayed character directly through the selected Mandarin voice. The owner tested
+   direct readings on their device and chose to remove pronunciation-context substitutions;
+   do not add extra words such as 好 to the prompt for 了.
 5. Run `npm test` to verify per-level counts, cumulative targets, unique characters, stable IDs, and
-   representative polyphonic speech contexts.
+   direct character speech.
+
+Grade 1C also teaches syllables, counting sequences, measure phrases, and complete example
+sentences. Those spoken examples are lesson content and remain explicit in its curriculum.
 
 This project does not reproduce the series' stories, illustrations, exercises, audio, video, logos,
 or companion-app content.
