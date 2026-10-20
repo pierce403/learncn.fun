@@ -12,7 +12,7 @@ vi.mock("../../lib/sfx", () => ({ playDing: vi.fn(), playTada: vi.fn() }));
 vi.mock("../../components/PwaInstall", () => ({ PwaInstallPrompt: () => null }));
 vi.mock("./TraceCharacter", () => ({ default: ({ hanzi, mode, onComplete, onHelp }: { hanzi: string; mode: WritingMode; onComplete: (result: WritingAttempt) => void; onHelp: (kind: "miss" | "hint") => void }) => <div aria-label={`Draw ${hanzi}`}><span>{mode} pad</span><button onClick={() => onHelp("miss")}>Stroke mistake</button><button onClick={() => onComplete({ assisted: mode === "guided" })}>Finish drawing</button><button onClick={() => onComplete({ assisted: true })}>Finish with help</button></div> }));
 beforeEach(() => {
-  localStorage.clear(); vi.useFakeTimers(); vi.setSystemTime(new Date("2026-10-20T02:47:00Z"));
+  localStorage.clear(); localStorage.setItem("learncn.read.answerMode", "en"); vi.useFakeTimers(); vi.setSystemTime(new Date("2026-10-20T02:47:00Z"));
   vi.spyOn(window, "scrollTo").mockImplementation(() => {});
   HTMLElement.prototype.scrollIntoView = vi.fn();
   vi.stubGlobal("matchMedia", () => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() }));
@@ -41,6 +41,28 @@ describe("direct weekly practice", () => {
     const word = answerCurrent();
     const history = JSON.parse(localStorage.getItem(WORD_HISTORY_KEY)!);
     expect(history[`read:${word.hanzi}`]).toMatchObject({ attempts: 1, successes: 1 });
+  });
+  it("switches pinyin and English answers in place, preserves mistakes, and remembers the shared preference", () => {
+    localStorage.removeItem("learncn.read.answerMode");
+    const first = render(<Grade1CApp/>);
+    fireEvent.click(screen.getByRole("button", { name: "Start lesson: Read" }));
+    expect(screen.getByRole("heading", { name: "How do you read this?" })).toBeTruthy();
+    const character = document.querySelector('.one-c-prompt-hanzi')!.textContent!;
+    const word = LESSONS[0].words.find(w => w.hanzi === character)!;
+    let choices = within(screen.getByRole("group", { name: "Answer choices" }));
+    expect(choices.getByRole("button", { name: word.pinyin })).toBeTruthy();
+    fireEvent.click(choices.getAllByRole("button").find(b => b.textContent !== word.pinyin)!);
+    fireEvent.click(screen.getByRole("button", { name: "Answers CN" }));
+    expect(screen.getByRole("heading", { name: "What does this mean?" })).toBeTruthy();
+    expect(document.querySelector('.one-c-prompt-hanzi')!.textContent).toBe(character);
+    choices = within(screen.getByRole("group", { name: "Answer choices" }));
+    expect(choices.getAllByRole("button").filter(b => (b as HTMLButtonElement).disabled)).toHaveLength(1);
+    fireEvent.click(choices.getByRole("button", { name: word.english }));
+    expect(JSON.parse(localStorage.getItem(WORD_HISTORY_KEY)!)[`read:${character}`]).toMatchObject({ attempts: 1, misses: 1, successes: 0 });
+    expect(localStorage.getItem("learncn.read.answerMode")).toBe("en");
+    first.unmount(); render(<Grade1CApp/>);
+    fireEvent.click(screen.getByRole("button", { name: "Start lesson: Read" }));
+    expect(screen.getByRole("button", { name: "Answers EN" })).toBeTruthy();
   });
   it("saves a mistake immediately and does not turn the later retry into a clean answer", () => {
     render(<Grade1CApp/>); fireEvent.click(screen.getByRole("button", { name: "Start lesson: Read" }));

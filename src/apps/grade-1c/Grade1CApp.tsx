@@ -13,6 +13,8 @@ import StrokesApp from "../strokes/StrokesApp";
 import { PwaInstallPrompt } from "../../components/PwaInstall";
 
 type Screen = "home" | "play" | "complete" | "strokes";
+// Share the main Read game's preference, including its default of CN/pinyin.
+const ANSWER_MODE_KEY = "learncn.read.answerMode";
 type Run = { original: Question[]; questions: Question[]; index: number; reviewing: boolean; missed: string[]; firstTry: number; continuous: boolean; practiced: number; written: string[] };
 function stored(key: string): string | null { try { return localStorage.getItem(key); } catch { return null; } }
 function SoundIcon() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M11 4 5 9H2v6h3l6 5V4Z" strokeLinejoin="round"/><path d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14" strokeLinecap="round"/></svg>; }
@@ -20,6 +22,7 @@ function SoundIcon() { return <svg viewBox="0 0 24 24" fill="none" stroke="curre
 export default function Grade1CApp() {
   const [currentWeek, setCurrentWeek] = useState(currentSchoolWeek);
   const [screen, setScreen] = useState<Screen>("home");
+  const [answerMode, setAnswerMode] = useState<"cn" | "en">(() => ["cn", "chinese", "pinyin"].includes((stored(ANSWER_MODE_KEY) ?? "cn").trim().toLowerCase()) ? "cn" : "en");
   const [lesson, setLesson] = useState<Lesson>(LESSONS[0]);
   const [progress, setProgress] = useState<Progress>(() => readPracticeProgress(stored(PRACTICE_PROGRESS_KEY), stored(PROGRESS_KEY)));
   const [history, setHistory] = useState<WordHistory>(() => parseWordHistory(stored(WORD_HISTORY_KEY)));
@@ -66,6 +69,12 @@ export default function Grade1CApp() {
   function save(key: string, value: unknown) {
     try { localStorage.setItem(key, JSON.stringify(value)); }
     catch { setStorageNotice("Progress lasts for this visit. This browser isn't allowing it to be saved."); }
+  }
+  function toggleAnswers() {
+    const mode = answerMode === "cn" ? "en" : "cn";
+    setAnswerMode(mode);
+    try { localStorage.setItem(ANSWER_MODE_KEY, mode); }
+    catch { setStorageNotice("Your answer preference lasts for this visit."); }
   }
   function resetAnswer(mode: WritingMode = "guided") {
     setWrong([]); setFeedback(""); setHint(false); setWritingMode(mode); setWritingAttempt(0); setWritingAction(null);
@@ -186,13 +195,13 @@ export default function Grade1CApp() {
         <details className="one-c-family-note"><summary>For grown-ups</summary><p>19 weeks, with separate reading and writing lists from the full Grade 1 character sheet. Each chapter maps to the same numbered week. Weeks open on Mondays, using the September 1, 2026 school start and Pacific time.</p><p>Practice starts immediately. Mistakes and hints give characters more weight in continuous play; successful practice gradually reduces that extra weight. Reading and handwriting are tracked separately. Only available weeks enter the practice pool.</p><p>Progress and word history stay in this browser. Earlier reading stars are carried over where they cover a whole new activity. Writing stars require every character to be written without hints; earlier tracing records are retained. No microphone or account is needed.</p></details>
       </>}
       {screen === "play" && run && question && <section className="one-c-activity">
-        <div className="one-c-activity-heading"><div><div className="one-c-eyebrow">{run.continuous ? "Continuous play" : `Week ${lesson.week}`} · {skillFor(lesson) === "write" ? "Write" : "Read"}{run.reviewing ? " · Review" : ""}</div><h1 ref={heading} tabIndex={-1}>{question.mode === "trace" ? writingMode === "guided" ? "Trace the character" : "Write it on your own" : "What does this mean?"}</h1></div><span className="one-c-step-count">{run.continuous ? `${run.practiced} practiced` : `${run.index + 1} / ${run.questions.length}`}</span></div>
+        <div className="one-c-activity-heading"><div><div className="one-c-eyebrow">{run.continuous ? "Continuous play" : `Week ${lesson.week}`} · {skillFor(lesson) === "write" ? "Write" : "Read"}{run.reviewing ? " · Review" : ""}</div><h1 ref={heading} tabIndex={-1}>{question.mode === "trace" ? writingMode === "guided" ? "Trace the character" : "Write it on your own" : answerMode === "cn" ? "How do you read this?" : "What does this mean?"}</h1></div><span className="one-c-step-count">{run.continuous ? `${run.practiced} practiced` : `${run.index + 1} / ${run.questions.length}`}</span></div>
         {!run.continuous && <progress className="one-c-progress" value={run.index + Number(feedback === "correct")} max={run.questions.length} aria-label={run.reviewing ? "Review progress" : "Practice progress"}/>}
         <div className="one-c-play-card">
           {question.mode === "meaning" ? <div className="one-c-prompt-hanzi" lang="zh-CN">{question.word.hanzi}</div> : <><div className="one-c-prompt-english">{question.word.english}</div><div className="one-c-pinyin" lang="zh-Latn-pinyin">{question.word.pinyin}</div></>}
-          <div className="one-c-audio-controls"><button className="one-c-button secondary" disabled={!audio.enabled} onClick={() => listen(question.word)}><SoundIcon/> Listen</button><button className="one-c-button quiet" disabled={!audio.enabled} onClick={() => listen(question.word, true)}>Slow</button></div>
+          <div className="one-c-audio-controls"><button className="one-c-button secondary" disabled={!audio.enabled} onClick={() => listen(question.word)}><SoundIcon/> Listen</button><button className="one-c-button quiet" disabled={!audio.enabled} onClick={() => listen(question.word, true)}>Slow</button>{question.mode !== "trace" && <button className="one-c-button secondary one-c-answer-mode" aria-pressed={answerMode === "cn"} title="CN: pinyin · EN: English" onClick={toggleAnswers}>Answers {answerMode === "cn" ? "CN" : "EN"}</button>}</div>
           {question.mode === "trace" && <TraceCharacter key={`${question.id}-${writingAttempt}`} hanzi={question.word.hanzi} mode={writingMode} onStrokeName={name => audio.play(name)} onComplete={completeWriting} onHelp={kind => { markMissed(kind); setHint(true); }}/>}
-          {(question.mode !== "trace") && <div className="one-c-options sentence-choices" role="group" aria-label="Answer choices">{question.options.map(option => <button key={option.id} className={`one-c-option ${wrong.includes(option.id) ? "wrong" : ""}`} disabled={wrong.includes(option.id) || feedback === "correct"} onClick={() => answer(option.id)}><span className="one-c-option-label" lang="en">{option.english}</span></button>)}</div>}
+          {(question.mode !== "trace") && <div className="one-c-options sentence-choices" role="group" aria-label="Answer choices">{question.options.map(option => <button key={option.id} className={`one-c-option ${wrong.includes(option.id) ? "wrong" : ""}`} disabled={wrong.includes(option.id) || feedback === "correct"} onClick={() => answer(option.id)}><span className="one-c-option-label" lang={answerMode === "cn" ? "zh-Latn-pinyin" : "en"}>{answerMode === "cn" ? option.pinyin : option.english}</span></button>)}</div>}
           {feedback !== "correct" && question.mode !== "trace" && <div className="one-c-hint">{hint ? detail(question.word) : <button className="one-c-text-button" onClick={() => { setHint(true); markMissed("hint"); }}>Hint</button>}</div>}
         </div>
         <div className={`one-c-feedback ${writingComplete ? "correct" : feedback} ${writingComplete ? "one-c-writing-feedback" : ""}`} aria-live="polite" aria-atomic="true">

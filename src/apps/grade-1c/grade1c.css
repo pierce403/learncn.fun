@@ -270,3 +270,6 @@
 .one-c-writing-feedback .one-c-button.primary { flex: 1; min-width: 8rem; max-width: 320px; min-height: 64px; font-size: 1.35rem; background: #fde68a; color: #422006; border: 2px solid #fef3c7; box-shadow: 0 4px 0 #b7791f; }
 .one-c-writing-feedback .one-c-button.primary:hover { background: #fef3c7; }
 .one-c-writing-feedback .one-c-button.primary:active { box-shadow: 0 2px 0 #b7791f; }
+
+.one-c-button.one-c-answer-mode { border-color: #fbbf24; color: #fde68a; }
+.one-c-button.one-c-answer-mode[aria-pressed="true"] { border-color: #67e8f9; color: #a5f3fc; }

@@ -96,12 +96,14 @@ function shuffled<T>(items: T[], random = Math.random): T[] {
 }
 
 export function practiceQuestion(lesson: Lesson, word: Word, id: string, random = Math.random): Question {
-  // Written character -> meaning avoids confusing homophones such as 他 / 她.
-  // Writing fallbacks show characters, so identical English meanings are excluded too.
-  const seen = new Set([word.english]);
+  // Choices stay unambiguous in both answer modes, so toggling never needs to
+  // replace a question or erase its mistakes (including homophones like 他 / 她).
+  const key = (text: string) => text.normalize("NFC").trim().toLowerCase();
+  const seen = new Set([key(word.english)]);
+  const pinyin = new Set([key(word.pinyin)]);
   const distractors = shuffled(lesson.words, random).filter(other => {
-    if (other.id === word.id || seen.has(other.english) || (word.meaningGroup && word.meaningGroup === other.meaningGroup)) return false;
-    seen.add(other.english); return true;
+    if (other.id === word.id || seen.has(key(other.english)) || pinyin.has(key(other.pinyin)) || (word.meaningGroup && word.meaningGroup === other.meaningGroup)) return false;
+    seen.add(key(other.english)); pinyin.add(key(other.pinyin)); return true;
   }).slice(0, 2);
   return { id, word, mode: lesson.kind === "writing" ? "trace" : "meaning", options: shuffled([word, ...distractors], random) };
 }

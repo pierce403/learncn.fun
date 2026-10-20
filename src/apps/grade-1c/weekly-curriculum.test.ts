@@ -46,6 +46,7 @@ describe("full Grade 1 character sheet", () => {
         expect(q.options).toHaveLength(3);
         expect(q.options.filter(w => w.id === q.word.id)).toHaveLength(1);
         expect(new Set(q.options.map(w => w.english)).size).toBe(3);
+        expect(new Set(q.options.map(w => w.pinyin.normalize("NFC").trim().toLowerCase())).size).toBe(3);
         if (q.word.meaningGroup) expect(q.options.filter(w => w.meaningGroup === q.word.meaningGroup)).toHaveLength(1);
       }
     }
