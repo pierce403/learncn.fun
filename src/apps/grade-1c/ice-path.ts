@@ -5,7 +5,7 @@ import { activityComplete } from "./practice";
 export const POLAR_ART = {
   penguin: "/1c/art/penguin.webp",
   ice: "/1c/art/ice-block.webp",
-  water: "/1c/art/polar-water.webp",
+  water: "/1c/art/polar-water-tile.webp",
 };
 
 // Reserve room for a week banner, the penguin, and generously spaced islands.

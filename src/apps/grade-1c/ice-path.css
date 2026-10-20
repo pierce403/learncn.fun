@@ -7,7 +7,7 @@
 .ice-star-total strong { font-size: 1.25rem; }
 .ice-star-total strong span { color: #b6d4e4; font-size: 1rem; font-weight: 500; }
 .ice-journey-layout { max-width: 680px; margin: 0 auto; }
-.ice-ocean { position: relative; isolation: isolate; height: 43.75rem; border: 2px solid #56cee0; border-radius: 26px; background-color: #007ca1; background-size: cover; background-position: center; box-shadow: 0 8px 0 #073c53, 0 20px 45px #0004; overflow: hidden; }
+.ice-ocean { position: relative; isolation: isolate; width: 100%; height: 43.75rem; border: 2px solid #56cee0; border-radius: 26px; background-color: #007ca1; background-size: 100% auto; background-repeat: repeat-y; background-position: center top; box-shadow: 0 8px 0 #073c53, 0 20px 45px #0004; overflow: hidden; }
 .ice-map-instruction { position: absolute; z-index: 5; top: 15px; left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 2rem); padding: .4rem .85rem; color: #e6fcff; background: #06445cdd; border: 1px solid #a5f3fc66; border-radius: 999px; text-align: center; font-size: .875rem; font-weight: 650; }
 .one-c .ice-route-lines { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; overflow: visible; }
 .ice-route-lines path { fill: none; stroke: #d9ffff; stroke-width: .6; stroke-dasharray: .65 1.8; stroke-linecap: round; opacity: .65; }
@@ -99,29 +99,22 @@
   .ice-platform, .ice-penguin-position, .ice-penguin-float, .ice-penguin-celebration { animation: none !important; }
 }
 
-.ice-ocean { width: 100%; background-size: 100% auto; background-repeat: repeat-y; }
-.ice-week-banner { position: absolute; left: 1rem; right: 1rem; transform: translateY(-50%); display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .85rem 1rem; border: 2px solid #aff5ff; border-radius: 15px; background: #064159f5; color: #ecfeff; z-index: 5; }
+.ice-week-banner { position: absolute; left: 1rem; right: 1rem; transform: translateY(-50%); display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .85rem 1rem; border: 2px solid #aff5ff; border-radius: 15px; background: #064159f5; color: #ecfeff; box-shadow: 0 4px 12px #00394c44; z-index: 5; }
 .ice-week-banner h2 { margin: 0 0 .15rem; font-size: 1.55rem; line-height: 1.2; font-weight: 800; }
 .ice-week-banner span { font-size: .875rem; line-height: 1.4; }
 .ice-week-banner > strong { color: #fde68a; white-space: nowrap; }
-.ice-week-banner.week-2 { background: #332159f5; border-color: #c8b5ff; box-shadow: 0 -1.5rem 0 .4rem #194360, 0 1.5rem 0 .4rem #194360; }
+.ice-week-banner.week-2 { background: #332159f5; border-color: #c8b5ff; }
 .ice-stop.week-2 .ice-stop-label { background: #30234ff2; border-color: #b8a1e9; }
 .ice-stop.week-2.selected .ice-stop-label { border-color: #fde68a; }
-.ice-week-banner.week-3 { background: #123f3bf5; border-color: #6ee7b7; box-shadow: 0 -1.5rem 0 .4rem #194360, 0 1.5rem 0 .4rem #194360; }
+.ice-week-banner.week-3 { background: #123f3bf5; border-color: #6ee7b7; }
 .ice-stop.week-3 .ice-stop-label { background: #123f3bf2; border-color: #6ee7b7; }
 .ice-stop.week-3.selected .ice-stop-label { border-color: #fde68a; }
 .ice-route-lines path { vector-effect: non-scaling-stroke; stroke-width: 3; stroke-dasharray: 2 12; }
-@media (max-width: 800px) {
-}
-@media (max-width: 540px) {
-}
 @media (max-width: 370px) {
   .ice-week-banner { left: .6rem; right: .6rem; padding: .75rem; }
 }
 
 .ice-stop.week-4.selected .ice-stop-label { border-color: #fde68a; }
-
-.ice-week-banner.week-4 { box-shadow: 0 -1.5rem 0 .4rem #194360, 0 1.5rem 0 .4rem #194360; }
 
 .ice-stop.locked { opacity: .6; }
 .one-c .ice-stop.locked button:disabled { cursor: not-allowed; }

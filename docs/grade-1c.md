@@ -16,6 +16,8 @@ The map displays all 19 weeks, with Read and Write islands for each. The ice pat
 
 ## Direct practice
 
+The ice path uses a repeating ocean texture, `public/1c/art/polar-water-tile.webp`, with uniform lighting and matching vertical edges. Week banners share one subtle shadow; there are no oversized week-specific blue masks around their borders. Artwork provenance and the generation prompt are in [grade-1c-art.md](grade-1c-art.md).
+
 Reading choices include decorative emoji cues in both answer modes. Shared columns center the emoji-and-label group while keeping every text label aligned with the others; longer labels wrap in the same column. Screen readers announce the answer text without the decorative emoji. Concrete characters use related icons and abstract or grammar words use a speech bubble.
 
 After a correct reading answer, the checkmark, Hanzi, pinyin, and English meaning form a centered horizontal row above a full-width Next button. Longer meanings wrap within the row on narrow screens.
