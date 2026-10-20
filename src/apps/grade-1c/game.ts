@@ -70,7 +70,7 @@ export function makeReview(round: Question[], missed: string[]): Question[] {
   });
 }
 
-export type Progress = Record<string, { completions: number; best: number }>;
+export type Progress = Record<string, { completions: number; best: number; handwritingVerified?: true }>;
 // Keep the existing key and Week 1 lesson IDs so adding weeks retains stars.
 export const PROGRESS_KEY = "learncn.1c.week1.v1";
 
@@ -87,7 +87,7 @@ export function parseProgress(raw: string | null, lessons: Lesson[]): Progress {
     };
     return Object.fromEntries(lessons.flatMap(({ id }) => {
       const current = entries[id];
-      if (valid(current)) return [[id, { completions: current.completions, best: current.best }]];
+      if (valid(current)) return [[id, { completions: current.completions, best: current.best, ...(current.handwritingVerified === true ? { handwritingVerified: true as const } : {}) }]];
       const previous = (WEEK_4_PREVIOUS_LESSONS[id] ?? []).map(oldId => entries[oldId]).filter(valid);
       if (!previous.length) return [];
       return [[id, {

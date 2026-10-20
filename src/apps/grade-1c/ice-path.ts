@@ -1,5 +1,6 @@
 import { LESSONS, WEEKS, availableLessons, currentSchoolWeek } from "./weekly-curriculum";
 import type { Progress } from "./game";
+import { activityComplete } from "./practice";
 
 export const POLAR_ART = {
   penguin: "/1c/art/penguin.webp",
@@ -33,7 +34,7 @@ export function nextIceLesson(progress: Progress, afterId?: string, currentWeek 
   const available = availableLessons(currentWeek);
   const start = afterId ? Math.max(0, available.findIndex(lesson => lesson.id === afterId) + 1) : 0;
   const candidates = [...available.slice(start), ...available.slice(0, start)];
-  return (candidates.find(lesson => !progress[lesson.id]) ?? available.at(-1) ?? LESSONS[0]).id;
+  return (candidates.find(lesson => !activityComplete(lesson, progress)) ?? available.at(-1) ?? LESSONS[0]).id;
 }
 
 export function iceRoutePath(stops = ICE_STOPS): string {

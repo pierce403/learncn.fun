@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { LESSONS as OLD_LESSONS } from "./curriculum";
 import { availableLessons, LESSONS } from "./weekly-curriculum";
-import { choosePractice, continuousUnlocked, parseWordHistory, practicePool, priority, readPracticeProgress, recordResult, wordKey, type WordHistory } from "./practice";
-const completeThrough = (week: number) => Object.fromEntries(availableLessons(week).map(l => [l.id, { completions: 1, best: 1 }]));
+import { activityComplete, choosePractice, continuousUnlocked, parseWordHistory, practicePool, priority, readPracticeProgress, recordResult, wordKey, type WordHistory } from "./practice";
+const completeThrough = (week: number) => Object.fromEntries(availableLessons(week).map(l => [l.id, { completions: 1, best: 1, handwritingVerified: true as const }]));
 
 describe("weekly completion and migration", () => {
   it("unlocks continuous only for complete available weeks and relocks for a newly opened week", () => {
@@ -13,8 +13,20 @@ describe("weekly completion and migration", () => {
     expect(continuousUnlocked(progress, 9)).toBe(false);
     delete progress["characters-w4-write"];
     expect(continuousUnlocked(progress, 8)).toBe(false);
-    progress["characters-w19-write"] = { completions: 1, best: 1 };
+    progress["characters-w19-write"] = { completions: 1, best: 1, handwritingVerified: true as const };
     expect(continuousUnlocked(progress, 8)).toBe(false);
+  });
+  it("retains old tracing records but requires verified handwriting before counting writing stars", () => {
+    const traced = Object.fromEntries(availableLessons(8).map(l => [l.id, { completions: 3, best: .9 }]));
+    const saved = readPracticeProgress(JSON.stringify(traced), null);
+    expect(saved).toEqual(traced);
+    expect(activityComplete(LESSONS[0], saved)).toBe(true);
+    expect(activityComplete(LESSONS[1], saved)).toBe(false);
+    expect(continuousUnlocked(saved, 8)).toBe(false);
+    const verified = readPracticeProgress(JSON.stringify(completeThrough(8)), null);
+    expect(continuousUnlocked(verified, 8)).toBe(true);
+    const invalid = readPracticeProgress(JSON.stringify({ ...traced, [LESSONS[1].id]: { ...traced[LESSONS[1].id], handwritingVerified: "true" } }), null);
+    expect(activityComplete(LESSONS[1], invalid)).toBe(false);
   });
   it("preserves completed character coverage without crediting unrelated activities", () => {
     const old = Object.fromEntries(OLD_LESSONS.map(l => [l.id, { completions: 2, best: .8 }]));

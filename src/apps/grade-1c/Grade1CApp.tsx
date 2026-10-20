@@ -4,16 +4,16 @@ import { playDing, playTada } from "../../lib/sfx";
 import type { Lesson, Word } from "./curriculum";
 import { LESSONS, WEEKS, availableLessons, currentSchoolWeek } from "./weekly-curriculum";
 import { makeReview, PROGRESS_KEY, saveCompletion, type Progress, type Question } from "./game";
-import { choosePractice, continuousUnlocked, parseWordHistory, PRACTICE_PROGRESS_KEY, practiceRound, practiceQuestion, priority, readPracticeProgress, recordResult, skillFor, wordKey, WORD_HISTORY_KEY, type WordHistory } from "./practice";
+import { activityComplete, choosePractice, continuousUnlocked, parseWordHistory, PRACTICE_PROGRESS_KEY, practiceRound, practiceQuestion, priority, readPracticeProgress, recordResult, skillFor, wordKey, WORD_HISTORY_KEY, type WordHistory } from "./practice";
 import { useLessonAudio } from "./useLessonAudio";
 import PenguinPath from "./PenguinPath";
 import { POLAR_ART, nextIceLesson } from "./ice-path";
-import TraceCharacter from "./TraceCharacter";
+import TraceCharacter, { type WritingAttempt, type WritingMode } from "./TraceCharacter";
 import StrokesApp from "../strokes/StrokesApp";
 import { PwaInstallPrompt } from "../../components/PwaInstall";
 
 type Screen = "home" | "play" | "complete" | "strokes";
-type Run = { original: Question[]; questions: Question[]; index: number; reviewing: boolean; missed: string[]; firstTry: number; continuous: boolean; practiced: number };
+type Run = { original: Question[]; questions: Question[]; index: number; reviewing: boolean; missed: string[]; firstTry: number; continuous: boolean; practiced: number; written: string[] };
 function stored(key: string): string | null { try { return localStorage.getItem(key); } catch { return null; } }
 function SoundIcon() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M11 4 5 9H2v6h3l6 5V4Z" strokeLinejoin="round"/><path d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14" strokeLinecap="round"/></svg>; }
 
@@ -29,7 +29,11 @@ export default function Grade1CApp() {
   const [wrong, setWrong] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<"" | "wrong" | "correct">("");
   const [hint, setHint] = useState(false);
-  const [traceFallback, setTraceFallback] = useState(false);
+  const [writingMode, setWritingMode] = useState<WritingMode>("guided");
+  const [writingAttempt, setWritingAttempt] = useState(0);
+  const [writingAction, setWritingAction] = useState<"recall" | "retry" | null>(null);
+  const writingHadHelp = useRef(false);
+  const writingAttemptHelp = useRef(false);
   const [storageNotice, setStorageNotice] = useState("");
   const [notice, setNotice] = useState("");
   const recorded = useRef(false);
@@ -40,10 +44,11 @@ export default function Grade1CApp() {
   const nextButton = useRef<HTMLButtonElement>(null);
   const audio = useLessonAudio();
   const question = run?.questions[run.index];
-  const writingComplete = screen === "play" && question?.mode === "trace" && feedback === "correct";
+  const writingComplete = screen === "play" && question?.mode === "trace" && (feedback === "correct" || writingAction !== null);
   const available = availableLessons(currentWeek);
-  const completed = available.filter(item => progress[item.id]).length;
+  const completed = available.filter(item => activityComplete(item, progress)).length;
   const unlocked = continuousUnlocked(progress, currentWeek);
+  const needsWritingCheck = available.some(item => item.kind === "writing" && progress[item.id] && !activityComplete(item, progress));
   const nextLessonId = nextIceLesson(progress, lesson.id, currentWeek);
   const tricky = Object.entries(history).filter(([, result]) => result.difficulty >= .25).sort((a, b) => priority(b[1]) - priority(a[1])).slice(0, 8);
 
@@ -56,13 +61,27 @@ export default function Grade1CApp() {
   }, []);
   useEffect(() => { heading.current?.focus({ preventScroll: true }); }, [screen, question?.id]);
   useEffect(() => { if (screen !== "home") window.scrollTo(0, 0); }, [screen]);
-  useEffect(() => { if (feedback === "correct") nextButton.current?.focus({ preventScroll: true }); }, [feedback]);
+  useEffect(() => { if (feedback === "correct" || writingAction) nextButton.current?.focus({ preventScroll: true }); }, [feedback, writingAction]);
 
   function save(key: string, value: unknown) {
     try { localStorage.setItem(key, JSON.stringify(value)); }
     catch { setStorageNotice("Progress lasts for this visit. This browser isn't allowing it to be saved."); }
   }
-  function resetAnswer() { setWrong([]); setFeedback(""); setHint(false); setTraceFallback(false); recorded.current = false; solvedOnce.current = false; }
+  function resetAnswer(mode: WritingMode = "guided") {
+    setWrong([]); setFeedback(""); setHint(false); setWritingMode(mode); setWritingAttempt(0); setWritingAction(null);
+    recorded.current = false; solvedOnce.current = false; writingHadHelp.current = false; writingAttemptHelp.current = false;
+  }
+  function beginRecall() {
+    audio.stop(); setWritingMode("recall"); setWritingAttempt(attempt => attempt + 1); setWritingAction(null);
+    setFeedback(""); setHint(false); recorded.current = false; solvedOnce.current = false; writingAttemptHelp.current = false;
+    heading.current?.focus({ preventScroll: true });
+  }
+  function completeWriting(result: WritingAttempt) {
+    if (writingMode === "recall" && !result.assisted && !writingAttemptHelp.current) { solved(result.lastStrokeName); return; }
+    if (writingMode === "recall") { markMissed("hint"); setHint(true); }
+    setWritingAction(writingMode === "guided" ? "recall" : "retry");
+    audio.narrate([...(result.lastStrokeName ? [{ text: result.lastStrokeName, language: "zh" as const }] : []), { text: question!.word.hanzi, language: "zh" }]);
+  }
   function showMap(destination = lesson.id) {
     audio.stop(); setMapPosition({ from: lesson.id, to: destination }); setScreen("home"); setRun(null); resetAnswer();
   }
@@ -74,7 +93,7 @@ export default function Grade1CApp() {
     if (item.week > currentSchoolWeek()) return;
     audio.stop(); setNotice(""); setLesson(item); resetAnswer();
     const questions = practiceRound(item);
-    setRun({ original: questions, questions, index: 0, reviewing: false, missed: [], firstTry: 0, continuous: false, practiced: 0 });
+    setRun({ original: questions, questions, index: 0, reviewing: false, missed: [], firstTry: 0, continuous: false, practiced: 0, written: [] });
     setScreen("play"); readQuestion(questions[0]);
   }
   function startContinuous() {
@@ -90,8 +109,8 @@ export default function Grade1CApp() {
     if (!item) return;
     recent.current = [...recent.current.slice(-2), item.key];
     const q = practiceQuestion(item.lesson, item.word, `continuous-${++sequence.current}`);
-    audio.stop(); resetAnswer(); setLesson(item.lesson);
-    setRun({ original: [q], questions: [q], index: 0, reviewing: false, missed: [], firstTry: 0, continuous: true, practiced });
+    audio.stop(); resetAnswer("recall"); setLesson(item.lesson);
+    setRun({ original: [q], questions: [q], index: 0, reviewing: false, missed: [], firstTry: 0, continuous: true, practiced, written: [] });
     setScreen("play"); readQuestion(q);
   }
   function record(outcome: "correct" | "miss" | "hint") {
@@ -103,14 +122,18 @@ export default function Grade1CApp() {
   function markMissed(outcome: "miss" | "hint") {
     if (!question || solvedOnce.current) return;
     record(outcome);
+    if (question.mode === "trace") { writingHadHelp.current = true; writingAttemptHelp.current = true; return; }
     setRun(current => current && !current.reviewing && !current.missed.includes(question.word.id) ? { ...current, missed: [...current.missed, question.word.id] } : current);
   }
   function solved(lastStrokeName?: string) {
     if (!question || solvedOnce.current) return;
     solvedOnce.current = true;
-    // A tap fallback isn't evidence of successful handwriting.
-    if (!traceFallback) record("correct");
-    if (!wrong.length && !hint && !traceFallback) setRun(current => current && !current.reviewing ? { ...current, firstTry: current.firstTry + 1 } : current);
+    record("correct");
+    setRun(current => current ? {
+      ...current,
+      written: question.mode === "trace" ? [...new Set([...current.written, question.word.id])] : current.written,
+      firstTry: current.firstTry + Number(!current.reviewing && !wrong.length && !hint && !writingHadHelp.current),
+    } : current);
     setFeedback("correct"); if (audio.enabled) playDing();
     audio.narrate([...(lastStrokeName ? [{ text: lastStrokeName, language: "zh" as const }] : []), { text: question.word.hanzi, language: "zh" }]);
   }
@@ -118,11 +141,12 @@ export default function Grade1CApp() {
     if (!question || solvedOnce.current) return;
     if (id === question.word.id) { solved(); return; }
     setWrong(previous => [...new Set([...previous, id])]); setFeedback("wrong");
-    if (!traceFallback) markMissed("miss");
+    markMissed("miss");
   }
   function finish() {
-    if (!run) return;
+    if (!run || (lesson.kind === "writing" && !run.original.every(q => run.written.includes(q.word.id)))) return;
     const updated = saveCompletion(progress, lesson.id, run.firstTry / run.original.length);
+    if (lesson.kind === "writing") updated[lesson.id].handwritingVerified = true;
     setProgress(updated); save(PRACTICE_PROGRESS_KEY, updated); setScreen("complete"); audio.stop();
     if (audio.enabled) playTada();
     if (!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) burstConfetti();
@@ -154,26 +178,27 @@ export default function Grade1CApp() {
           <button className="one-c-button primary" disabled={!unlocked} onClick={startContinuous}>{unlocked ? "Continuous play →" : "🔒 Continuous play"}</button>
         </section>
         {notice && <p role="status" className="one-c-review-note">{notice}</p>}
+        {needsWritingCheck && <p className="one-c-review-note">Writing stars now need a full attempt without hints. Your earlier practice is saved.</p>}
         {tricky.length > 0 && <section className="one-c-tricky"><h2>Getting extra practice</h2><div>{tricky.map(([key, result]) => <span key={key}><strong lang="zh-CN">{key.split(":")[1]}</strong> {key.startsWith("write:") ? "Writing" : "Reading"}<small>{result.misses} {result.misses === 1 ? "tricky attempt" : "tricky attempts"}</small></span>)}</div></section>}
         <PenguinPath currentWeek={currentWeek} progress={progress} initialLessonId={mapPosition.from} destinationLessonId={mapPosition.to} onStart={startLesson} headingRef={heading}/>
         <div className="one-c-audio-controls"><button className="one-c-button secondary" onClick={() => { audio.stop(); setScreen("strokes"); }}>✏️ Learn strokes · 笔画</button></div>
 
-        <details className="one-c-family-note"><summary>For grown-ups</summary><p>19 weeks, with separate reading and writing lists from the full Grade 1 character sheet. Each chapter maps to the same numbered week. Weeks open on Mondays, using the September 1, 2026 school start and Pacific time.</p><p>Practice starts immediately. Mistakes and hints give characters more weight in continuous play; successful practice gradually reduces that extra weight. Reading and handwriting are tracked separately. Only available weeks enter the practice pool.</p><p>Progress and word history stay in this browser. Earlier character-practice stars are carried over where they cover a whole new activity; the old save is retained. No microphone or account is needed.</p></details>
+        <details className="one-c-family-note"><summary>For grown-ups</summary><p>19 weeks, with separate reading and writing lists from the full Grade 1 character sheet. Each chapter maps to the same numbered week. Weeks open on Mondays, using the September 1, 2026 school start and Pacific time.</p><p>Practice starts immediately. Mistakes and hints give characters more weight in continuous play; successful practice gradually reduces that extra weight. Reading and handwriting are tracked separately. Only available weeks enter the practice pool.</p><p>Progress and word history stay in this browser. Earlier reading stars are carried over where they cover a whole new activity. Writing stars require every character to be written without hints; earlier tracing records are retained. No microphone or account is needed.</p></details>
       </>}
       {screen === "play" && run && question && <section className="one-c-activity">
-        <div className="one-c-activity-heading"><div><div className="one-c-eyebrow">{run.continuous ? "Continuous play" : `Week ${lesson.week}`} · {skillFor(lesson) === "write" ? "Write" : "Read"}{run.reviewing ? " · Review" : ""}</div><h1 ref={heading} tabIndex={-1}>{question.mode === "trace" ? traceFallback ? "Find the character" : "Write the character" : "What does this mean?"}</h1></div><span className="one-c-step-count">{run.continuous ? `${run.practiced} practiced` : `${run.index + 1} / ${run.questions.length}`}</span></div>
+        <div className="one-c-activity-heading"><div><div className="one-c-eyebrow">{run.continuous ? "Continuous play" : `Week ${lesson.week}`} · {skillFor(lesson) === "write" ? "Write" : "Read"}{run.reviewing ? " · Review" : ""}</div><h1 ref={heading} tabIndex={-1}>{question.mode === "trace" ? writingMode === "guided" ? "Trace the character" : "Write it on your own" : "What does this mean?"}</h1></div><span className="one-c-step-count">{run.continuous ? `${run.practiced} practiced` : `${run.index + 1} / ${run.questions.length}`}</span></div>
         {!run.continuous && <progress className="one-c-progress" value={run.index + Number(feedback === "correct")} max={run.questions.length} aria-label={run.reviewing ? "Review progress" : "Practice progress"}/>}
         <div className="one-c-play-card">
           {question.mode === "meaning" ? <div className="one-c-prompt-hanzi" lang="zh-CN">{question.word.hanzi}</div> : <><div className="one-c-prompt-english">{question.word.english}</div><div className="one-c-pinyin" lang="zh-Latn-pinyin">{question.word.pinyin}</div></>}
           <div className="one-c-audio-controls"><button className="one-c-button secondary" disabled={!audio.enabled} onClick={() => listen(question.word)}><SoundIcon/> Listen</button><button className="one-c-button quiet" disabled={!audio.enabled} onClick={() => listen(question.word, true)}>Slow</button></div>
-          {question.mode === "trace" && !traceFallback && <TraceCharacter key={question.id} hanzi={question.word.hanzi} onStrokeName={name => audio.play(name)} onComplete={solved} onHelp={() => { markMissed("hint"); setHint(true); }} onFallback={() => setTraceFallback(true)}/>}
-          {traceFallback && <p className="one-c-small">Drawing unavailable? You can finish with a tap. <button className="one-c-text-button" onClick={() => setTraceFallback(false)}>Try drawing again</button></p>}
-          {(question.mode !== "trace" || traceFallback) && <div className="one-c-options sentence-choices" role="group" aria-label="Answer choices">{question.options.map(option => <button key={option.id} className={`one-c-option ${traceFallback ? "chinese" : ""} ${wrong.includes(option.id) ? "wrong" : ""}`} disabled={wrong.includes(option.id) || feedback === "correct"} onClick={() => answer(option.id)}><span className="one-c-option-label" lang={traceFallback ? "zh-CN" : "en"}>{traceFallback ? option.hanzi : option.english}</span></button>)}</div>}
+          {question.mode === "trace" && <TraceCharacter key={`${question.id}-${writingAttempt}`} hanzi={question.word.hanzi} mode={writingMode} onStrokeName={name => audio.play(name)} onComplete={completeWriting} onHelp={kind => { markMissed(kind); setHint(true); }}/>}
+          {(question.mode !== "trace") && <div className="one-c-options sentence-choices" role="group" aria-label="Answer choices">{question.options.map(option => <button key={option.id} className={`one-c-option ${wrong.includes(option.id) ? "wrong" : ""}`} disabled={wrong.includes(option.id) || feedback === "correct"} onClick={() => answer(option.id)}><span className="one-c-option-label" lang="en">{option.english}</span></button>)}</div>}
           {feedback !== "correct" && question.mode !== "trace" && <div className="one-c-hint">{hint ? detail(question.word) : <button className="one-c-text-button" onClick={() => { setHint(true); markMissed("hint"); }}>Hint</button>}</div>}
         </div>
-        <div className={`one-c-feedback ${feedback} ${writingComplete ? "one-c-writing-feedback" : ""}`} aria-live="polite" aria-atomic="true">
+        <div className={`one-c-feedback ${writingComplete ? "correct" : feedback} ${writingComplete ? "one-c-writing-feedback" : ""}`} aria-live="polite" aria-atomic="true">
           {feedback === "wrong" && <p>Try again.</p>}
-          {feedback === "correct" && <>{writingComplete ? <span className="one-c-writing-success"><span aria-hidden="true">✓</span>{traceFallback ? "Correct!" : "You wrote it!"}</span> : <div><strong>✓</strong>{detail(question.word)}</div>}<button className="one-c-button primary" ref={nextButton} aria-label={run.continuous ? "Next practice question" : "Next question"} onClick={advance}>{run.continuous || run.index + 1 < run.questions.length ? "Next" : !run.reviewing && run.missed.length ? "Review" : "Done"} →</button></>}
+          {writingAction && <><span className="one-c-writing-success">{writingAction === "recall" ? "Trace complete" : "One more try"}</span><button className="one-c-button primary" ref={nextButton} onClick={beginRecall}>{writingAction === "recall" ? "Your turn" : "Try again"} →</button></>}
+          {feedback === "correct" && <>{writingComplete ? <span className="one-c-writing-success"><span aria-hidden="true">✓</span>You wrote it!</span> : <div><strong>✓</strong>{detail(question.word)}</div>}<button className="one-c-button primary" ref={nextButton} aria-label={run.continuous ? "Next practice question" : "Next question"} onClick={advance}>{run.continuous || run.index + 1 < run.questions.length ? "Next" : !run.reviewing && run.missed.length ? "Review" : "Done"} →</button></>}
         </div>
       </section>}
       {screen === "complete" && run && <section className="one-c-complete">

@@ -29,9 +29,14 @@ export function readPracticeProgress(raw: string | null, legacyRaw: string | nul
     .map(lesson => [lesson.id, { completions: 1, best: 0 }]));
 }
 
+export function activityComplete(lesson: Lesson, progress: Progress): boolean {
+  const saved = progress[lesson.id];
+  return (saved?.completions ?? 0) > 0 && (lesson.kind !== "writing" || saved.handwritingVerified === true);
+}
+
 export function continuousUnlocked(progress: Progress, currentWeek: number): boolean {
   const available = availableLessons(currentWeek);
-  return available.length > 0 && available.every(lesson => (progress[lesson.id]?.completions ?? 0) > 0);
+  return available.length > 0 && available.every(lesson => activityComplete(lesson, progress));
 }
 
 export function parseWordHistory(raw: string | null): WordHistory {

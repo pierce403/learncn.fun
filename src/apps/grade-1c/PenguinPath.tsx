@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties, type Ref } from "react
 import type { Lesson } from "./curriculum";
 import { WEEKS, availableLessons } from "./weekly-curriculum";
 import type { Progress } from "./game";
+import { activityComplete } from "./practice";
 import { HOP_DURATION_MS, ICE_MAP_HEIGHT, ICE_STOPS, ICE_WEEKS, POLAR_ART, iceRoutePath, lessonIndex, nextHop } from "./ice-path";
 
 type Props = {
@@ -21,7 +22,7 @@ export default function PenguinPath({ currentWeek, progress, initialLessonId, de
   const selected = ICE_STOPS[destination].lesson;
   const moving = current !== destination;
   const available = availableLessons(currentWeek);
-  const completed = available.filter(lesson => progress[lesson.id]).length;
+  const completed = available.filter(lesson => activityComplete(lesson, progress)).length;
   const startButton = useRef<HTMLButtonElement>(null);
   const hasExplored = useRef(false);
   const wasMoving = useRef(false);
@@ -83,28 +84,23 @@ export default function PenguinPath({ currentWeek, progress, initialLessonId, de
       <div className="ice-star-total" aria-label={`${completed} of ${available.length} lesson stars earned`}><span aria-hidden="true">★</span><strong>{completed}<span> / {available.length}</span></strong></div>
     </div>
 
-    <nav className="ice-week-nav" aria-label="Choose a week">{WEEKS.map((week) => <button key={week.number} className={`ice-week-link week-${week.number}`} aria-pressed={selected.week === week.number} disabled={moving || week.number > currentWeek} onClick={() => {
-      const next = week.lessons.find((lesson) => !progress[lesson.id]) ?? week.lessons[0];
-      exploreLesson(lessonIndex(next.id));
-    }}><strong>Week {week.number}</strong><span>{week.number > currentWeek ? `🔒 Opens ${week.dates.split("–")[0]}` : week.title}</span><small>★ {week.lessons.filter((lesson) => progress[lesson.id]).length} / {week.lessons.length}</small></button>)}</nav>
-
     <div className="ice-journey-layout">
       <div className="ice-ocean" aria-label={`Reading and writing islands for ${WEEKS.length} weeks`} style={{ backgroundImage: `url(${POLAR_ART.water})`, height: `${ICE_MAP_HEIGHT}rem` }}>
         {ICE_WEEKS.map((week) => <div key={week.number} className={`ice-week-banner week-${week.number}`} style={{ top: `${week.y}%` }}>
           <div><h2>Week {week.number}</h2><span>{week.dates} · {week.title}</span></div>
-          <strong aria-label={`${week.lessons.filter((lesson) => progress[lesson.id]).length} of ${week.lessons.length} stars`}>★ {week.lessons.filter((lesson) => progress[lesson.id]).length}/{week.lessons.length}</strong>
+          <strong aria-label={`${week.lessons.filter((lesson) => activityComplete(lesson, progress)).length} of ${week.lessons.length} stars`}>★ {week.lessons.filter((lesson) => activityComplete(lesson, progress)).length}/{week.lessons.length}</strong>
         </div>)}
         <svg className="ice-route-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">{ICE_WEEKS.map((week) => <path key={week.number} d={iceRoutePath(week.stops)} />)}</svg>
         <ol className="ice-stops" aria-label="Lesson path">
-          {ICE_STOPS.map(({ lesson, lessonNumber, x, y }, index) => <li key={lesson.id} className={`ice-stop ${x < 50 ? "left" : "right"} week-${lesson.week} ${lesson.week > currentWeek ? "locked" : ""} ${progress[lesson.id] ? "completed" : ""} ${index === destination ? "selected" : ""}`} style={{ left: `${x}%`, top: `${y}%`, "--float-delay": `${index * -.4}s` } as CSSProperties}>
-            <button className="ice-stop-button" disabled={moving || lesson.week > currentWeek} aria-current={index === destination ? "step" : undefined} aria-label={`Week ${lesson.week}, lesson ${lessonNumber}: ${lesson.title}. ${lesson.week > currentWeek ? "Locked until this school week." : progress[lesson.id] ? "Star earned. Play again." : "Ready to play."}`} onClick={() => exploreLesson(index)}>
-              <span className="ice-platform" aria-hidden="true"><img src={POLAR_ART.ice} alt="" width="1254" height="1254" draggable={false} /><span className={`ice-stop-number ${current === index ? "occupied" : ""}`}>{lesson.week > currentWeek ? "🔒" : progress[lesson.id] ? "★" : lessonNumber}</span></span>
+          {ICE_STOPS.map(({ lesson, lessonNumber, x, y }, index) => <li key={lesson.id} className={`ice-stop ${x < 50 ? "left" : "right"} week-${lesson.week} ${lesson.week > currentWeek ? "locked" : ""} ${activityComplete(lesson, progress) ? "completed" : ""} ${index === destination ? "selected" : ""}`} style={{ left: `${x}%`, top: `${y}%`, "--float-delay": `${index * -.4}s` } as CSSProperties}>
+            <button className="ice-stop-button" disabled={moving || lesson.week > currentWeek} aria-current={index === destination ? "step" : undefined} aria-label={`Week ${lesson.week}, lesson ${lessonNumber}: ${lesson.title}. ${lesson.week > currentWeek ? "Locked until this school week." : activityComplete(lesson, progress) ? "Star earned. Play again." : "Ready to play."}`} onClick={() => exploreLesson(index)}>
+              <span className="ice-platform" aria-hidden="true"><img src={POLAR_ART.ice} alt="" width="1254" height="1254" draggable={false} /><span className={`ice-stop-number ${current === index ? "occupied" : ""}`}>{lesson.week > currentWeek ? "🔒" : activityComplete(lesson, progress) ? "★" : lessonNumber}</span></span>
             </button>
             <div className="ice-stop-label">
               <button className="ice-lesson-select" disabled={moving || lesson.week > currentWeek} aria-current={index === destination ? "step" : undefined} onClick={() => exploreLesson(index)}>
-                <span className="ice-stop-caption">{lesson.week > currentWeek ? "🔒 Coming later" : progress[lesson.id] ? "★ Star earned" : `Week ${lesson.week} · ${lessonNumber}`}</span><strong>{lesson.title}</strong><span lang={lesson.kind === "sounds" ? "zh-Latn-pinyin" : "zh-CN"}>{lesson.chinese}</span>
+                <span className="ice-stop-caption">{lesson.week > currentWeek ? "🔒 Coming later" : activityComplete(lesson, progress) ? "★ Star earned" : `Week ${lesson.week} · ${lessonNumber}`}</span><strong>{lesson.title}</strong><span lang={lesson.kind === "sounds" ? "zh-Latn-pinyin" : "zh-CN"}>{lesson.chinese}</span>
               </button>
-              {index === destination && lesson.week <= currentWeek && <button className="one-c-button primary ice-start-lesson" ref={startButton} aria-label={`${progress[lesson.id] ? "Practice again" : "Start lesson"}: ${lesson.title}`} onClick={() => onStart(lesson)}>{progress[lesson.id] ? "Again" : "Start"}</button>}
+              {index === destination && lesson.week <= currentWeek && <button className="one-c-button primary ice-start-lesson" ref={startButton} aria-label={`${activityComplete(lesson, progress) ? "Practice again" : "Start lesson"}: ${lesson.title}`} onClick={() => onStart(lesson)}>{activityComplete(lesson, progress) ? "Again" : "Start"}</button>}
             </div>
           </li>)}
         </ol>

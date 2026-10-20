@@ -2,6 +2,7 @@
 import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Grade1CApp from "./Grade1CApp";
+import type { WritingAttempt, WritingMode } from "./TraceCharacter";
 import { availableLessons, LESSONS } from "./weekly-curriculum";
 import { PRACTICE_PROGRESS_KEY, WORD_HISTORY_KEY } from "./practice";
 const audio = vi.hoisted(() => ({ enabled: true, canListen: true, message: "", play: vi.fn(), narrate: vi.fn(), stop: vi.fn(), toggle: vi.fn() }));
@@ -9,7 +10,7 @@ vi.mock("./useLessonAudio", () => ({ useLessonAudio: () => audio }));
 vi.mock("../../lib/confetti", () => ({ burstConfetti: vi.fn() }));
 vi.mock("../../lib/sfx", () => ({ playDing: vi.fn(), playTada: vi.fn() }));
 vi.mock("../../components/PwaInstall", () => ({ PwaInstallPrompt: () => null }));
-vi.mock("./TraceCharacter", () => ({ default: ({ hanzi, onComplete, onHelp, onFallback }: { hanzi: string; onComplete: () => void; onHelp: () => void; onFallback: () => void }) => <div aria-label={`Draw ${hanzi}`}><button onClick={onHelp}>Stroke mistake</button><button onClick={onComplete}>Finish drawing</button><button onClick={onFallback}>Tap instead</button></div> }));
+vi.mock("./TraceCharacter", () => ({ default: ({ hanzi, mode, onComplete, onHelp }: { hanzi: string; mode: WritingMode; onComplete: (result: WritingAttempt) => void; onHelp: (kind: "miss" | "hint") => void }) => <div aria-label={`Draw ${hanzi}`}><span>{mode} pad</span><button onClick={() => onHelp("miss")}>Stroke mistake</button><button onClick={() => onComplete({ assisted: mode === "guided" })}>Finish drawing</button><button onClick={() => onComplete({ assisted: true })}>Finish with help</button></div> }));
 beforeEach(() => {
   localStorage.clear(); vi.useFakeTimers(); vi.setSystemTime(new Date("2026-10-20T02:47:00Z"));
   vi.spyOn(window, "scrollTo").mockImplementation(() => {});
@@ -18,7 +19,7 @@ beforeEach(() => {
   vi.spyOn(Math, "random").mockReturnValue(.4);
 });
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.clearAllMocks(); vi.useRealTimers(); });
-function completeThrough(week: number) { localStorage.setItem(PRACTICE_PROGRESS_KEY, JSON.stringify(Object.fromEntries(availableLessons(week).map(l => [l.id, { completions: 1, best: 1 }])))); }
+function completeThrough(week: number) { localStorage.setItem(PRACTICE_PROGRESS_KEY, JSON.stringify(Object.fromEntries(availableLessons(week).map(l => [l.id, { completions: 1, best: 1, handwritingVerified: true as const }])))); }
 function clickNext() { fireEvent.click(screen.getByRole("button", { name: "Next question" })); }
 function answerCurrent() {
   const character = document.querySelector('.one-c-prompt-hanzi')!.textContent;
@@ -30,11 +31,12 @@ function answerCurrent() {
 describe("direct weekly practice", () => {
   it("locks future weeks and continuous play, then opens reading without teaching cards", () => {
     render(<Grade1CApp/>);
-    expect((screen.getByRole("button", { name: /Week 9.*Opens/ }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole("button", { name: "Week 9, lesson 1: Read. Locked until this school week." }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole("button", { name: /🔒 Continuous play/ }) as HTMLButtonElement).disabled).toBe(true);
     fireEvent.click(screen.getByRole("button", { name: "Start lesson: Read" }));
     expect(screen.getByRole("heading", { name: "What does this mean?" })).toBeTruthy();
     expect(screen.queryByText("Meet your new words.")).toBeNull();
+    expect(screen.queryByRole("navigation", { name: "Choose a week" })).toBeNull();
     expect(audio.narrate).not.toHaveBeenCalled();
     const word = answerCurrent();
     const history = JSON.parse(localStorage.getItem(WORD_HISTORY_KEY)!);
@@ -60,12 +62,41 @@ describe("direct weekly practice", () => {
     fireEvent.click(screen.getByRole("button", { name: "Map →" }));
     await act(async () => {});
     fireEvent.click(screen.getByRole("button", { name: "Start lesson: Write" }));
-    expect(screen.getByRole("heading", { name: "Write the character" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Trace the character" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Stroke mistake" }));
     fireEvent.click(screen.getByRole("button", { name: "Stroke mistake" }));
     fireEvent.click(screen.getByRole("button", { name: "Finish drawing" }));
     const rows = Object.entries(JSON.parse(localStorage.getItem(WORD_HISTORY_KEY)!)).filter(([key]) => key.startsWith("write:"));
     expect(rows).toHaveLength(1); expect(rows[0][1]).toMatchObject({ attempts: 1, misses: 1, successes: 0 });
+  });
+  it("requires an unassisted whole character after tracing and after every assisted attempt", () => {
+    render(<Grade1CApp/>);
+    fireEvent.click(screen.getByRole("button", { name: "Week 1, lesson 2: Write. Ready to play." }));
+    fireEvent.click(screen.getByRole("button", { name: "Start lesson: Write" }));
+    for (let i = 0; i < 5; i++) {
+      expect(screen.getByText("guided pad")).toBeTruthy();
+      fireEvent.click(screen.getByRole("button", { name: "Finish drawing" }));
+      expect(screen.queryByRole("button", { name: "Next question" })).toBeNull();
+      expect(localStorage.getItem(PRACTICE_PROGRESS_KEY)).toBeNull();
+      fireEvent.click(screen.getByRole("button", { name: "Your turn →" }));
+      expect(screen.getByText("recall pad")).toBeTruthy();
+      if (i === 0) {
+        fireEvent.click(screen.getByRole("button", { name: "Stroke mistake" }));
+        fireEvent.click(screen.getByRole("button", { name: "Finish drawing" }));
+        expect(screen.queryByRole("button", { name: "Next question" })).toBeNull();
+        expect(screen.getByText("1 / 5")).toBeTruthy();
+        fireEvent.click(screen.getByRole("button", { name: "Try again →" }));
+        expect(screen.getByText("recall pad")).toBeTruthy();
+      }
+      fireEvent.click(screen.getByRole("button", { name: "Finish drawing" }));
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "Next question" }));
+      clickNext();
+    }
+    expect(screen.getByRole("heading", { name: "Practice complete!" })).toBeTruthy();
+    expect(JSON.parse(localStorage.getItem(PRACTICE_PROGRESS_KEY)!)["characters-w1-write"]).toMatchObject({ completions: 1, handwritingVerified: true });
+    const history = Object.values(JSON.parse(localStorage.getItem(WORD_HISTORY_KEY)!));
+    expect(history).toHaveLength(5);
+    expect(history).toContainEqual(expect.objectContaining({ attempts: 2, misses: 1, successes: 1 }));
   });
   it("unlocks an endless session after all current activities and rechecks when the next week opens", () => {
     completeThrough(8); render(<Grade1CApp/>);
@@ -78,6 +109,6 @@ describe("direct weekly practice", () => {
     expect(screen.getByText("1 characters practiced.")).toBeTruthy();
     act(() => { vi.setSystemTime(new Date("2026-10-26T07:00:00Z")); window.dispatchEvent(new Event("focus")); });
     expect((screen.getByRole("button", { name: /🔒 Continuous play/ }) as HTMLButtonElement).disabled).toBe(true);
-    expect((screen.getByRole("button", { name: /Week 9.*Chapter 9/ }) as HTMLButtonElement).disabled).toBe(false);
+    expect((screen.getByRole("button", { name: "Week 9, lesson 1: Read. Ready to play." }) as HTMLButtonElement).disabled).toBe(false);
   });
 });

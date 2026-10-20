@@ -17,7 +17,7 @@ describe("weekly penguin path", () => {
   });
   it("resumes unfinished practice without routing into locked weeks", () => {
     expect(nextIceLesson({}, undefined, 8)).toBe("characters-w1-read");
-    const complete = Object.fromEntries(availableLessons(8).map(l => [l.id, { completions: 1, best: 1 }]));
+    const complete = Object.fromEntries(availableLessons(8).map(l => [l.id, { completions: 1, best: 1, handwritingVerified: true as const }]));
     expect(nextIceLesson(complete, undefined, 8)).toBe("characters-w8-write");
     expect(nextIceLesson(complete, "characters-w8-write", 8)).toBe("characters-w8-write");
     expect(nextIceLesson(complete, undefined, 9)).toBe("characters-w9-read");
