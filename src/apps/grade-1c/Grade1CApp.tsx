@@ -40,6 +40,7 @@ export default function Grade1CApp() {
   const nextButton = useRef<HTMLButtonElement>(null);
   const audio = useLessonAudio();
   const question = run?.questions[run.index];
+  const writingComplete = screen === "play" && question?.mode === "trace" && feedback === "correct";
   const available = availableLessons(currentWeek);
   const completed = available.filter(item => progress[item.id]).length;
   const unlocked = continuousUnlocked(progress, currentWeek);
@@ -141,7 +142,7 @@ export default function Grade1CApp() {
   function listen(word: Word, slow = false) { audio.play(word.hanzi, "zh", slow); }
   if (screen === "strokes") return <StrokesApp homeLabel="Map" initialAudio={audio.enabled} onHome={() => setScreen("home")} />;
 
-  return <div className="one-c" style={{ "--lesson-accent": lesson.kind === "writing" ? "#6ee7b7" : "#67e8f9" } as CSSProperties}><div className="one-c-shell">
+  return <div className={`one-c ${writingComplete ? "one-c-writing-complete" : ""}`} style={{ "--lesson-accent": lesson.kind === "writing" ? "#6ee7b7" : "#67e8f9" } as CSSProperties}><div className="one-c-shell">
     <header className="one-c-header"><a className="one-c-brand" href="/">learncn<span>.fun</span></a><div className="one-c-header-actions">
       {screen !== "home" && <button className="one-c-button quiet" aria-label={run?.continuous ? "End continuous practice" : "Back to the ice path"} onClick={() => { if (run?.continuous) setNotice(`${run.practiced + Number(feedback === "correct")} characters practiced.`); showMap(); }}>{run?.continuous ? "End practice" : "Map"}</button>}
       <button className="one-c-sound-toggle" aria-label={audio.enabled ? "Turn sound off" : "Turn sound on"} aria-pressed={audio.enabled} onClick={audio.toggle}><SoundIcon/><span>Sound</span></button>
@@ -170,9 +171,9 @@ export default function Grade1CApp() {
           {(question.mode !== "trace" || traceFallback) && <div className="one-c-options sentence-choices" role="group" aria-label="Answer choices">{question.options.map(option => <button key={option.id} className={`one-c-option ${traceFallback ? "chinese" : ""} ${wrong.includes(option.id) ? "wrong" : ""}`} disabled={wrong.includes(option.id) || feedback === "correct"} onClick={() => answer(option.id)}><span className="one-c-option-label" lang={traceFallback ? "zh-CN" : "en"}>{traceFallback ? option.hanzi : option.english}</span></button>)}</div>}
           {feedback !== "correct" && question.mode !== "trace" && <div className="one-c-hint">{hint ? detail(question.word) : <button className="one-c-text-button" onClick={() => { setHint(true); markMissed("hint"); }}>Hint</button>}</div>}
         </div>
-        <div className={`one-c-feedback ${feedback}`} aria-live="polite" aria-atomic="true">
+        <div className={`one-c-feedback ${feedback} ${writingComplete ? "one-c-writing-feedback" : ""}`} aria-live="polite" aria-atomic="true">
           {feedback === "wrong" && <p>Try again.</p>}
-          {feedback === "correct" && <><div><strong>✓</strong>{detail(question.word)}</div><button className="one-c-button primary" ref={nextButton} aria-label={run.continuous ? "Next practice question" : "Next question"} onClick={advance}>{run.continuous || run.index + 1 < run.questions.length ? "Next" : !run.reviewing && run.missed.length ? "Review" : "Done"} →</button></>}
+          {feedback === "correct" && <>{writingComplete ? <span className="one-c-writing-success"><span aria-hidden="true">✓</span>{traceFallback ? "Correct!" : "You wrote it!"}</span> : <div><strong>✓</strong>{detail(question.word)}</div>}<button className="one-c-button primary" ref={nextButton} aria-label={run.continuous ? "Next practice question" : "Next question"} onClick={advance}>{run.continuous || run.index + 1 < run.questions.length ? "Next" : !run.reviewing && run.missed.length ? "Review" : "Done"} →</button></>}
         </div>
       </section>}
       {screen === "complete" && run && <section className="one-c-complete">
