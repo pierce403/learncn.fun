@@ -34,7 +34,7 @@ A reading activity earns a star after its practice and review. Each writing char
 
 ## Adaptive continuous play
 
-Continuous play mixes reading and handwriting without a fixed round length. Its writing questions start directly from memory, with the same help-and-retry rule. Next draws a new question; End practice returns to the map. Only unlocked characters are candidates. Each character/skill pair appears once in the pool even if it appears in multiple weeks. The previous three pairs are excluded when other candidates are available.
+The Continuous play button sits in the map header beside the trophy case; its locked tooltip explains the remaining requirement and activity count. Continuous play mixes reading and handwriting without a fixed round length. Its writing questions start directly from memory, with the same help-and-retry rule. Next draws a new question; End practice returns to the map. Only unlocked characters are candidates. Each character/skill pair appears once in the pool even if it appears in multiple weeks. The previous three pairs are excluded when other candidates are available.
 
 Word history is keyed by `read:<hanzi>` or `write:<hanzi>` and saves after the first result on each question. A wrong answer or hint is recorded immediately, so leaving the question doesn't erase the difficulty. Retrying that same question successfully does not overwrite the miss or create a clean result. A later review or fresh unassisted writing retry is a new attempt. Repeated wrong taps/stroke hints within one question do not inflate the attempt count.
 

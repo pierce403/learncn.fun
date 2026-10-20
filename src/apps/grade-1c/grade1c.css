@@ -21,6 +21,10 @@
 .one-c-header-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
 .one-c-sound-toggle { display: inline-flex; align-items: center; justify-content: center; gap: .55rem; min-height: 44px; padding: .5rem .85rem; border: 1px solid #35435b; border-radius: 999px; background: #111e32; color: #e2e8f0; font-size: .875rem !important; }
 .one-c-sound-toggle[aria-pressed="false"] { color: #a9b7cd; }
+.one-c-continuous-button { display: inline-flex; align-items: center; justify-content: center; gap: .45rem; min-height: 48px; padding: .55rem .8rem; border: 1px solid #4daba3; border-radius: 999px; background: #123b38; color: #b4f5e1; font-size: .875rem !important; font-weight: 700 !important; white-space: nowrap; }
+.one-c-continuous-button:not(:disabled):hover { background: #1b514a; }
+.one-c-continuous-button:disabled { opacity: .7; }
+.one-c-continuous-button > span { font-size: 1.15rem; line-height: 1; }
 .one-c-welcome { padding: 2.5rem 0 2.8rem; display: grid; grid-template-columns: minmax(0, 1fr) 260px; column-gap: 2.5rem; }
 .one-c-eyebrow { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; font-size: .875rem; font-weight: 650; color: #b7c7db; }
 .one-c-welcome .one-c-eyebrow { grid-column: 1 / -1; }
@@ -248,11 +252,6 @@
 .one-c-die.die-1 button { color: #fde68a; }
 .one-c-die button[aria-pressed="true"] { background: #ffffff20; font-size: 1.6rem; }
 
-.one-c-continuous { display: flex; gap: 1.5rem; align-items: center; justify-content: space-between; border: 1px solid #5aa692; background: #123b38; padding: 1.25rem; border-radius: 20px; margin: 1.5rem 0 .5rem; }
-.one-c-continuous h2 { font-size: 1.15rem; margin: 0 0 .35rem; font-weight: 750; }
-.one-c-continuous p { color: #b7d5d1; margin: .3rem 0; font-size: .9rem; }
-.one-c-continuous button { flex-shrink: 0; }
-@media(max-width:600px) { .one-c-continuous { flex-direction: column; align-items: stretch; gap: .8rem; } }
 .one-c-options > .one-c-option { width: 100%; background: #1b2c43; border: 2px solid #3d536f; border-radius: 15px; }
 .one-c-options > .one-c-option:not(:disabled):hover { border-color: #b9d3e9; background: #263e5b; }
 .one-c-options > .one-c-option.wrong { border-color: #d8887e; background: #462932; }

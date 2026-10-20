@@ -54,6 +54,7 @@ export default function Grade1CApp() {
   const available = availableLessons(currentWeek);
   const completed = available.filter(item => activityComplete(item, progress)).length;
   const unlocked = continuousUnlocked(progress, currentWeek);
+  const continuousHelp = unlocked ? "Read and write, with extra practice for tricky characters." : `Complete Read and Write in weeks 1–${currentWeek || 1} to unlock. ${completed} / ${available.length} activities complete.`;
   const needsWritingCheck = available.some(item => item.kind === "writing" && progress[item.id] && !activityComplete(item, progress));
   const nextLessonId = nextIceLesson(progress, lesson.id, currentWeek);
 
@@ -186,16 +187,13 @@ export default function Grade1CApp() {
 
   return <div className={`one-c ${writingComplete ? "one-c-writing-complete" : ""} ${readingActive ? "one-c-reading" : ""}`} style={{ "--lesson-accent": lesson.kind === "writing" ? "#6ee7b7" : "#67e8f9" } as CSSProperties}><div className="one-c-shell">
     <header className="one-c-header"><a className="one-c-brand" href="/">learncn<span>.fun</span></a><div className="one-c-header-actions">
+      {screen === "home" && <><button className="one-c-continuous-button" aria-label="Continuous play" aria-describedby="continuous-help" title={continuousHelp} disabled={!unlocked} onClick={startContinuous}><span aria-hidden="true">{unlocked ? "∞" : "🔒"}</span>Continuous play</button><span id="continuous-help" hidden>{continuousHelp}</span></>}
       {screen === "home" && <button className="one-c-trophy-button" aria-label="Open trophy case" title="Trophy case" onClick={() => { audio.stop(); setScreen("trophies"); }}><TrophyIcon/></button>}
       {screen !== "home" && <button className="one-c-button quiet" aria-label={run?.continuous ? "End continuous practice" : "Back to the ice path"} onClick={() => { if (run?.continuous) setNotice(`${run.practiced + Number(feedback === "correct")} characters practiced.`); showMap(); }}>{run?.continuous ? "End practice" : "Map"}</button>}
       <button className="one-c-sound-toggle" aria-label={audio.enabled ? "Turn sound off" : "Turn sound on"} aria-pressed={audio.enabled} onClick={audio.toggle}><SoundIcon/><span>Sound</span></button>
     </div></header>
     <main>
       {screen === "home" && <><PwaInstallPrompt/>
-        <section className="one-c-continuous" aria-label="Continuous practice">
-          <div><h2>Continuous play</h2><p>{unlocked ? "Read and write, with extra practice for tricky characters." : `Complete Read and Write in weeks 1–${currentWeek || 1} to unlock.`}</p><span className="one-c-small">{completed} / {available.length} activities complete</span></div>
-          <button className="one-c-button primary" disabled={!unlocked} onClick={startContinuous}>{unlocked ? "Continuous play →" : "🔒 Continuous play"}</button>
-        </section>
         {notice && <p role="status" className="one-c-review-note">{notice}</p>}
         {needsWritingCheck && <p className="one-c-review-note">Writing stars now need a full attempt without hints. Your earlier practice is saved.</p>}
         <PenguinPath currentWeek={currentWeek} progress={progress} initialLessonId={mapPosition.from} destinationLessonId={mapPosition.to} onStart={startLesson} headingRef={heading}/>

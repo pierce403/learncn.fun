@@ -83,7 +83,7 @@ describe("direct weekly practice", () => {
   it("locks future weeks and continuous play, then opens reading without teaching cards", () => {
     render(<Grade1CApp/>);
     expect((screen.getByRole("button", { name: "Week 9, lesson 1: Read. Locked until this school week." }) as HTMLButtonElement).disabled).toBe(true);
-    expect((screen.getByRole("button", { name: /🔒 Continuous play/ }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole("button", { name: "Continuous play" }) as HTMLButtonElement).disabled).toBe(true);
     fireEvent.click(screen.getByRole("button", { name: "Start lesson: Read" }));
     expect(screen.getByRole("heading", { name: "What does this mean?" })).toBeTruthy();
     expect(screen.queryByText("Meet your new words.")).toBeNull();
@@ -181,7 +181,7 @@ describe("direct weekly practice", () => {
   });
   it("unlocks an endless session after all current activities and rechecks when the next week opens", () => {
     completeThrough(8); render(<Grade1CApp/>);
-    fireEvent.click(screen.getByRole("button", { name: "Continuous play →" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continuous play" }));
     expect(screen.getByText("0 practiced")).toBeTruthy();
     if (screen.queryByRole("button", { name: "Finish drawing" })) fireEvent.click(screen.getByRole("button", { name: "Finish drawing" })); else answerCurrent();
     fireEvent.click(screen.getByRole("button", { name: "Next practice question" }));
@@ -189,7 +189,7 @@ describe("direct weekly practice", () => {
     fireEvent.click(screen.getByRole("button", { name: "End continuous practice" }));
     expect(screen.getByText("1 characters practiced.")).toBeTruthy();
     act(() => { vi.setSystemTime(new Date("2026-10-26T07:00:00Z")); window.dispatchEvent(new Event("focus")); });
-    expect((screen.getByRole("button", { name: /🔒 Continuous play/ }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole("button", { name: "Continuous play" }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole("button", { name: "Week 9, lesson 1: Read. Ready to play." }) as HTMLButtonElement).disabled).toBe(false);
   });
 });
