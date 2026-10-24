@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import lists from "./character-lists.json";
 import { availableLessons, currentSchoolWeek, LESSONS, WEEKS } from "./weekly-curriculum";
+import { readingWord } from "./reading-vocabulary";
 import { practiceRound } from "./practice";
 
 describe("full Grade 1 character sheet", () => {
@@ -24,6 +25,21 @@ describe("full Grade 1 character sheet", () => {
       expect(word.pinyin).toBeTruthy(); expect(word.english).toBeTruthy();
       expect(word.audioText).toBeUndefined(); expect(word.example).toBeUndefined();
     }
+  });
+  it("uses full family words for reading while retaining single-character writing and saved keys", () => {
+    const forms = { 爸: "爸爸", 妈: "妈妈", 哥: "哥哥", 姐: "姐姐", 弟: "弟弟", 妹: "妹妹", 爷: "爷爷", 奶: "奶奶", 叔: "叔叔" };
+    for (const [character, full] of Object.entries(forms)) {
+      const original = { ...LESSONS[0].words[0], hanzi: character };
+      expect(readingWord(original).hanzi).toBe(full);
+      expect(readingWord(original).id).toBe(original.id);
+      expect(original.hanzi).toBe(character);
+    }
+    for (const lesson of LESSONS) for (const q of practiceRound(lesson, () => .4)) {
+      const answer = q.options.find(w => w.id === q.word.id)!;
+      expect(answer).toEqual(lesson.kind === "writing" ? q.word : readingWord(q.word));
+    }
+    const grandma = LESSONS.flatMap(l => l.words).find(w => w.hanzi === "奶")!;
+    expect(readingWord(grandma)).toMatchObject({ hanzi: "奶奶", pinyin: "nǎinai", english: "grandma", icon: "👵" });
   });
   it("uses Pacific calendar weeks, including Monday and daylight-saving boundaries", () => {
     expect(currentSchoolWeek(new Date("2026-09-01T06:59:59Z"))).toBe(0);

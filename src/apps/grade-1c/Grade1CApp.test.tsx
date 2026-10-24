@@ -2,6 +2,7 @@
 import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Grade1CApp from "./Grade1CApp";
+import { readingWord } from "./reading-vocabulary";
 import type { WritingAttempt, WritingMode } from "./TraceCharacter";
 import { availableLessons, LESSONS } from "./weekly-curriculum";
 import { PRACTICE_PROGRESS_KEY, WORD_HISTORY_KEY } from "./practice";
@@ -25,19 +26,19 @@ function completeThrough(week: number) { localStorage.setItem(PRACTICE_PROGRESS_
 function clickNext() { fireEvent.click(screen.getByRole("button", { name: "Next question" })); }
 function answerCurrent() {
   const character = document.querySelector('.one-c-prompt-hanzi')!.textContent;
-  const word = LESSONS.flatMap(l => l.words).find(w => w.hanzi === character)!;
-  fireEvent.click(within(screen.getByRole("group", { name: "Answer choices" })).getByRole("button", { name: word.english }));
+  const word = LESSONS.flatMap(l => l.words).find(w => readingWord(w).hanzi === character)!;
+  fireEvent.click(within(screen.getByRole("group", { name: "Answer choices" })).getByRole("button", { name: readingWord(word).english }));
   return word;
 }
 
 describe("direct weekly practice", () => {
-  it("plays the short reading cue per new card, pops on mistakes, and dings and says the correct character", () => {
+  it("says the displayed reading target per new card, pops on mistakes, and dings and says the correct character", () => {
     render(<Grade1CApp/>);
     expect(audio.play).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Start lesson: Read" }));
-    expect(audio.play).toHaveBeenCalledExactlyOnceWith("这是什么字？", "zh");
     const character = document.querySelector('.one-c-prompt-hanzi')!.textContent!;
-    const word = LESSONS[0].words.find(w => w.hanzi === character)!;
+    expect(audio.play).toHaveBeenCalledExactlyOnceWith(character, "zh");
+    const word = LESSONS[0].words.find(w => readingWord(w).hanzi === character)!;
     const choices = within(screen.getByRole("group", { name: "Answer choices" }));
     fireEvent.click(choices.getAllByRole("button").find(button => button !== choices.getByRole("button", { name: word.english }))!);
     expect(playPop).toHaveBeenCalledTimes(1);
@@ -47,7 +48,7 @@ describe("direct weekly practice", () => {
     expect(audio.narrate).toHaveBeenLastCalledWith([{ text: character, language: "zh" }]);
     clickNext();
     expect(audio.play).toHaveBeenCalledTimes(2);
-    expect(audio.play).toHaveBeenLastCalledWith("这是什么字？", "zh");
+    expect(audio.play).toHaveBeenLastCalledWith(document.querySelector(".one-c-prompt-hanzi")!.textContent, "zh");
     fireEvent.click(screen.getByRole("button", { name: "Back to the ice path" }));
     expect(audio.play).toHaveBeenCalledTimes(2);
   });
@@ -65,6 +66,27 @@ describe("direct weekly practice", () => {
     expect(document.querySelector('.one-c-prompt-hanzi')!.textContent).toBe(character);
     fireEvent.click(screen.getByRole("button", { name: "Listen" }));
     expect(audio.play).toHaveBeenLastCalledWith(character, "zh");
+  });
+  it("shows and announces 妹妹, uses its full pinyin, and retains character history", () => {
+    render(<Grade1CApp/>);
+    fireEvent.click(screen.getByRole("button", { name: "Week 8, lesson 1: Read. Ready to play." }));
+    fireEvent.click(screen.getByRole("button", { name: "Start lesson: Read" }));
+    for (let i = 0; i < 20 && document.querySelector(".one-c-prompt-hanzi")!.textContent !== "妹妹"; i++) { answerCurrent(); clickNext(); }
+    expect(document.querySelector(".one-c-prompt-hanzi")!.textContent).toBe("妹妹");
+    expect(audio.play).toHaveBeenLastCalledWith("妹妹", "zh");
+    fireEvent.click(screen.getByRole("button", { name: "Listen" }));
+    expect(audio.play).toHaveBeenLastCalledWith("妹妹", "zh");
+    audio.play.mockClear();
+    fireEvent.click(screen.getByRole("button", { name: "Answers EN" }));
+    expect(audio.play).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Listen" }));
+    expect(audio.play).toHaveBeenCalledExactlyOnceWith("妹妹", "zh");
+    fireEvent.click(within(screen.getByRole("group", { name: "Answer choices" })).getByRole("button", { name: "mèimei" }));
+    expect(audio.narrate).toHaveBeenLastCalledWith([{ text: "妹妹", language: "zh" }]);
+    expect(document.querySelector(".one-c-word-answer")!.textContent).toContain("妹妹mèimei");
+    const history = JSON.parse(localStorage.getItem(WORD_HISTORY_KEY)!);
+    expect(history["read:妹"]).toMatchObject({ attempts: 1, successes: 1 });
+    expect(history["read:妹妹"]).toBeUndefined();
   });
   it("keeps automatic prompts and feedback sounds silent when sound is off", () => {
     audio.enabled = false;
@@ -98,7 +120,7 @@ describe("direct weekly practice", () => {
     fireEvent.click(screen.getByRole("button", { name: "Start lesson: Read" }));
     expect(screen.getByRole("heading", { name: "How do you read this?" })).toBeTruthy();
     const character = document.querySelector('.one-c-prompt-hanzi')!.textContent!;
-    const word = LESSONS[0].words.find(w => w.hanzi === character)!;
+    const word = LESSONS[0].words.find(w => readingWord(w).hanzi === character)!;
     let choices = within(screen.getByRole("group", { name: "Answer choices" }));
     expect(choices.getByRole("button", { name: word.pinyin })).toBeTruthy();
     fireEvent.click(choices.getAllByRole("button").find(b => b !== choices.getByRole("button", { name: word.pinyin }))!);
@@ -117,7 +139,7 @@ describe("direct weekly practice", () => {
   it("saves a mistake immediately and does not turn the later retry into a clean answer", () => {
     render(<Grade1CApp/>); fireEvent.click(screen.getByRole("button", { name: "Start lesson: Read" }));
     const character = document.querySelector('.one-c-prompt-hanzi')!.textContent!;
-    const word = LESSONS[0].words.find(w => w.hanzi === character)!;
+    const word = LESSONS[0].words.find(w => readingWord(w).hanzi === character)!;
     const buttons = within(screen.getByRole("group", { name: "Answer choices" })).getAllByRole("button");
     fireEvent.click(buttons.find(b => b !== within(screen.getByRole("group", { name: "Answer choices" })).getByRole("button", { name: word.english }))!);
     expect(JSON.parse(localStorage.getItem(WORD_HISTORY_KEY)!)[`read:${character}`].misses).toBe(1);

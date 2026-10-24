@@ -1,5 +1,6 @@
 import { LESSONS as OLD_LESSONS, type Lesson, type Word } from "./curriculum";
 import { parseProgress, type Progress, type Question } from "./game";
+import { readingWord } from "./reading-vocabulary";
 import { availableLessons, LESSONS } from "./weekly-curriculum";
 
 export const PRACTICE_PROGRESS_KEY = "learncn.1c.characters.v1";
@@ -99,13 +100,15 @@ export function practiceQuestion(lesson: Lesson, word: Word, id: string, random 
   // Choices stay unambiguous in both answer modes, so toggling never needs to
   // replace a question or erase its mistakes (including homophones like 他 / 她).
   const key = (text: string) => text.normalize("NFC").trim().toLowerCase();
-  const seen = new Set([key(word.english)]);
-  const pinyin = new Set([key(word.pinyin)]);
-  const distractors = shuffled(lesson.words, random).filter(other => {
+  const answer = lesson.kind === "writing" ? word : readingWord(word);
+  const choices = lesson.kind === "writing" ? lesson.words : lesson.words.map(readingWord);
+  const seen = new Set([key(answer.english)]);
+  const pinyin = new Set([key(answer.pinyin)]);
+  const distractors = shuffled(choices, random).filter(other => {
     if (other.id === word.id || seen.has(key(other.english)) || pinyin.has(key(other.pinyin)) || (word.meaningGroup && word.meaningGroup === other.meaningGroup)) return false;
     seen.add(key(other.english)); pinyin.add(key(other.pinyin)); return true;
   }).slice(0, 2);
-  return { id, word, mode: lesson.kind === "writing" ? "trace" : "meaning", options: shuffled([word, ...distractors], random) };
+  return { id, word, mode: lesson.kind === "writing" ? "trace" : "meaning", options: shuffled([answer, ...distractors], random) };
 }
 
 export function practiceRound(lesson: Lesson, random = Math.random): Question[] {

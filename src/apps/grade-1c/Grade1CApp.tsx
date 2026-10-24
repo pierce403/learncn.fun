@@ -5,6 +5,7 @@ import type { Lesson, Word } from "./curriculum";
 import { LESSONS, WEEKS, availableLessons, currentSchoolWeek } from "./weekly-curriculum";
 import { makeReview, PROGRESS_KEY, saveCompletion, type Progress, type Question } from "./game";
 import { activityComplete, choosePractice, continuousUnlocked, parseWordHistory, PRACTICE_PROGRESS_KEY, practiceRound, practiceQuestion, readPracticeProgress, recordResult, skillFor, wordKey, WORD_HISTORY_KEY, type WordHistory } from "./practice";
+import { readingWord } from "./reading-vocabulary";
 import { useLessonAudio } from "./useLessonAudio";
 import PenguinPath from "./PenguinPath";
 import { POLAR_ART, nextIceLesson } from "./ice-path";
@@ -16,7 +17,6 @@ import TrophyCase, { TrophyIcon } from "./TrophyCase";
 type Screen = "home" | "play" | "complete" | "strokes" | "trophies";
 // Share the main Read game's preference, including its default of CN/pinyin.
 const ANSWER_MODE_KEY = "learncn.read.answerMode";
-const READING_PROMPT = "这是什么字？";
 type Run = { original: Question[]; questions: Question[]; index: number; reviewing: boolean; missed: string[]; firstTry: number; continuous: boolean; practiced: number; written: string[] };
 function stored(key: string): string | null { try { return localStorage.getItem(key); } catch { return null; } }
 function SoundIcon() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M11 4 5 9H2v6h3l6 5V4Z" strokeLinejoin="round"/><path d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14" strokeLinecap="round"/></svg>; }
@@ -50,6 +50,7 @@ export default function Grade1CApp() {
   const audio = useLessonAudio();
   const question = run?.questions[run.index];
   const readingActive = screen === "play" && question?.mode === "meaning";
+  const target = question?.mode === "meaning" ? readingWord(question.word) : question?.word;
   const writingComplete = screen === "play" && question?.mode === "trace" && (feedback === "correct" || writingAction !== null);
   const available = availableLessons(currentWeek);
   const completed = available.filter(item => activityComplete(item, progress)).length;
@@ -69,8 +70,8 @@ export default function Grade1CApp() {
   useEffect(() => { if (screen !== "home") window.scrollTo(0, 0); }, [screen]);
   useEffect(() => { if (feedback === "correct" || writingAction) nextButton.current?.focus({ preventScroll: true }); }, [feedback, writingAction]);
   useEffect(() => {
-    if (readingActive && audio.enabled) audio.play(READING_PROMPT, "zh");
-  }, [readingActive, question?.id, audio.enabled, audio.play]);
+    if (readingActive && audio.enabled && target) audio.play(target.hanzi, "zh");
+  }, [readingActive, question?.id, target?.hanzi, audio.enabled, audio.play]);
 
   function save(key: string, value: unknown) {
     try { localStorage.setItem(key, JSON.stringify(value)); }
@@ -101,7 +102,7 @@ export default function Grade1CApp() {
     audio.stop(); setMapPosition({ from: lesson.id, to: destination }); setScreen("home"); setRun(null); resetAnswer();
   }
   function readQuestion(item: Question) {
-    // Reading uses the short question cue above; writing says its target.
+    // Reading announces its displayed word in the effect above.
     if (item.mode === "trace") audio.play(item.word.hanzi);
   }
   function startLesson(item: Lesson) {
@@ -150,7 +151,7 @@ export default function Grade1CApp() {
       firstTry: current.firstTry + Number(!current.reviewing && !wrong.length && !hint && !writingHadHelp.current),
     } : current);
     setFeedback("correct"); if (audio.enabled) playDing();
-    audio.narrate([...(lastStrokeName ? [{ text: lastStrokeName, language: "zh" as const }] : []), { text: question.word.hanzi, language: "zh" }]);
+    audio.narrate([...(lastStrokeName ? [{ text: lastStrokeName, language: "zh" as const }] : []), { text: target!.hanzi, language: "zh" }]);
   }
   function answer(id: string) {
     if (!question || solvedOnce.current) return;
@@ -178,9 +179,11 @@ export default function Grade1CApp() {
     }
     finish();
   }
-  function detail(word: Word) { return <div className="one-c-word-answer"><div className="one-c-answer-hanzi" lang="zh-CN">{word.hanzi}</div><div className="one-c-pinyin" lang="zh-Latn-pinyin">{word.pinyin}</div><div>{word.english}</div></div>; }
+  function detail(word: Word) {
+    if (readingActive) word = readingWord(word);
+    return <div className="one-c-word-answer"><div className="one-c-answer-hanzi" lang="zh-CN">{word.hanzi}</div><div className="one-c-pinyin" lang="zh-Latn-pinyin">{word.pinyin}</div><div>{word.english}</div></div>; }
   function listen(word: Word) {
-    audio.play(word.hanzi, "zh");
+    audio.play((readingActive ? readingWord(word) : word).hanzi, "zh");
   }
   if (screen === "strokes") return <StrokesApp homeLabel="Map" initialAudio={audio.enabled} onHome={() => setScreen("home")} />;
 
@@ -205,7 +208,7 @@ export default function Grade1CApp() {
         <div className="one-c-activity-heading"><div><div className="one-c-eyebrow">{run.continuous ? "Continuous play" : `Week ${lesson.week}`} · {skillFor(lesson) === "write" ? "Write" : "Read"}{run.reviewing ? " · Review" : ""}</div><h1 ref={heading} tabIndex={-1}>{question.mode === "trace" ? writingMode === "guided" ? "Trace the character" : "Write it on your own" : answerMode === "cn" ? "How do you read this?" : "What does this mean?"}</h1></div><span className="one-c-step-count">{run.continuous ? `${run.practiced} practiced` : `${run.index + 1} / ${run.questions.length}`}</span></div>
         {!run.continuous && <progress className="one-c-progress" value={run.index + Number(feedback === "correct")} max={run.questions.length} aria-label={run.reviewing ? "Review progress" : "Practice progress"}/>}
         <div className="one-c-play-card">
-          {question.mode === "meaning" ? <div className="one-c-prompt-hanzi" lang="zh-CN">{question.word.hanzi}</div> : <><div className="one-c-prompt-english">{question.word.english}</div><div className="one-c-pinyin" lang="zh-Latn-pinyin">{question.word.pinyin}</div></>}
+          {question.mode === "meaning" ? <div className="one-c-prompt-hanzi" lang="zh-CN">{target!.hanzi}</div> : <><div className="one-c-prompt-english">{question.word.english}</div><div className="one-c-pinyin" lang="zh-Latn-pinyin">{question.word.pinyin}</div></>}
           <div className="one-c-audio-controls"><button className="one-c-button secondary" disabled={!audio.enabled} onClick={() => listen(question.word)}><SoundIcon/> Listen</button></div>
           {question.mode === "trace" && <TraceCharacter key={`${question.id}-${writingAttempt}`} hanzi={question.word.hanzi} mode={writingMode} onStrokeName={name => audio.play(name)} onComplete={completeWriting} onHelp={kind => { markMissed(kind); setHint(true); }}/>}
           {(question.mode !== "trace") && <div className="one-c-options reading-choices" role="group" aria-label="Answer choices">{question.options.map(option => <button key={option.id} className={`one-c-option ${wrong.includes(option.id) ? "wrong" : ""}`} disabled={wrong.includes(option.id) || feedback === "correct"} onClick={() => answer(option.id)}><span className="one-c-option-icon" aria-hidden="true">{option.icon}</span><span className="one-c-option-label" lang={answerMode === "cn" ? "zh-Latn-pinyin" : "en"}>{answerMode === "cn" ? option.pinyin : option.english}</span></button>)}</div>}
