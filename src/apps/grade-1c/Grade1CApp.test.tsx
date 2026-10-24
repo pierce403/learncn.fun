@@ -51,15 +51,14 @@ describe("direct weekly practice", () => {
     fireEvent.click(screen.getByRole("button", { name: "Back to the ice path" }));
     expect(audio.play).toHaveBeenCalledTimes(2);
   });
-  it("matches Listen to the answer language without restarting the cue or changing questions", () => {
+  it("speaks the Chinese character with Listen in both answer modes without changing questions", () => {
     localStorage.setItem("learncn.read.answerMode", "cn");
     render(<Grade1CApp/>);
     fireEvent.click(screen.getByRole("button", { name: "Start lesson: Read" }));
     const character = document.querySelector('.one-c-prompt-hanzi')!.textContent!;
-    const word = LESSONS[0].words.find(w => w.hanzi === character)!;
     audio.play.mockClear();
     fireEvent.click(screen.getByRole("button", { name: "Listen" }));
-    expect(audio.play).toHaveBeenLastCalledWith(word.english, "en");
+    expect(audio.play).toHaveBeenCalledExactlyOnceWith(character, "zh");
     audio.play.mockClear();
     fireEvent.click(screen.getByRole("button", { name: "Answers CN" }));
     expect(audio.play).not.toHaveBeenCalled();

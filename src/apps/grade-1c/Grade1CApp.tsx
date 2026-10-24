@@ -180,8 +180,7 @@ export default function Grade1CApp() {
   }
   function detail(word: Word) { return <div className="one-c-word-answer"><div className="one-c-answer-hanzi" lang="zh-CN">{word.hanzi}</div><div className="one-c-pinyin" lang="zh-Latn-pinyin">{word.pinyin}</div><div>{word.english}</div></div>; }
   function listen(word: Word) {
-    const english = readingActive && answerMode === "cn";
-    audio.play(english ? word.english : word.hanzi, english ? "en" : "zh");
+    audio.play(word.hanzi, "zh");
   }
   if (screen === "strokes") return <StrokesApp homeLabel="Map" initialAudio={audio.enabled} onHome={() => setScreen("home")} />;
 
